@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
+<<<<<<< HEAD
 	<name>BPMIntegrationTest</name>
+=======
+	<name>BPMIntegration</name>
+>>>>>>> 249b1a73ae7221ff697716d39de2406aaa165fde
 	<comment></comment>
 	<projects>
 	</projects>

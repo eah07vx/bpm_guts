@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="src" path="src"/>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="C:/IBM/ProcessDesigner/v8.5/teamworks/eclipse/plugins/teamworks.appserver.websphere_8.5.7.0/lib/psclnt.jar"/>
 	<classpathentry kind="lib" path="C:/Users/akatre/Documents/McKesson/lib/jackson-core-2.9.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
@@ -10,5 +11,7 @@
 	<classpathentry kind="lib" path="C:/Users/akatre/Documents/McKesson/lib/jackson-databind-2.9.2.jar"/>
 	<classpathentry kind="lib" path="C:/Users/akatre/Documents/McKesson/lib/jackson-annotations-2.9.2.jar"/>
 	<classpathentry kind="lib" path="C:/IBM/ProcessDesigner/v8.5/teamworks/eclipse/plugins/teamworks.appserver.websphere_8.5.7.0/lib/svrcoreclnt.jar"/>
+=======
+>>>>>>> 249b1a73ae7221ff697716d39de2406aaa165fde
 	<classpathentry kind="output" path="bin"/>
 </classpath>

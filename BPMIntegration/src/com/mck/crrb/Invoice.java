@@ -11,6 +11,7 @@ import java.util.TreeMap;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,6 +32,8 @@ public class Invoice extends SAPIntegration {
 	
 	public static SalesHistoryResp parseInvoiceLookupResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
+		jacksonMapper.configure(
+			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		SalesHistoryResp invoiceLookupResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -138,6 +141,8 @@ public class Invoice extends SAPIntegration {
 	
 	private static SimulatePriceResp parsesimulatePriceResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
+		jacksonMapper.configure(
+			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		SimulatePriceResp simulatePriceresp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -206,6 +211,9 @@ public class Invoice extends SAPIntegration {
 		//System.out.println("testLookupInvoices() response: " + resp);
 		return parseInvoiceLookupResp(resp).getTwCorrectionRows();
 		/*ObjectMapper jacksonMapper = new ObjectMapper();
+		//jacksonMapper.configure(
+		//	    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 		try {
 			//String jsonTestObject = "{ \"invoiceLookupResp\": [  {   \"oldChargeBack\": 3.3,   \"deaNum\": \"BA2050538\",   \"chainId\": \"184\",   \"billQty\": 1,   \"oldWacCogPer\": 0,   \"oldWac\": 22,   \"sellPriceExt\": 17.5,   \"totChbk\": 3.3,   \"retQty\": 0,   \"ndcUpc\": \"N67457042612\",   \"oldLead\": \"00586432\",   \"oldItemMkUpPer\": 0,   \"invoiceId\": \"7788900280\",   \"groupId\": \"0360\",   \"oldAwp\": 36,   \"uom\": \"KAR\",   \"netBill\": \"\",   \"salesOrg\": \"8000\",   \"createdOn\": \"20170123\",   \"customerId\": \"0000040769\",   \"oldPrice\": 17.5,   \"oldBid\": 18.7,   \"poNumber\": \"AHIP-65300-0123100\",   \"subgroupId\": \"\",   \"oldSellCd\": \"2\",   \"oldContCogPer\": -6.4,   \"pricingDate\": \"20170123\",   \"billType\": \"ZPF2\",   \"chainName\": \"VOLUNTARY HOSP OF AMER\",   \"groupName\": \"VHA\",   \"orderType\": \"ZSOR\",   \"gxcb\": 0,   \"oldCbRef\": \"PHARMP\",   \"invoiceLineItemNum\": \"000018\",   \"oldNoChargeBack\": \"\",   \"orgDbtMemoId\": \"7024SMIIEV\",   \"materialName\": \"HALOP LAC SDV 5MG/ML MYL  25\",   \"materialId\": \"000000000002579258\",   \"orgVendorAccAmt\": 19.8,   \"oldSf\": 0,   \"crQty\": 0,   \"oldActivePrice\": \"YCON\",   \"oldSsf\": 0,   \"customerName\": \"ALLENMORE HOSP PHCY\",   \"dc\": \"8128\",   \"oldConRef\": \"PHARMP\",   \"rebillQty\": 1,   \"oldListPrice\": 24.26,   \"supplierId\": \"\",   \"supplierName\": \"\"  },  {   \"oldChargeBack\": 3.3,   \"deaNum\": \"BB6894251\",   \"chainId\": \"045\",   \"billQty\": 1,   \"oldWacCogPer\": 0,   \"oldWac\": 22,   \"sellPriceExt\": 17.39,   \"totChbk\": 3.3,   \"retQty\": 0,   \"ndcUpc\": \"N67457042612\",   \"oldLead\": \"00586432\",   \"oldItemMkUpPer\": 0,   \"invoiceId\": \"7789371577\",   \"groupId\": \"0230\",   \"oldAwp\": 36,   \"uom\": \"KAR\",   \"netBill\": \"\",   \"salesOrg\": \"8000\",   \"createdOn\": \"20170125\",   \"customerId\": \"0000242616\",   \"oldPrice\": 17.39,   \"oldBid\": 18.7,   \"poNumber\": \"012517HEART  00\",   \"subgroupId\": \"000008\",   \"oldSellCd\": \"2\",   \"oldContCogPer\": -7.03,   \"pricingDate\": \"20170125\",   \"billType\": \"ZPF2\",   \"chainName\": \"BANNER HEALTH\",   \"groupName\": \"PREMIER\",   \"orderType\": \"ZSOR\",   \"gxcb\": 0,   \"oldCbRef\": \"PHARMP\",   \"invoiceLineItemNum\": \"000001\",   \"oldNoChargeBack\": \"\",   \"orgDbtMemoId\": \"7026SMIIPX\",   \"materialName\": \"HALOP LAC SDV 5MG/ML MYL  25\",   \"materialId\": \"000000000002579258\",   \"orgVendorAccAmt\": 23.1,   \"oldSf\": 0,   \"crQty\": 0,   \"oldActivePrice\": \"YCON\",   \"oldSsf\": 0,   \"customerName\": \"BANNER HEART HOSPITAL\",   \"subgroupName\": \"BANNER HEALTH\",   \"dc\": \"8170\",   \"oldConRef\": \"PHARMP\",   \"rebillQty\": 1,   \"oldListPrice\": 24.26,   \"supplierId\": \"\",   \"supplierName\": \"\"  },  {   \"oldChargeBack\": 0,   \"deaNum\": \"AJ4147357\",   \"chainId\": \"830\",   \"billQty\": 6,   \"oldWacCogPer\": -5.86,   \"oldWac\": 25,   \"sellPriceExt\": 141.24,   \"totChbk\": 0,   \"retQty\": 0,   \"ndcUpc\": \"N25021078104\",   \"oldLead\": \"\",   \"oldItemMkUpPer\": 0,   \"invoiceId\": \"7806123021\",   \"groupId\": \"0230\",   \"oldAwp\": 30,   \"uom\": \"EA\",   \"netBill\": \"\",   \"salesOrg\": \"8000\",   \"createdOn\": \"20170502\",   \"customerId\": \"0000233303\",   \"oldPrice\": 23.54,   \"oldBid\": 0,   \"poNumber\": \"57999315100  00\",   \"subgroupId\": \"000086\",   \"oldSellCd\": \"N\",   \"oldContCogPer\": 0,   \"pricingDate\": \"20170502\",   \"billType\": \"ZPF2\",   \"chainName\": \"NOBILANT\",   \"groupName\": \"PREMIER\",   \"orderType\": \"ZSOR\",   \"gxcb\": 0,   \"oldCbRef\": \"\",   \"invoiceLineItemNum\": \"000008\",   \"oldNoChargeBack\": \"X\",   \"materialName\": \"GRANIS MDV 1MG/ML   SAG 4ML\",   \"materialId\": \"000000000001750843\",   \"oldSf\": 0,   \"crQty\": 0,   \"oldActivePrice\": \"YCOS\",   \"oldSsf\": 0,   \"customerName\": \"JOHNS HOPKINS PEDS GPO\",   \"subgroupName\": \"HMPG\",   \"dc\": \"8120\",   \"oldConRef\": \"\",   \"rebillQty\": 6,   \"oldListPrice\": 27.56,   \"supplierId\": \"\",   \"supplierName\": \"\"  }   ], \"results\": [{  \"index\": \"1\",  \"status\": \"success\"} ], \"startIndex\": 0, \"endIndex\": 2, \"totalNumberOfRecords\": 3}";
 			

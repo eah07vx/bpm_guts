@@ -21,7 +21,6 @@ class CurrentPriceMaterial extends Material {
     private double curBid;
     private float curWacCogPer;
     //TODO: Validate naming convention, mapping and requirement of this field
-    private float wacCog;  
     private float curItemMkUpPer;
     private double curListPrice;
     private double curAwp;
@@ -96,12 +95,6 @@ class CurrentPriceMaterial extends Material {
 	}
 	public void setCurWacCogPer(float curWacCogPer) {
 		this.curWacCogPer = curWacCogPer;
-	}
-	public float getWacCog() {
-		return wacCog;
-	}
-	public void setWacCog(float wacCog) {
-		this.wacCog = wacCog;
 	}
 	public float getCurItemMkUpPer() {
 		return curItemMkUpPer;

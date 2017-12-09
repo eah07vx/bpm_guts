@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,6 +32,9 @@ class CurrentPrice extends SAPIntegration {
 	
 	public static CurrentPriceResp parseCurrentPriceLookupResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
+		jacksonMapper.configure(
+			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 		CurrentPriceResp currentPriceLookupResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");

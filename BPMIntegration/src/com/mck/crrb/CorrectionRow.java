@@ -142,7 +142,10 @@ class CorrectionRow {
 	private double sellPriceExt;
 	private double totChbk;
 	private double gxcb;
+	//Abd trifecta
+	private double oldAbd;
 	private double curAbd;
+	private double newAbd;
 	//TODO: remove this field once Archit makes the change in Mulesoft API
 	private String address; 
 	
@@ -1049,12 +1052,28 @@ class CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("gxcb", this.gxcb);
 	}
 
+	public double getOldAbd() {
+		return oldAbd;
+	}
+
+	public void setOldAbd(double oldAbd) {
+		this.oldAbd = oldAbd;
+	}
+
 	public double getCurAbd() {
 		return curAbd;
 	}
 
 	public void setCurAbd(double curAbd) {
 		this.curAbd = curAbd;
+	}
+
+	public double getNewAbd() {
+		return newAbd;
+	}
+
+	public void setNewAbd(double newAbd) {
+		this.newAbd = newAbd;
 	}
 
 	//TODO: Remove when API is updated

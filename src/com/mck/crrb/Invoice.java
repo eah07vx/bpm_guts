@@ -69,7 +69,7 @@ public class Invoice extends SAPIntegration {
 			//System.out.print("materialList[" + i + "] before: " + materialList);
 			
 			if (materialList == null) { // Key not in TreeMap - new key found
-				materialList = new TreeMap<String, String>();
+				materialList = new TreeMap<String, boolean>();
 				materialList.put(value, value);	// First material in list
 				priceMap.put(key, materialList);
 			}
@@ -97,7 +97,7 @@ public class Invoice extends SAPIntegration {
 		for (int i = 0; i < correctionRows.getArraySize(); i++) {
 			invoices[i] = (CorrectionRow) correctionRows.getArrayData(i);
 		}
-		TreeMap<NameValuePair<String, String>, TreeMap<String, String>> priceMap = bucketizePriceMap(invoices);
+		TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> priceMap = bucketizePriceMap(invoices);
 		
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		List<Object> pricingRequests = new ArrayList<Object>();

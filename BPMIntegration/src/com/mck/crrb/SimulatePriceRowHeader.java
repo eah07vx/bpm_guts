@@ -5,7 +5,7 @@ public class SimulatePriceRowHeader extends PriceRow {
 	private String salesOrg;
 	private String billType;
 	//TODO: remove recordKey from header level - keep only in material level
-	private String recordKey; // Consists of invoiceId-invoiceLineItemNum
+	//private String recordKey; // Consists of invoiceId-invoiceLineItemNum
 	
 	public int getIndex() {
 		return index;
@@ -25,6 +25,7 @@ public class SimulatePriceRowHeader extends PriceRow {
 	public void setBillType(String billType) {
 		this.billType = billType;
 	}
+	/*
 	//TODO: remove recordKey from header level - keep only in material level
 	public String getRecordKey() {
 		return recordKey;
@@ -33,6 +34,7 @@ public class SimulatePriceRowHeader extends PriceRow {
 	public void setRecordKey(String recordKey) {
 		this.recordKey = recordKey;
 	}
+	*/
 	@Override
 	public String toString() {
 		String str = "";

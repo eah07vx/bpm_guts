@@ -8,7 +8,6 @@ package com.mck.crrb;
  *
  */
 public class SimulatePriceRow extends SimulatePriceRowHeader {
-	
 	private CreditRebillMaterial[] materials;
 	
 	public CreditRebillMaterial[] getMaterials() {

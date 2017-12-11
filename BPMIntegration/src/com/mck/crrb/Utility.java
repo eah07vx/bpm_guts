@@ -3,6 +3,11 @@
  */
 package com.mck.crrb;
 
+import java.lang.reflect.Field;
+import java.util.Set;
+
+import teamworks.TWObject;
+
 /**
  * @author akatre
  *
@@ -52,7 +57,33 @@ public class Utility {
         }
         return str.substring(start);	
 	}
-	
+	/*
+	public CorrectionRow TWtoJavaCorrectionRow(TWObject twCorrectionRow) {
+		this.twCorrectionRow = twCorrectionRow;
+		this.invoiceId = twCorrectionRow.getPropertyValue("invoiceId").toString();
+		Set<String> props = twCorrectionRow.getPropertyNames();
+		for (String prop: props) {
+			Field field;
+			try {
+				field = CorrectionRow.class.getDeclaredField(prop);
+				field.getType()
+				field.set(this, twCorrectionRow.getPropertyValue(prop));
+			} catch (NoSuchFieldException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	} 
+	*/
 	/**
 	 * @param args
 	 */

@@ -3,18 +3,17 @@
  */
 package com.mck.crrb;
 
-import java.util.Date;
-
 /**
+ * CreditRebillMaterial represents the material on an invoice line item with pricing components, WAC, COG, contract reference, chargeback reference, etc.
+ * 
  * @author akatre
  *
- * CreditRebillMaterial represents the material on an invoice line item with pricing components, WAC, COG, contract reference, chargeback reference, etc.
  */
 public class CreditRebillMaterial extends Material {
 
 	private String recordKey; // Consists of invoiceId-invoiceLineItemNum
-	//TODO: Check why privingDate is needed at the material level if it is already at the header level?
-	private Date pricingDate;
+//	TODO: Check why privingDate is needed at the material level if it is already at the header level?
+//	private Date pricingDate;
 	private float rebillQty;
 	private String uom;
 	private String dc;
@@ -32,14 +31,15 @@ public class CreditRebillMaterial extends Material {
 	private double newSellPrice;
 	private double newChargeBack;
     private double newListPrice;
-    private String manufacturer;
     //TODO: Remove these fields if not expected in response. START:
+    private String manufacturer;
+    private double newPrice;
+    //TODO: END Remove these fields if not expected in response.
     private double newOverridePrice;
     private double newSsf;
     private double newSf;
 	private String newSellCd;
     private String newActivePrice;
-    //TODO: END Remove these fields if not expected in response.
     
 	public String getRecordKey() {
 		return recordKey;
@@ -47,12 +47,14 @@ public class CreditRebillMaterial extends Material {
 	public void setRecordKey(String recordKey) {
 		this.recordKey = recordKey;
 	}
+	/*
 	public Date getPricingDate() {
 		return pricingDate;
 	}
 	public void setPricingDate(Date pricingDate) {
 		this.pricingDate = pricingDate;
 	}
+	*/
 	public float getRebillQty() {
 		return rebillQty;
 	}
@@ -161,6 +163,12 @@ public class CreditRebillMaterial extends Material {
 	public void setManufacturer(String manufacturer) {
 		this.manufacturer = manufacturer;
 	}
+	public double getNewPrice() {
+		return newPrice;
+	}
+	public void setNewPrice(double newPrice) {
+		this.newPrice = newPrice;
+	}
 	public double getNewOverridePrice() {
 		return newOverridePrice;
 	}
@@ -194,25 +202,31 @@ public class CreditRebillMaterial extends Material {
 	@Override
 	public String toString() {
 		String str = "";
-		str += "recordKey: " + recordKey 
-			+ ", rebillQty: " + rebillQty 
-			+ ", uom: " + uom 
-			+ ", dc: " + dc 
-			+ ", newWac: " + newWac 
-			+ ", newBid: " + newBid 
-			+ ", newLead: " + newLead 
-			+ ", newConRef: " + newConRef 
-			+ ", newCbRef : " + newCbRef  
-			+ ", newContCogPer: " + newContCogPer 
-			+ ", newItemVarPer: " + newItemVarPer 
-			+ ", newWacCogPer: " + newWacCogPer 
-			+ ", newItemMkUpPer: " + newItemMkUpPer 
-			+ ", newAwp: " + newAwp 
-			+ ", newNoChargeBack: " + newNoChargeBack 
-			+ ", newSellPrice: " + newSellPrice 
-			+ ", newChargeBack: " + newChargeBack 
-			+ ", newListPrice: " + newListPrice 
-			+ ", manufacturer: " + manufacturer;
+		str += "  recordKey: " + recordKey 
+				+ ", rebillQty: " + rebillQty 
+				+ ", uom: " + uom 
+				+ ", dc: " + dc 
+				+ ", newWac: " + newWac 
+				+ ", newBid: " + newBid 
+				+ ", newLead: " + newLead 
+				+ ", newConRef: " + newConRef 
+				+ ", newCbRef: " + newCbRef 
+				+ ", newContCogPer: " + newContCogPer 
+				+ ", newItemVarPer: " + newItemVarPer 
+				+ ", newWacCogPer: " + newWacCogPer 
+				+ ", newItemMkUpPer: " + newItemMkUpPer 
+				+ ", newAwp: " + newAwp 
+				+ ", newNoChargeBack: " + newNoChargeBack 
+				+ ", newSellPrice: " + newSellPrice 
+				+ ", newChargeBack: " + newChargeBack 
+				+ ", newListPrice: " + newListPrice 
+				+ ", manufacturer: " + manufacturer 
+				+ ", newPrice: " + newPrice 
+				+ ", newOverridePrice: " + newOverridePrice 
+				+ ", newSsf: " + newSsf 
+				+ ", newSf: " + newSf 
+				+ ", newSellCd: " + newSellCd 
+				+ ", newActivePrice: " + newActivePrice; 
 		return str;
 	}
 }

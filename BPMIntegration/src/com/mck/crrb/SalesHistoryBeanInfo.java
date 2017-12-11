@@ -9,8 +9,10 @@ import java.beans.SimpleBeanInfo;
 import java.lang.reflect.Method;
 
 /**
+ * Descriptor of SalesHistory bean
+ * 
  * @author akatre
- *
+ * 
  */
 public class SalesHistoryBeanInfo extends SimpleBeanInfo {
 

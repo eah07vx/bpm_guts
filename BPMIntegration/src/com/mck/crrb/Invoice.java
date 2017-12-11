@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import teamworks.TWList;
+import teamworks.TWObjectFactory;
 
 
 /**
@@ -28,6 +29,31 @@ public class Invoice extends SAPIntegration {
 		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.lookupInvoices response: " + resp);
 		return parseInvoiceLookupResp(resp);
+	}
+
+	public static TWList simulatePrice(String url, String httpMethod, String sslAlias, TWList correctionRows, boolean sopDebug) {
+		CorrectionRow[] invoices = new CorrectionRow[correctionRows.getArraySize()];
+		for (int i = 0; i < correctionRows.getArraySize(); i++) {
+			if(sopDebug) System.out.println(correctionRows.getArrayData(i).getClass().getName());
+			invoices[i] = new CorrectionRow(correctionRows.getArrayData(i));
+		}
+		String requestJSON = prepSimulatePriceCall(invoices, "priceSimulationReq", 1, 10000);
+		if (sopDebug) System.out.println("Invoice.simulatePrice requestJSON" + requestJSON);
+		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		if (sopDebug) System.out.println("Invoice.simulatePrice response: " + resp);
+		overrideSimulatePriceValues(invoices, parseSimulatePriceResp(resp));
+		TWList twCorrectionRows = null;
+		try {
+			twCorrectionRows = TWObjectFactory.createList();
+			int size = invoices.length;
+			for (int i = 0; i < size; i++) {
+				twCorrectionRows.addArrayData(invoices[i].getTwCorrectionRow());
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		return twCorrectionRows;
 	}
 	
 	public static SalesHistoryResp parseInvoiceLookupResp(String resp) {
@@ -53,6 +79,44 @@ public class Invoice extends SAPIntegration {
 			e.printStackTrace();
 		}
 		return invoiceLookupResp;
+	}
+	
+	private static String prepSimulatePriceCall(CorrectionRow[] invoices, String containerName, int startIndex, int endIndex) {
+		String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"billType\": \"ZPF2\",        \"materials\":[			{                \"recordKey\": \"7840363909-000001\",            	\"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
+//		String simulatePriceReqJSON = null; 
+//		Map<String, Object> priceReqMap = new HashMap<String, Object>();
+		
+		/*TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> priceMap = bucketizePriceMap(invoices);
+		List<Object> pricingRequests = new ArrayList<Object>();
+		int i = 0;
+		for (Map.Entry<NameValuePair<String, String>, TreeMap<String, String>> entry : priceMap.entrySet()) {
+			Map<String, Object> pricingReq = new HashMap<String, Object>();
+			NameValuePair<String, String> custPricingDatePair = entry.getKey();
+			if (custPricingDatePair != null && custPricingDatePair.getKey() != null && custPricingDatePair.getValue() != null) {
+				pricingReq.put("index", i++);
+				pricingReq.put("customerId", custPricingDatePair.getKey());
+				pricingReq.put("pricingDate", custPricingDatePair.getValue());
+				if (entry != null && entry.getValue() != null && entry.getValue().values() != null) {
+					pricingReq.put("materialIds", entry.getValue().values());		// value in the priceMap entry has materials
+				}
+				pricingRequests.add(pricingReq);
+			}
+		}
+		priceReqMap.put(containerName, pricingRequests.toArray());
+		priceReqMap.put("startIndex", startIndex);
+		priceReqMap.put("endIndex", endIndex);
+		*/
+		
+//		ObjectMapper jacksonMapper = new ObjectMapper();
+//		jacksonMapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
+//		
+//		try {
+//			simulatePriceReqJSON = jacksonMapper.writeValueAsString(priceReqMap);
+//		} catch (JsonProcessingException e) {
+//			e.printStackTrace();
+//			simulatePriceReqJSON = "failed";
+//		}
+		return tst;
 	}
 	
 	static TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> bucketizePriceMap(CorrectionRow[] invoices) {
@@ -90,65 +154,16 @@ public class Invoice extends SAPIntegration {
 		return priceMap;
 	}
 	
-	public static SimulatePriceResp simulatePrice(String url, String httpMethod, String sslAlias, TWList correctionRows, boolean sopDebug) {
-		String requestJSON = prepSimulatePriceCall(correctionRows, "priceSimulationReq", 1, 10000);
-		if (sopDebug) System.out.println("Invoice.simulatePrice requestJSON" + requestJSON);
-		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
-		if (sopDebug) System.out.println("Invoice.simulatePrice response: " + resp);
-		return parsesimulatePriceResp(resp);
-	}
-	
-	private static String prepSimulatePriceCall(TWList correctionRows, String containerName, int startIndex, int endIndex) {
-		//String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"recordKey\":\"7840363909-000001\",        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"orderType\": \"ZPF2\",        \"materials\":[			{                \"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
-		String simulatePriceReqJSON = null; 
-		CorrectionRow[] invoices = new CorrectionRow[correctionRows.getArraySize()];
-		for (int i = 0; i < correctionRows.getArraySize(); i++) {
-			invoices[i] = (CorrectionRow) correctionRows.getArrayData(i);
-		}
-		
-		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-		/*TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> priceMap = bucketizePriceMap(invoices);
-		List<Object> pricingRequests = new ArrayList<Object>();
-		int i = 0;
-		for (Map.Entry<NameValuePair<String, String>, TreeMap<String, String>> entry : priceMap.entrySet()) {
-			Map<String, Object> pricingReq = new HashMap<String, Object>();
-			NameValuePair<String, String> custPricingDatePair = entry.getKey();
-			if (custPricingDatePair != null && custPricingDatePair.getKey() != null && custPricingDatePair.getValue() != null) {
-				pricingReq.put("index", i++);
-				pricingReq.put("customerId", custPricingDatePair.getKey());
-				pricingReq.put("pricingDate", custPricingDatePair.getValue());
-				if (entry != null && entry.getValue() != null && entry.getValue().values() != null) {
-					pricingReq.put("materialIds", entry.getValue().values());		// value in the priceMap entry has materials
-				}
-				pricingRequests.add(pricingReq);
-			}
-		}
-		priceReqMap.put(containerName, pricingRequests.toArray());
-		priceReqMap.put("startIndex", startIndex);
-		priceReqMap.put("endIndex", endIndex);
-		*/
-		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
-		
-		try {
-			simulatePriceReqJSON = jacksonMapper.writeValueAsString(priceReqMap);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-			simulatePriceReqJSON = "failed";
-		}
-		return simulatePriceReqJSON;
-	}
-	
-	private static SimulatePriceResp parsesimulatePriceResp(String resp) {
+	private static SimulatePriceResp parseSimulatePriceResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		SimulatePriceResp simulatePriceresp = null;
+		SimulatePriceResp simulatePriceResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			jacksonMapper.setDateFormat(sdf);
 			
-			simulatePriceresp = jacksonMapper.readValue(resp, SimulatePriceResp.class);
+			simulatePriceResp = jacksonMapper.readValue(resp, SimulatePriceResp.class);
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
@@ -161,7 +176,22 @@ public class Invoice extends SAPIntegration {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return simulatePriceresp;
+		return simulatePriceResp;
+	}
+	
+	private static CorrectionRow[] overrideSimulatePriceValues(CorrectionRow[] invoices, SimulatePriceResp simulatePriceResp) {
+		if (invoices != null && invoices.length > 0 && simulatePriceResp != null 
+				&& simulatePriceResp.getPriceSimulationResp() != null && simulatePriceResp.getPriceSimulationResp().length > 0) {
+			SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();
+			for(int i = 0; i < invoices.length; i++) {
+				
+				for(int j = 0; j < simulatePriceRows.length; j++){
+					CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
+//					invoices[i].setNewPrice(crMaterials[]);
+				}
+			}
+		}
+		return invoices;
 	}
 	
 	/**
@@ -170,7 +200,7 @@ public class Invoice extends SAPIntegration {
 	public static void main(String[] args) {
 		
 		String simulatePriceResp = "{    \"priceSimulationResp\": [        {            \"index\": \"0\",            \"customerId\": \"\",            \"salesOrg\": \"\",            \"billType\": \"\",            \"pricingDate\": \"\",            \"materials\": [                {                    \"materialId\": \"\",					\"recordKey\": \"7840363909-000001\",                    \"rebillQty\": \"0.000\",                    \"uom\": \"\",                    \"dc\": \"\",                    \"newLead\": \"\",                    \"newConRef\": \"\",                    \"newNoChargeBack\": \"\",                    \"newCbRef\": \"\",                    \"newSellCd\": \"\",                    \"newActivePrice\": \"\",                    \"newWac\": \"435.39\",                    \"newBid\": \"64.65\",                    \"newContCogPer\": \"-2.50\",                    \"newItemVarPer\": \"3.00\",                    \"newWacCogPer\": \"0.00\",                    \"newItemMkUpPer\": \"1.00\",                    \"newAwp\": \"608.93\",                    \"newOverridePrice\": \"0.00\"                }            ]        }    ],    \"results\": [        {            \"index\": \"0\",            \"status\": \"success\"        }    ]}";
-		SimulatePriceResp spr = parsesimulatePriceResp(simulatePriceResp);
+		SimulatePriceResp spr = parseSimulatePriceResp(simulatePriceResp);
 		System.out.println("Parsed output: " + spr);
 		/*
 		String url = "https://esswsqdpz01.mckesson.com/MckWebServices/muleservices/crrb/invoices";

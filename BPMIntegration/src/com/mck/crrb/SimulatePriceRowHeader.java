@@ -29,6 +29,7 @@ public class SimulatePriceRowHeader extends PriceRow {
 	//TODO: remove recordKey from header level - keep only in material level
 	public String getRecordKey() {
 		return recordKey;
+		this here
 	}
 	//TODO: remove recordKey from header level - keep only in material level
 	public void setRecordKey(String recordKey) {

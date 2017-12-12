@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="C:/Users/akatre/Documents/McKesson/lib/psapiclnt.jar"/>
 	<classpathentry kind="lib" path="C:/Users/akatre/Documents/McKesson/lib/psclnt.jar"/>
 	<classpathentry kind="lib" path="C:/Users/akatre/Documents/McKesson/lib/com.ibm.ws.runtime.jar"/>
+	<classpathentry kind="lib" path="C:/Users/akatre/Documents/McKesson/lib/jackson-annotations-2.9.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

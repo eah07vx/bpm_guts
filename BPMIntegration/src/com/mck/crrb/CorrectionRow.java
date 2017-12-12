@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 //import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import teamworks.TWObject;
 import teamworks.TWObjectFactory;
 
@@ -29,16 +31,18 @@ class CorrectionRow {
 	//material
 	private String materialId;
 	private String materialName;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date pricingDate;
 	//supplier
 	private String supplierId;
 	private String supplierName;
 	//quantity
-	private double billQty;
-	private double retQty;
-	private double crQty;
-	private double rebillQty;
+	private float billQty;
+	private float retQty;
+	private float crQty;
+	private float rebillQty;
 	private String uom;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date createdOn;
 	private String dc;
 	private String ndcUpc;
@@ -173,14 +177,18 @@ class CorrectionRow {
 			this.customerName = this.twCorrectionRow.getPropertyValue("customerName").toString();
 			this.materialId = this.twCorrectionRow.getPropertyValue("materialId").toString();
 			this.materialName = this.twCorrectionRow.getPropertyValue("materialName").toString();
+			//TODO: Remove SOP debug
+			System.out.println("CorrectionRow.pricingDate input string: " + this.twCorrectionRow.getPropertyValue("pricingDate").toString());
 			this.pricingDate = dateFormat.parse(this.twCorrectionRow.getPropertyValue("pricingDate").toString());
 			this.supplierId = this.twCorrectionRow.getPropertyValue("supplierId").toString();
 			this.supplierName = this.twCorrectionRow.getPropertyValue("supplierName").toString();
-			this.billQty = Double.parseDouble(this.twCorrectionRow.getPropertyValue("billQty").toString());
-			this.retQty = Double.parseDouble(this.twCorrectionRow.getPropertyValue("retQty").toString());
-			this.crQty = Double.parseDouble(this.twCorrectionRow.getPropertyValue("crQty").toString());
-			this.rebillQty = Double.parseDouble(this.twCorrectionRow.getPropertyValue("rebillQty").toString());
+			this.billQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("billQty").toString());
+			this.retQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("retQty").toString());
+			this.crQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("crQty").toString());
+			this.rebillQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("rebillQty").toString());
 			this.uom = this.twCorrectionRow.getPropertyValue("uom").toString();
+			//TODO: Remove SOP debug
+			System.out.println("CorrectionRow.createdOn input string: " + this.twCorrectionRow.getPropertyValue("createdOn").toString());
 			this.createdOn = dateFormat.parse(this.twCorrectionRow.getPropertyValue("createdOn").toString());
 			this.dc = this.twCorrectionRow.getPropertyValue("dc").toString();
 			this.ndcUpc = this.twCorrectionRow.getPropertyValue("ndcUpc").toString();
@@ -276,7 +284,8 @@ class CorrectionRow {
 	} 
 	
 	public String toString() {
-		return this.getBillQty() + ", " + this.getBillType() + ", " + this.getChainId() + ", " + this.getChainName() + ", " + this.getCreatedOn() + ", " + this.getCrQty() + ", " + this.getCustomerId() + ", " + this.getCustomerName() + ", " + this.getDc() + ", " + this.getDeaNum() + ", " + this.getGroupId() + ", " + this.getGroupName() + ", " + this.getGxcb() + ", " + this.getInvoiceId() + ", " + this.getInvoiceLineItemNum() + ", " + this.getMaterialId() + ", " + this.getMaterialName() + ", " + this.getNdcUpc() + ", " + this.getNetBill() + ", " + this.getOldActivePrice() + ", " + this.getOldAwp() + ", " + this.getOldBid() + ", " + this.getOldCbRef() + ", " + this.getOldChargeBack() + ", " + this.getOldConRef() + ", " + this.getOldContCogPer() + ", " + this.getOldItemMkUpPer() + ", " + this.getOldLead() + ", " + this.getOldListPrice() + ", " + this.getReasonCode() + ", " + this.getOldNoChargeBack() + ", " + this.getOldPrice() + ", " + this.getOldSellCd() + ", " + this.getOldSf() + ", " + this.getOldSsf() + ", " + this.getOldWac() + ", " + this.getOldWacCogPer() + ", " + this.getOrderType() + ", " + this.getOrgDbtMemoId() + ", " + this.getOrgVendorAccAmt() + ", " + this.getPoNumber() + ", " + this.getPricingDate() + ", " + this.getRebillQty() + ", " + this.getRetQty() + ", " + this.getSalesOrg() + ", " + this.getSellPriceExt() + ", " + this.getSubgroupId() + ", " + this.getSubgroupName() + ", " + this.getSupplierId() + ", " + this.supplierName + ", " + this.getTotChbk() + ", " + this.getUom();
+		//return this.getBillQty() + ", " + this.getBillType() + ", " + this.getChainId() + ", " + this.getChainName() + ", " + this.getCreatedOn() + ", " + this.getCrQty() + ", " + this.getCustomerId() + ", " + this.getCustomerName() + ", " + this.getDc() + ", " + this.getDeaNum() + ", " + this.getGroupId() + ", " + this.getGroupName() + ", " + this.getGxcb() + ", " + this.getInvoiceId() + ", " + this.getInvoiceLineItemNum() + ", " + this.getMaterialId() + ", " + this.getMaterialName() + ", " + this.getNdcUpc() + ", " + this.getNetBill() + ", " + this.getOldActivePrice() + ", " + this.getOldAwp() + ", " + this.getOldBid() + ", " + this.getOldCbRef() + ", " + this.getOldChargeBack() + ", " + this.getOldConRef() + ", " + this.getOldContCogPer() + ", " + this.getOldItemMkUpPer() + ", " + this.getOldLead() + ", " + this.getOldListPrice() + ", " + this.getReasonCode() + ", " + this.getOldNoChargeBack() + ", " + this.getOldPrice() + ", " + this.getOldSellCd() + ", " + this.getOldSf() + ", " + this.getOldSsf() + ", " + this.getOldWac() + ", " + this.getOldWacCogPer() + ", " + this.getOrderType() + ", " + this.getOrgDbtMemoId() + ", " + this.getOrgVendorAccAmt() + ", " + this.getPoNumber() + ", " + this.getPricingDate() + ", " + this.getRebillQty() + ", " + this.getRetQty() + ", " + this.getSalesOrg() + ", " + this.getSellPriceExt() + ", " + this.getSubgroupId() + ", " + this.getSubgroupName() + ", " + this.getSupplierId() + ", " + this.supplierName + ", " + this.getTotChbk() + ", " + this.getUom();
+		return "invoiceId: " + this.invoiceId +  ", invoiceLineItemNum: " + this.invoiceLineItemNum +  ", customerId: " + this.customerId +  ", customerName: " + this.customerName +  ", materialId: " + this.materialId +  ", materialName: " + this.materialName +  ", pricingDate: " + this.pricingDate +  ", supplierId: " + this.supplierId +  ", supplierName: " + this.supplierName +  ", billQty: " + this.billQty +  ", retQty: " + this.retQty +  ", crQty: " + this.crQty +  ", rebillQty: " + this.rebillQty +  ", uom: " + this.uom +  ", createdOn: " + this.createdOn +  ", dc: " + this.dc +  ", ndcUpc: " + this.ndcUpc +  ", billType: " + this.billType +  ", chainId: " + this.chainId +  ", chainName: " + this.chainName +  ", groupId: " + this.groupId +  ", groupName: " + this.groupName +  ", subgroupId: " + this.subgroupId +  ", subgroupName: " + this.subgroupName +  ", reasonCode: " + this.reasonCode +  ", poNumber: " + this.poNumber +  ", oldPrice: " + this.oldPrice +  ", curPrice: " + this.curPrice +  ", newPrice: " + this.newPrice +  ", oldWac: " + this.oldWac +  ", curWac: " + this.curWac +  ", newWac: " + this.newWac +  ", oldBid: " + this.oldBid +  ", curBid: " + this.curBid +  ", newBid: " + this.newBid +  ", oldLead: " + this.oldLead +  ", curLead: " + this.curLead +  ", newLead: " + this.newLead +  ", oldConRef: " + this.oldConRef +  ", curConRef: " + this.curConRef +  ", newConRef: " + this.newConRef +  ", oldCbRef: " + this.oldCbRef +  ", curCbRef: " + this.curCbRef +  ", newCbRef: " + this.newCbRef +  ", oldContCogPer: " + this.oldContCogPer +  ", curContCogPer: " + this.curContCogPer +  ", newContCogPer: " + this.newContCogPer +  ", oldItemVarPer: " + this.oldItemVarPer +  ", curItemVarPer: " + this.curItemVarPer +  ", newItemVarPer: " + this.newItemVarPer +  ", oldWacCogPer: " + this.oldWacCogPer +  ", curWacCogPer: " + this.curWacCogPer +  ", newWacCogPer: " + this.newWacCogPer +  ", oldItemMkUpPer: " + this.oldItemMkUpPer +  ", curItemMkUpPer: " + this.curItemMkUpPer +  ", newItemMkUpPer: " + this.newItemMkUpPer +  ", oldChargeBack: " + this.oldChargeBack +  ", curChargeBack: " + this.curChargeBack +  ", newChargeBack: " + this.newChargeBack +  ", oldSellCd: " + this.oldSellCd +  ", curSellCd: " + this.curSellCd +  ", newSellCd: " + this.newSellCd +  ", oldNoChargeBack: " + this.oldNoChargeBack +  ", curNoChargeBack: " + this.curNoChargeBack +  ", newNoChargeBack: " + this.newNoChargeBack +  ", oldActivePrice: " + this.oldActivePrice +  ", curActivePrice: " + this.curActivePrice +  ", newActivePrice: " + this.newActivePrice +  ", oldSsf: " + this.oldSsf +  ", curSsf: " + this.curSsf +  ", newSsf: " + this.newSsf +  ", oldSf: " + this.oldSf +  ", curSf: " + this.curSf +  ", newSf: " + this.newSf +  ", oldListPrice: " + this.oldListPrice +  ", curListPrice: " + this.curListPrice +  ", newListPrice: " + this.newListPrice +  ", oldAwp: " + this.oldAwp +  ", curAwp: " + this.curAwp +  ", newAwp: " + this.newAwp +  ", oldOverridePrice: " + this.oldOverridePrice +  ", curOverridePrice: " + this.curOverridePrice +  ", newOverridePrice: " + this.newOverridePrice +  ", orgDbtMemoId: " + this.orgDbtMemoId +  ", orgVendorAccAmt: " + this.orgVendorAccAmt +  ", deaNum: " + this.deaNum +  ", hin: " + this.hin +  ", street: " + this.street +  ", city: " + this.city +  ", region: " + this.region +  ", postalCode: " + this.postalCode +  ", country: " + this.country +  ", salesOrg: " + this.salesOrg +  ", orderType: " + this.orderType +  ", netBill: " + this.netBill +  ", sellPriceExt: " + this.sellPriceExt +  ", totChbk: " + this.totChbk +  ", gxcb: " + this.gxcb +  ", oldAbd: " + this.oldAbd +  ", curAbd: " + this.curAbd +  ", newAbd: " + this.newAbd;
 	}
 
 	public TWObject getTwCorrectionRow() {
@@ -341,6 +350,7 @@ class CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("materialName", this.materialName);
 	}
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
 	public Date getPricingDate() {
 		return pricingDate;
 	}
@@ -368,38 +378,38 @@ class CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("supplierName", this.supplierName);
 	}
 
-	public double getBillQty() {
+	public float getBillQty() {
 		return billQty;
 	}
 
-	public void setBillQty(double billQty) {
+	public void setBillQty(float billQty) {
 		this.billQty = billQty;
 		this.twCorrectionRow.setPropertyValue("billQty", this.billQty);
 	}
 
-	public double getRetQty() {
+	public float getRetQty() {
 		return retQty;
 	}
 
-	public void setRetQty(double retQty) {
+	public void setRetQty(float retQty) {
 		this.retQty = retQty;
 		this.twCorrectionRow.setPropertyValue("retQty", this.retQty);
 	}
 
-	public double getCrQty() {
+	public float getCrQty() {
 		return crQty;
 	}
 
-	public void setCrQty(double crQty) {
+	public void setCrQty(float crQty) {
 		this.crQty = crQty;
 		this.twCorrectionRow.setPropertyValue("crQty", this.crQty);
 	}
 
-	public double getRebillQty() {
+	public float getRebillQty() {
 		return rebillQty;
 	}
 
-	public void setRebillQty(double rebillQty) {
+	public void setRebillQty(float rebillQty) {
 		this.rebillQty = rebillQty;
 		this.twCorrectionRow.setPropertyValue("rebillQty", this.rebillQty);
 	}
@@ -413,6 +423,7 @@ class CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("uom", this.uom);
 	}
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
 	public Date getCreatedOn() {
 		return createdOn;
 	}

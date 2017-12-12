@@ -28,13 +28,9 @@ public class CreditRebillMaterial extends Material {
     private float newItemMkUpPer;
     private double newAwp;
 	private String newNoChargeBack;
-	private double newSellPrice;
 	private double newChargeBack;
     private double newListPrice;
-    //TODO: Remove these fields if not expected in response. START:
-    private String manufacturer;
-    private double newPrice;
-    //TODO: END Remove these fields if not expected in response.
+    private double newPrice; // Same as newSellPrice
     private double newOverridePrice;
     private double newSsf;
     private double newSf;
@@ -140,10 +136,10 @@ public class CreditRebillMaterial extends Material {
 		this.newNoChargeBack = newNoChargeBack;
 	}
 	public double getNewSellPrice() {
-		return newSellPrice;
+		return newPrice; // Same as newSellPrice
 	}
 	public void setNewSellPrice(double newSellPrice) {
-		this.newSellPrice = newSellPrice;
+		this.newPrice = newSellPrice; 
 	}
 	public double getNewChargeBack() {
 		return newChargeBack;
@@ -156,12 +152,6 @@ public class CreditRebillMaterial extends Material {
 	}
 	public void setNewListPrice(double newListPrice) {
 		this.newListPrice = newListPrice;
-	}
-	public String getManufacturer() {
-		return manufacturer;
-	}
-	public void setManufacturer(String manufacturer) {
-		this.manufacturer = manufacturer;
 	}
 	public double getNewPrice() {
 		return newPrice;
@@ -217,10 +207,8 @@ public class CreditRebillMaterial extends Material {
 				+ ", newItemMkUpPer: " + newItemMkUpPer 
 				+ ", newAwp: " + newAwp 
 				+ ", newNoChargeBack: " + newNoChargeBack 
-				+ ", newSellPrice: " + newSellPrice 
 				+ ", newChargeBack: " + newChargeBack 
 				+ ", newListPrice: " + newListPrice 
-				+ ", manufacturer: " + manufacturer 
 				+ ", newPrice: " + newPrice 
 				+ ", newOverridePrice: " + newOverridePrice 
 				+ ", newSsf: " + newSsf 

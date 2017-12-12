@@ -14,6 +14,7 @@ import teamworks.TWObject;
  */
 public class Utility {
 	public static final int INDEX_NOT_FOUND = -1;
+	public static final int FETCH_SIZE = 10000;
 	/*
 	 * <p>This code is a modified version of StringUtils.stripStart method.</p>
 	 * <p>Trims any of a set of characters from the start of a String except if the set character is the last one in the string.

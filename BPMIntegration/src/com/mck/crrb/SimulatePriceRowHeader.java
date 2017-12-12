@@ -1,9 +1,10 @@
 package com.mck.crrb;
 
-public class SimulatePriceRowHeader extends PriceRow {
+public class SimulatePriceRowHeader extends PriceRow implements Comparable<SimulatePriceRowHeader> {
 	private int index; 
 	private String salesOrg;
 	private String billType;
+	private String orderType;
 	//TODO: remove recordKey from header level - keep only in material level
 	//private String recordKey; // Consists of invoiceId-invoiceLineItemNum
 	
@@ -25,6 +26,12 @@ public class SimulatePriceRowHeader extends PriceRow {
 	public void setBillType(String billType) {
 		this.billType = billType;
 	}
+	public String getOrderType() {
+		return orderType;
+	}
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
+	}
 	/*
 	//TODO: remove recordKey from header level - keep only in material level
 	public String getRecordKey() {
@@ -42,5 +49,13 @@ public class SimulatePriceRowHeader extends PriceRow {
 		str = super.toString();
 		str += ", index: " + index + ", salesOrg: " + salesOrg + ", billType: " + billType;
 		return str;
+	}
+	@Override
+	public int compareTo(SimulatePriceRowHeader arg0) {
+		int comparison = -1;
+		if ((this.getCustomerId()).equals((String)arg0.getCustomerId()) && (this.getPricingDate()).compareTo(arg0.getPricingDate()) == 0) {
+			comparison = 0;
+		}
+		return comparison;		
 	}
 }

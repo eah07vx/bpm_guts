@@ -11,10 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import teamworks.TWList;
+import teamworks.TWObjectFactory;
 
 /**
  * @author akatre
@@ -44,38 +46,52 @@ public class SalesHistory {
 			d1 = new Date();
 			System.out.println("\r\nSalesHistory.getSalesHistory() Start invoiceLookup API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
 		}
-		this.salesHistory = Invoice.lookupInvoices(invoiceURL, httpMethod, sslAlias, filtersJSON, sopDebug);
-		if(sopDebug) {
-			d2 = new Date();
-			System.out.println("End invoiceLookup API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
-			System.out.println("Total invoiceLookup API time (ms): " + (d2.getTime() - d1.getTime()));
-			System.out.println("resp Complex object from json file with number of records: " + (this.salesHistory != null ? this.salesHistory.numberOfInvoiceLines() : 0));
+		try {
+			salesHistory = Invoice.lookupInvoices(invoiceURL, httpMethod, sslAlias, filtersJSON, sopDebug);
+			if(sopDebug) {
+				d2 = new Date();
+				System.out.println("End invoiceLookup API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
+				System.out.println("Total invoiceLookup API time (ms): " + (d2.getTime() - d1.getTime()));
+				System.out.println("resp Complex object from json file with number of records: " + (this.salesHistory != null ? this.salesHistory.numberOfInvoiceLines() : 0));
+			}
+	
+			// Current Price
+			String currentPriceReqJSON = prepCurrentPriceReq(salesHistory, 0, 100000);
+			if(sopDebug) {
+				System.out.println("SalesHistory.getSalesHistory() currentPriceReqJSON:" + currentPriceReqJSON);
+				d1 = new Date();
+				System.out.println("Total time to prepReq call JSON (ms): " + (d1.getTime() - d2.getTime()));
+				System.out.println("SalesHistory.getSalesHistory() Start currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+			}
+			CurrentPriceResp currentPriceLookupResp = CurrentPrice.getCurrentPrices(curPriceURL, httpMethod, sslAlias, currentPriceReqJSON, sopDebug);
+			if(sopDebug) {
+				d2 = new Date();
+				System.out.println("End currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
+				System.out.println("Total currentPrice API time (ms): " + (d2.getTime() - d1.getTime()));
+				System.out.println("SalesHistory.getSalesHistory() currentPriceLookupResp no. of rows:" + currentPriceLookupResp.getCurrentPriceResp().length);
+			}
+			if (currentPriceLookupResp != null && currentPriceLookupResp.getCurrentPriceResp() != null && currentPriceLookupResp.getCurrentPriceResp().length > 0) {
+				mergeResponse(currentPriceLookupResp, isCurrentCorrection, sopDebug);
+			}
+			if(sopDebug) {
+				CorrectionRow[] debugRows = salesHistory.getInvoiceLookupResp();
+				System.out.println("SalesHistory.getSalesHistory() response merged: " + (debugRows != null ? debugRows.length : -1));
+				TWList twDebugRows = salesHistory.getTwCorrectionRows();
+				System.out.println("SalesHistory.getSalesHistory().getTwCorrectionRows(): " + (twDebugRows != null ? twDebugRows.getArraySize() : -1));
+			}
 		}
-
-		// Current Price
-		String currentPriceReqJSON = prepCurrentPriceReq(salesHistory, 0, 100000);
-		if(sopDebug) {
-			System.out.println("SalesHistory.getSalesHistory() currentPriceReqJSON:" + currentPriceReqJSON);
-			d1 = new Date();
-			System.out.println("SalesHistory.getSalesHistory() Start currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+		catch (Exception e) {
+			e.printStackTrace();
 		}
-		CurrentPriceResp currentPriceLookupResp = CurrentPrice.getCurrentPrices(curPriceURL, httpMethod, sslAlias, currentPriceReqJSON, sopDebug);
-		if(sopDebug) {
-			d2 = new Date();
-			System.out.println("End currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
-			System.out.println("Total currentPrice API time (ms): " + (d2.getTime() - d1.getTime()));
-			System.out.println("SalesHistory.getSalesHistory() currentPriceLookupResp no. of rows:" + currentPriceLookupResp.getCurrentPriceResp().length);
+		TWList corRows = null;
+		if (salesHistory != null && (corRows = salesHistory.getTwCorrectionRows()) != null) {
+			if(sopDebug) System.out.println("SalesHistory.getSalesHistory() Returning non empty response!");
+			return corRows;
 		}
-		if (currentPriceLookupResp != null && currentPriceLookupResp.getCurrentPriceResp() != null && currentPriceLookupResp.getCurrentPriceResp().length > 0) {
-			mergeResponse(currentPriceLookupResp, isCurrentCorrection, sopDebug);
+		else {
+			if(sopDebug) System.out.println("SalesHistory.getSalesHistory() Returning empty response!");
+			return TWObjectFactory.createList();	// Return empty list but not a null object
 		}
-		if(sopDebug) {
-			CorrectionRow[] debugRows = salesHistory.getInvoiceLookupResp();
-			System.out.println("SalesHistory.getSalesHistory() response merged: " + (debugRows != null ? debugRows.length : -1));
-			TWList twDebugRows = salesHistory.getTwCorrectionRows();
-			System.out.println("SalesHistory.getSalesHistory().getTwCorrectionRows(): " + (twDebugRows != null ? twDebugRows.getArraySize() : -1));
-		}
-		return salesHistory.getTwCorrectionRows();
 	}
 	
 	private void mergeResponse(CurrentPriceResp currentPriceLookupResp, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
@@ -224,6 +240,7 @@ public class SalesHistory {
 		priceReqMap.put("endIndex", endIndex);
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
+		jacksonMapper.setSerializationInclusion(Include.NON_EMPTY);
 		
 		try {
 			priceReqJSON = jacksonMapper.writeValueAsString(priceReqMap);

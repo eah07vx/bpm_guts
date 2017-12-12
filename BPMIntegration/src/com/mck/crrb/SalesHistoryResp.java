@@ -11,13 +11,13 @@ import teamworks.TWObjectFactory;
  *
  */
 public class SalesHistoryResp extends APIResp {
-	private CorrectionRow[] invoiceLookupResp;  // Named to match response from invoiceLookup call 
+	private CorrectionRowNonISO[] invoiceLookupResp;  // Named to match response from invoiceLookup call 
 	private TWList twCorrectionRows;
 
 	/**
 	 * @return the invoiceLookupResp
 	 */
-	public CorrectionRow[] getInvoiceLookupResp() {
+	public CorrectionRowNonISO[] getInvoiceLookupResp() {
 		return invoiceLookupResp;
 	}
 
@@ -25,7 +25,7 @@ public class SalesHistoryResp extends APIResp {
 	 * @param invoiceLookupResp the invoiceLookupResp to set
 	 * @throws Exception 
 	 */
-	public void setInvoiceLookupResp(CorrectionRow[] invoiceLookupResp) throws Exception {
+	public void setInvoiceLookupResp(CorrectionRowNonISO[] invoiceLookupResp) throws Exception {
 		this.invoiceLookupResp = invoiceLookupResp;
 		updateTwCorrectionRows(invoiceLookupResp);
 	}
@@ -38,7 +38,7 @@ public class SalesHistoryResp extends APIResp {
 		this.twCorrectionRows = twCorrectionRows;
 	}
 
-	public void updateTwCorrectionRows(CorrectionRow[] invoiceLookupResp) throws Exception {
+	public void updateTwCorrectionRows(CorrectionRowNonISO[] invoiceLookupResp) throws Exception {
 		this.twCorrectionRows = TWObjectFactory.createList();
 		int size = invoiceLookupResp.length;
 		for (int i = 0; i < size; i++) {

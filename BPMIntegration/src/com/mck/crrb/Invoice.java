@@ -52,10 +52,10 @@ public class Invoice extends SAPIntegration {
 		}
 		
 
-		CorrectionRow[] invoiceLines = new CorrectionRow[correctionRows.getArraySize()];
+		CorrectionRowISO[] invoiceLines = new CorrectionRowISO[correctionRows.getArraySize()];
 		for (int i = 0; i < correctionRows.getArraySize(); i++) {
 			if(sopDebug) System.out.println("Invoice.simulatePrice() correctionRows.getArrayData(i).getClass().getName(): " + correctionRows.getArrayData(i).getClass().getName());
-			invoiceLines[i] = new CorrectionRow(correctionRows.getArrayData(i));
+			invoiceLines[i] = new CorrectionRowISO(correctionRows.getArrayData(i));
 			if (invoiceLines[i] != null) {
 				System.out.println("Invoice.simulatePrice() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
 			}
@@ -98,13 +98,13 @@ public class Invoice extends SAPIntegration {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		CorrectionRow[] invoiceLines = null;
+		CorrectionRowISO[] invoiceLines = null;
 		try {
 			//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");			
 			//jacksonMapper.setDateFormat(sdf);
 			//OffsetDateTime
 			
-			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, CorrectionRow[].class);
+			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, CorrectionRowISO[].class);
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
@@ -174,7 +174,7 @@ public class Invoice extends SAPIntegration {
 		return invoiceLookupResp;
 	}
 	
-	private static String prepSimulatePriceCall(CorrectionRow[] invoiceLines, String containerName, int startIndex, int endIndex, boolean sopDebug) {
+	private static String prepSimulatePriceCall(CorrectionRowISO[] invoiceLines, String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
 		//String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"billType\": \"ZPF2\",        \"materials\":[			{                \"recordKey\": \"7840363909-000001\",            	\"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
 		String simulatePriceReqJSON = null; 
@@ -218,7 +218,7 @@ public class Invoice extends SAPIntegration {
 		return simulatePriceReqJSON;
 	}
 	
-	static TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> bucketizePriceMap(CorrectionRow[] invoiceLines) {
+	static TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> bucketizePriceMap(CorrectionRowISO[] invoiceLines) {
 		TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> priceMap = new TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>>();
 		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
 		
@@ -256,7 +256,7 @@ public class Invoice extends SAPIntegration {
 		return priceMap;
 	}
 	
-	private static SimulatePriceRowHeader hydrateSimulatePriceRowHeader(CorrectionRow invoiceLine, int index){
+	private static SimulatePriceRowHeader hydrateSimulatePriceRowHeader(CorrectionRowISO invoiceLine, int index){
 		SimulatePriceRowHeader headerKey = new SimulatePriceRowHeader();
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
@@ -267,7 +267,7 @@ public class Invoice extends SAPIntegration {
 		return headerKey;
 	}
 	
-	private static CreditRebillMaterial hydrateCreditRebillMaterial(CorrectionRow invoiceLine) {
+	private static CreditRebillMaterial hydrateCreditRebillMaterial(CorrectionRowISO invoiceLine) {
 		CreditRebillMaterial creditRebillMaterial = new CreditRebillMaterial();
 		creditRebillMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
 		creditRebillMaterial.setMaterialId(invoiceLine.getMaterialId());
@@ -322,7 +322,7 @@ public class Invoice extends SAPIntegration {
 		return simulatePriceResp;
 	}
 	
-	private static CorrectionRow[] overrideSimulatePriceValues(CorrectionRow[] invoiceLines, SimulatePriceResp simulatePriceResp) {
+	private static CorrectionRowISO[] overrideSimulatePriceValues(CorrectionRowISO[] invoiceLines, SimulatePriceResp simulatePriceResp) {
 		if (invoiceLines != null && invoiceLines.length > 0 && simulatePriceResp != null 
 				&& simulatePriceResp.getPriceSimulationResp() != null && simulatePriceResp.getPriceSimulationResp().length > 0) {
 			SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();

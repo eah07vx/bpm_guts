@@ -74,7 +74,7 @@ public class SalesHistory {
 				mergeResponse(currentPriceLookupResp, isCurrentCorrection, sopDebug);
 			}
 			if(sopDebug) {
-				CorrectionRow[] debugRows = salesHistory.getInvoiceLookupResp();
+				CorrectionRowNonISO[] debugRows = salesHistory.getInvoiceLookupResp();
 				System.out.println("SalesHistory.getSalesHistory() response merged: " + (debugRows != null ? debugRows.length : -1));
 				TWList twDebugRows = salesHistory.getTwCorrectionRows();
 				System.out.println("SalesHistory.getSalesHistory().getTwCorrectionRows(): " + (twDebugRows != null ? twDebugRows.getArraySize() : -1));
@@ -95,7 +95,7 @@ public class SalesHistory {
 	}
 	
 	private void mergeResponse(CurrentPriceResp currentPriceLookupResp, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
-		CorrectionRow[] corrRows = salesHistory.getInvoiceLookupResp();
+		CorrectionRowNonISO[] corrRows = salesHistory.getInvoiceLookupResp();
 		CurrentPriceRow[] cpRows = currentPriceLookupResp.getCurrentPriceResp();
 		boolean corrRowHydrated = false;
 		if (cpRows != null && cpRows.length > 0) {
@@ -129,7 +129,7 @@ public class SalesHistory {
 		salesHistory.setInvoiceLookupResp(corrRows);
 	}
 	
-	private void hydrateCurrentValuesOfCorrectionRow(CorrectionRow correctionRow, CurrentPriceMaterial cpMaterial, boolean isCurrentCorrection) {
+	private void hydrateCurrentValuesOfCorrectionRow(CorrectionRowNonISO correctionRow, CurrentPriceMaterial cpMaterial, boolean isCurrentCorrection) {
 		correctionRow.setCurSellCd(cpMaterial.getCurSellCd());
 		correctionRow.setCurNoChargeBack(cpMaterial.getCurNoChargeBack());
 	    correctionRow.setCurActivePrice(cpMaterial.getCurActivePrice());
@@ -176,7 +176,7 @@ public class SalesHistory {
 		}
 	}
 
-	private static TreeMap<NameValuePair<String, String>, TreeMap<String, String>> bucketizePriceMap(CorrectionRow[] invoices) {
+	private static TreeMap<NameValuePair<String, String>, TreeMap<String, String>> bucketizePriceMap(CorrectionRowNonISO[] invoices) {
 		TreeMap<NameValuePair<String, String>, TreeMap<String, String>> priceMap = new TreeMap<NameValuePair<String, String>, TreeMap<String, String>>();
 		//System.out.println("TestRow[] invoices.length: " + invoices.length);
 		int i = 0;

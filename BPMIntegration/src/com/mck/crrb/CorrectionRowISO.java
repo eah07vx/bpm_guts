@@ -26,7 +26,7 @@ public class CorrectionRowISO extends CorrectionRowNonDate {
 		public CorrectionRowISO() {
 			super();
 		} 
-				
+
 		public CorrectionRowISO(Object twCorrectionRow) {			
 			super((TWObject)twCorrectionRow);
 			TWObject twCorrRow = super.getTwCorrectionRow();

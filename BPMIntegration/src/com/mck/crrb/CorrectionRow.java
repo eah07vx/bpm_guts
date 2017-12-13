@@ -40,11 +40,6 @@ public class CorrectionRow extends CorrectionRowNonDate {
 			}
 		}
 
-		public String toString() {
-			String s = super.toString();
-			return s + ", pricingDate: " + this.getPricingDate() +  ", createdOn: " + this.getCreatedOn();
-		}
-
 		public Date getPricingDate() {
 			return pricingDate;
 		}
@@ -61,5 +56,10 @@ public class CorrectionRow extends CorrectionRowNonDate {
 		public void setCreatedOn(Date createdOn) {
 			this.createdOn = createdOn;
 			super.getTwCorrectionRow().setPropertyValue("createdOn", this.createdOn);
+		}
+
+		public String toString() {
+			String s = super.toString();
+			return s + ", pricingDate: " + this.getPricingDate() +  ", createdOn: " + this.getCreatedOn();
 		}
 }

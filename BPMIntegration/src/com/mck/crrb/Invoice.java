@@ -41,7 +41,6 @@ public class Invoice extends SAPIntegration {
 	 */
 	public static TWList simulatePrice(String url, String httpMethod, String sslAlias, TWList correctionRows, boolean sopDebug) {
 		Date d1 = null;
-		Date d2 = null;
 
 		if(sopDebug) {
 			System.out.println("Invoice.simulatePrice() input parameters:");
@@ -357,12 +356,11 @@ public class Invoice extends SAPIntegration {
 	static TreeMap<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>> bucketizeSubmitMap(CorrectionRowISO[] invoiceLines, String correlationId) {
 		TreeMap<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>> priceMap = new TreeMap<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>>();
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//Hydrate key as SubmitPriceReqHeader
 			SubmitPriceReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], correlationId, i); 
 			//TODO: Remove SOP debug statement below
-			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + sdf.format(headerKey.getBillType()));
+			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
  			
 			//Hydrate priceCorrectionMaterial
 			PriceCorrectionMaterial priceCorrectionMaterial = hydratePriceCorrectionMaterial(invoiceLines[i]);

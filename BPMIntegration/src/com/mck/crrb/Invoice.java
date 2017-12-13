@@ -64,7 +64,7 @@ public class Invoice extends SAPIntegration {
 		if (sopDebug) System.out.println("Invoice.simulatePrice requestJSON" + requestJSON);
 		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePrice response: " + resp);
-		overrideSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
+		mergeSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
 		TWList twCorrectionRows = null;
 		try {
 			twCorrectionRows = TWObjectFactory.createList();
@@ -134,7 +134,7 @@ public class Invoice extends SAPIntegration {
 
 		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePriceJSON() response: " + resp);
-		overrideSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
+		mergeSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
 		TWList twCorrectionRows = null;
 		try {
 			twCorrectionRows = TWObjectFactory.createList();
@@ -322,15 +322,42 @@ public class Invoice extends SAPIntegration {
 		return simulatePriceResp;
 	}
 	
-	private static CorrectionRowISO[] overrideSimulatePriceValues(CorrectionRowISO[] invoiceLines, SimulatePriceResp simulatePriceResp) {
+	private static CorrectionRowISO[] mergeSimulatePriceValues(CorrectionRowISO[] invoiceLines, SimulatePriceResp simulatePriceResp) {
 		if (invoiceLines != null && invoiceLines.length > 0 && simulatePriceResp != null 
 				&& simulatePriceResp.getPriceSimulationResp() != null && simulatePriceResp.getPriceSimulationResp().length > 0) {
 			SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();
 			for(int i = 0; i < invoiceLines.length; i++) {
-				
 				for(int j = 0; j < simulatePriceRows.length; j++){
-					CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
-//					invoiceLines[i].setNewPrice(crMaterials[]);
+					if (invoiceLines[i].getCustomerId() != null && invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
+							&& invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
+						CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
+						for(int k = 0; k < crMaterials.length; k++) {
+							String invoiceLineRecordKey = invoiceLines[i].getInvoiceId() + "-" + invoiceLines[i].getInvoiceLineItemNum();
+							if (invoiceLineRecordKey.equals(crMaterials[k].getRecordKey())) {
+								invoiceLines[i].setNewPrice(crMaterials[k].getNewSellPrice());
+								invoiceLines[i].setNewActivePrice(crMaterials[k].getNewActivePrice());
+								invoiceLines[i].setNewAwp(crMaterials[k].getNewAwp());
+								invoiceLines[i].setNewBid(crMaterials[k].getNewBid());
+								invoiceLines[i].setNewCbRef(crMaterials[k].getNewCbRef());
+								invoiceLines[i].setNewChargeBack(crMaterials[k].getNewChargeBack());
+								invoiceLines[i].setNewConRef(crMaterials[k].getNewConRef());
+								invoiceLines[i].setNewContCogPer(crMaterials[k].getNewContCogPer());
+								invoiceLines[i].setNewItemMkUpPer(crMaterials[k].getNewItemMkUpPer());
+								invoiceLines[i].setNewItemVarPer(crMaterials[k].getNewItemVarPer());
+								invoiceLines[i].setNewLead(crMaterials[k].getNewLead());
+								invoiceLines[i].setNewListPrice(crMaterials[k].getNewListPrice());
+								invoiceLines[i].setNewNoChargeBack(crMaterials[k].getNewNoChargeBack());
+								invoiceLines[i].setNewOverridePrice(crMaterials[k].getNewOverridePrice());
+								invoiceLines[i].setNewSellCd(crMaterials[k].getNewSellCd());
+								invoiceLines[i].setNewSf(crMaterials[k].getNewSf());
+								invoiceLines[i].setNewSsf(crMaterials[k].getNewSsf());
+								invoiceLines[i].setNewWac(crMaterials[k].getNewWac());
+								invoiceLines[i].setNewWacCogPer(crMaterials[k].getNewWacCogPer());
+//								TODO: Check if newAbd needs to be added to materials
+//								invoiceLines[i].setNewAbd(crMaterials[k].getNew??);
+							}
+						}
+					}
 				}
 			}
 		}

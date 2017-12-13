@@ -6,6 +6,8 @@ package com.mck.crrb;
 import java.util.Date;
 
 /**
+ * Top level price row will have attributes from this POJO at a minimum
+ * 
  * @author akatre
  *
  */

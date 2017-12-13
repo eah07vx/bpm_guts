@@ -4,6 +4,8 @@
 package com.mck.crrb;
 
 /**
+ * Each record in the simulate price API response. Has materials list.
+ * 
  * @author akatre
  *
  */

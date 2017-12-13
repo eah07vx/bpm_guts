@@ -7,6 +7,8 @@ import java.util.Date;
 import teamworks.TWObject;
 
 /**
+ * Represents an invoice line item in the Correct Price table - 1 line per row
+ * 
  * @author akatre
  *
  */

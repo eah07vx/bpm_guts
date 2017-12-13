@@ -19,6 +19,8 @@ import teamworks.TWList;
 import teamworks.TWObjectFactory;
 
 /**
+ * Overall SalesHistory operations class
+ * 
  * @author akatre
  *
  */

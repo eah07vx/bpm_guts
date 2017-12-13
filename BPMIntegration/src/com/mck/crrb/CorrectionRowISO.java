@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import teamworks.TWObject;
 
 /**
+ * Uses the date format returned by Date.prototype.toJSON() which defaults to Date.prototype.toISOString() with format 'yyyy-MM-ddTHH:mm:ss.SSSSZ'
+ * 
  * @author akatre
  *
  */

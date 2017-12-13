@@ -353,7 +353,7 @@ public class Invoice extends SAPIntegration {
 								invoiceLines[i].setNewSsf(crMaterials[k].getNewSsf());
 								invoiceLines[i].setNewWac(crMaterials[k].getNewWac());
 								invoiceLines[i].setNewWacCogPer(crMaterials[k].getNewWacCogPer());
-//								TODO: Check if newAbd needs to be added to materials
+//								TODO: Check if newAbd needs to be added to materials and add other fields
 //								invoiceLines[i].setNewAbd(crMaterials[k].getNew??);
 							}
 						}

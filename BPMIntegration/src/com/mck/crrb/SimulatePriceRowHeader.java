@@ -1,5 +1,12 @@
 package com.mck.crrb;
 
+
+/**
+ * Header information of each record in the simulate price API response. Subclass can have detail attributes.
+ * 
+ * @author akatre
+ *
+ */
 public class SimulatePriceRowHeader extends PriceRow implements Comparable<SimulatePriceRowHeader> {
 	private int index; 
 	private String salesOrg;

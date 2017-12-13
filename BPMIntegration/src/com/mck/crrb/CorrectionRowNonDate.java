@@ -17,6 +17,8 @@ import teamworks.TWObjectFactory;
 //import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * Base Correction Row POJO without date components. Could be abstract. Known subclasses with JSON ISO format date and non-ISO date
+ * 
  * @author akatre
  *
  */

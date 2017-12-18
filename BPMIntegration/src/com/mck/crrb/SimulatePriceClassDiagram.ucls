@@ -55,8 +55,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="com.mck.crrb.IndexedResultStatus" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/IndexedResultStatus.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="7" language="java" name="com.mck.crrb.IndexedResult" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/IndexedResult.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="858" y="-674"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -73,26 +73,34 @@
       <operations public="true" package="false" protected="false" private="false" static="true"/>    
     </display>  
   </class>  
-  <generalization id="9">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="6"/>  
-  </generalization>  
-  <generalization id="10">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="4"/>  
-  </generalization>  
-  <association id="11">    
+  <association id="9">    
     <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="12" name="priceSimulationResp"/>      
-      <multiplicity id="13" minimum="0" maximum="2147483647"/>    
+      <attribute id="10" name="priceSimulationResp">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="11" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="2" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
+  <generalization id="12">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <generalization id="13">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </generalization>  
   <association id="14">    
     <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="15" name="materials"/>      
-      <multiplicity id="16" minimum="0" maximum="2147483647"/>    
+      <attribute id="15" name="materials">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="16" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="3" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
@@ -103,8 +111,12 @@
   </generalization>  
   <association id="18">    
     <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="19" name="results"/>      
-      <multiplicity id="20" minimum="0" maximum="2147483647"/>    
+      <attribute id="19" name="results">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="20" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="7" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import teamworks.TWList;
+import teamworks.TWObject;
 import teamworks.TWObjectFactory;
 
 
@@ -28,12 +29,108 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-public class Invoice extends SAPIntegration {
+public class Invoice extends API {
+	/**
+	 * Convenience method that does the same job as process method inherited from API. 
+	 * 
+	 * @param url
+	 * @param httpMethod
+	 * @param sslAlias
+	 * @param requestJSON
+	 * @param sopDebug
+	 * @return teamworks.TWObject to be mapped to BPM BO with same properties/parameters 
+	 *  
+	 */
 
-	public static SalesHistoryResp lookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
-		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
+	public TWObject lookup(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
+		return super.process(url, httpMethod, sslAlias, requestJSON, sopDebug);
+	}
+	
+	@Override
+	TWObject parseResponse(String rawResp, boolean sopDebug) throws Exception {
+		ObjectMapper jacksonMapper = new ObjectMapper();
+		jacksonMapper.configure(
+			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		InvoiceLookupResp invoices = null;
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(API.DATE_FORMAT);
+			jacksonMapper.setDateFormat(sdf);
+			
+			invoices = jacksonMapper.readValue(rawResp, InvoiceLookupResp.class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			TWObject twInvoiceLookupResp = TWObjectFactory.createObject();
+			TWList corRows = null;
+			TWList lookupResults = null;
+			if (invoices != null && (corRows = invoices.getTwCorrectionRows()) != null && (lookupResults = invoices.getTwResults()) != null) {
+				if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning non empty response!");
+				twInvoiceLookupResp.setPropertyValue("correctionRows", corRows);
+				twInvoiceLookupResp.setPropertyValue("results", lookupResults);
+			}
+			else {
+				// Return empty object but not a null object
+				if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning empty response!");
+				twInvoiceLookupResp.setPropertyValue("correctionRows", TWObjectFactory.createList());
+				twInvoiceLookupResp.setPropertyValue("results", TWObjectFactory.createList());
+			}
+			return twInvoiceLookupResp;
+		} catch (Exception e) {
+			e.getMessage();
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Deprecated
+	public static TWObject lookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
+		String resp = call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.lookupInvoices response: " + resp);
-		return parseInvoiceLookupResp(resp);
+		InvoiceLookupResp invoices = parseInvoiceLookupResp(resp);
+		
+		TWObject invoiceLookupResp = TWObjectFactory.createObject();
+		TWList corRows = null;
+		TWList lookupResults = null;
+		if (invoices != null && (corRows = invoices.getTwCorrectionRows()) != null && (lookupResults = invoices.getTwResults()) != null) {
+			if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning non empty response!");
+			invoiceLookupResp.setPropertyValue("correctionRows", corRows);
+			invoiceLookupResp.setPropertyValue("results", lookupResults);
+		}
+		else {
+			// Return empty object but not a null object
+			if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning empty response!");
+			invoiceLookupResp.setPropertyValue("correctionRows", TWObjectFactory.createList());
+			invoiceLookupResp.setPropertyValue("results", TWObjectFactory.createList());
+		}
+		return invoiceLookupResp;
+	}
+	
+	/**
+	 * 
+	 * @param url
+	 * @param httpMethod
+	 * @param sslAlias
+	 * @param requestJSON
+	 * @param sopDebug
+	 * @return
+	 * 
+	 * @deprecated 	this old method returned SalesHistoryResp which was processes in SalesHistory class to get TWList of CorrectionRow objects.
+	 * 				use {@link #lookup(String, String, String, String, boolean)} instead
+	 */
+	@Deprecated
+	public static _SalesHistoryResp lookupOldInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
+		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		if (sopDebug) System.out.println("Invoice.lookupInvoices response: " + resp);
+		//return parseInvoiceLookupResp(resp);
+		return new _SalesHistoryResp();
 	}
 	
 	/*
@@ -64,7 +161,7 @@ public class Invoice extends SAPIntegration {
 		}
 		String requestJSON = prepSimulatePriceCall(invoiceLines, "priceSimulationReq", 1, Utility.FETCH_SIZE, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePrice requestJSON" + requestJSON);
-		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePrice response: " + resp);
 		mergeSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
 		TWList twCorrectionRows = null;
@@ -134,7 +231,7 @@ public class Invoice extends SAPIntegration {
 			System.out.println("Invoice.simulatePriceJSON() requestJSON: " + requestJSON);
 		}
 
-		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePriceJSON() response: " + resp);
 		mergeSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
 		TWList twCorrectionRows = null;
@@ -201,7 +298,7 @@ public class Invoice extends SAPIntegration {
 			System.out.println("Invoice.submitPriceCorrection() requestJSON: " + requestJSON);
 		}
 
-		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.submitPriceCorrection() response: " + resp);
 		PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(resp);
 		
@@ -387,16 +484,16 @@ public class Invoice extends SAPIntegration {
 		return priceMap;
 	}
 	
-	private static SalesHistoryResp parseInvoiceLookupResp(String resp) {
+	private static InvoiceLookupResp parseInvoiceLookupResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		SalesHistoryResp invoiceLookupResp = null;
+		InvoiceLookupResp invoiceLookupResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			jacksonMapper.setDateFormat(sdf);
 			
-			invoiceLookupResp = jacksonMapper.readValue(resp, SalesHistoryResp.class);
+			invoiceLookupResp = jacksonMapper.readValue(resp, InvoiceLookupResp.class);
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
@@ -656,10 +753,10 @@ public class Invoice extends SAPIntegration {
 	
 	//@VisibleForTesting
 	public static TWList testLookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws IOException, JsonMappingException, JsonParseException {
-		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		//System.out.println("testLookupInvoices() response: " + resp);
 		return parseInvoiceLookupResp(resp).getTwCorrectionRows();
 	}
-	
+
 
 }

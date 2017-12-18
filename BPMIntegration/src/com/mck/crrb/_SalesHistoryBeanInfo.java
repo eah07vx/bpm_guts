@@ -14,10 +14,10 @@ import java.lang.reflect.Method;
  * @author akatre
  * 
  */
-public class SalesHistoryBeanInfo extends SimpleBeanInfo {
+public class _SalesHistoryBeanInfo extends SimpleBeanInfo {
 
 	@SuppressWarnings("rawtypes")
-	private Class beanClass = SalesHistory.class;
+	private Class beanClass = _SalesHistory.class;
 
 	@Override
 	public MethodDescriptor[] getMethodDescriptors() {

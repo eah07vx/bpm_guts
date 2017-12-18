@@ -46,7 +46,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="6" language="java" name="com.mck.crrb.IndexedResultStatus" project="BPMIntegrationTest" 
+  <class id="6" language="java" name="com.mck.crrb.IndexedResult" project="BPMIntegrationTest" 
     file="/BPMIntegrationTest/src/com/mck/crrb/IndexedResultStatus.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="806" y="454"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -55,7 +55,7 @@
       <operations public="false" package="false" protected="false" private="false" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="com.mck.crrb.SAPIntegration" project="BPMIntegrationTest" 
+  <class id="7" language="java" name="com.mck.crrb.API" project="BPMIntegrationTest" 
     file="/BPMIntegrationTest/src/com/mck/crrb/SAPIntegration.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1025" y="18"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 

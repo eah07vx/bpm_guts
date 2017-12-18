@@ -16,7 +16,7 @@ import teamworks.TWObject;
  * @author akatre
  *
  */
-public class CorrectionRowISO extends CorrectionRowNonDate {
+public class CorrectionRowISO extends CorrectionRow {
 
 		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 		private Date pricingDate;
@@ -46,24 +46,29 @@ public class CorrectionRowISO extends CorrectionRowNonDate {
 			}
 		}
 
+		@Override
 		public String toString() {
 			String s = super.toString();
 			return s + "pricingDate: " + this.getPricingDate() +  ", createdOn: " + this.getCreatedOn();
 		}
-
+		
+		@Override
 		public Date getPricingDate() {
 			return pricingDate;
 		}
 
+		@Override
 		public void setPricingDate(Date pricingDate) {
 			this.pricingDate = pricingDate;
 			super.getTwCorrectionRow().setPropertyValue("pricingDate", this.pricingDate);
 		}
 
+		@Override
 		public Date getCreatedOn() {
 			return createdOn;
 		}
 
+		@Override
 		public void setCreatedOn(Date createdOn) {
 			this.createdOn = createdOn;
 			super.getTwCorrectionRow().setPropertyValue("createdOn", this.createdOn);

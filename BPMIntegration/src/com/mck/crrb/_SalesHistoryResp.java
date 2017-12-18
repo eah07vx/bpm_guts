@@ -10,7 +10,7 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-public class SalesHistoryResp extends APIResp {
+public class _SalesHistoryResp extends APIResp {
 	private CorrectionRow[] invoiceLookupResp;  // Named to match response from invoiceLookup call 
 	private TWList twCorrectionRows;
 

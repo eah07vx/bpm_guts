@@ -9,7 +9,7 @@ import teamworks.TWObject;
  * @author akatre
  *
  */
-public class PriceCorrectionRow extends IndexedResultStatus {
+public class PriceCorrectionRow extends IndexedResult {
 	private TWObject twPriceCorrectionRow;
 	
 	private String customerId;

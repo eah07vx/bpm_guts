@@ -12,14 +12,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import teamworks.TWObject;
+
 /**
  * @author akatre
  *
  */
-class CurrentPrice extends SAPIntegration {
+class _CurrentPrice extends API {
 
-	public static CurrentPriceResp getCurrentPrices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
-		String resp = callAPI(url, httpMethod, sslAlias, requestJSON, sopDebug);
+	public static _CurrentPriceResp getCurrentPrices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
+		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		//TODO remove this test code
 		//@Test - set specific resp object as callAPI doesn't return anything
 		if (sopDebug) { System.out.println("CurrentPrice.getCurrentPrices() raw response: " + resp); }
@@ -30,17 +32,17 @@ class CurrentPrice extends SAPIntegration {
 		return parseCurrentPriceLookupResp(resp);
 	}
 	
-	public static CurrentPriceResp parseCurrentPriceLookupResp(String resp) {
+	public static _CurrentPriceResp parseCurrentPriceLookupResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-		CurrentPriceResp currentPriceLookupResp = null;
+		_CurrentPriceResp currentPriceLookupResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			jacksonMapper.setDateFormat(sdf);
 			
-			currentPriceLookupResp = jacksonMapper.readValue(resp, CurrentPriceResp.class);
+			currentPriceLookupResp = jacksonMapper.readValue(resp, _CurrentPriceResp.class);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,13 +66,13 @@ class CurrentPrice extends SAPIntegration {
 		String sslAlias = "CellDefaultSSLSettings";
 		String requestJSON = "{\"CurrentPriceReq\":[		{			\"customerId\":\"80853\",			\"pricingDate\":\"20170505\",			\"materials\":[\"1361955\",\"1116854\",\"1100452\"]		},		{			\"customerId\":\"80853\",			\"pricingDate\":\"20171119\",			\"materials\":[\"1361955\"]		}	],	\"startIndex\" : 0,	\"endIndex\" : 0}";
 		String rawResp = "";
-		CurrentPriceResp currentPriceLookupResp = null;
+		_CurrentPriceResp currentPriceLookupResp = null;
 		Date d1 = new Date();
 		Date d2 = null;
 		
 		d1 = new Date();
 		System.out.println("\r\nStart invoiceLookup API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
-		rawResp = callAPI(url, httpMethod, sslAlias, requestJSON, true);
+		rawResp = API.call(url, httpMethod, sslAlias, requestJSON, true);
 		d2 = new Date();
 		System.out.println("End invoiceLookup API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
 		System.out.println("rawInvoiceLookupResp length:" + rawResp.length()); 
@@ -85,4 +87,11 @@ class CurrentPrice extends SAPIntegration {
 		System.out.println("resp Complex object from json file with number of records: " + currentPriceLookupResp.numberOfResponseLines());
 		System.out.println("Total parsing time (ms): " + (d2.getTime() - d1.getTime()));
 	}
+
+	@Override
+	public TWObject parseResponse(String rawResp, boolean sopDebug) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

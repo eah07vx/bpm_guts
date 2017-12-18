@@ -22,7 +22,7 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-class CorrectionRowNonDate {
+class _CorrectionRowNonDate {
 	private TWObject twCorrectionRow;
 	//invoice
 	private String invoiceId;
@@ -148,18 +148,45 @@ class CorrectionRowNonDate {
 	//miscellaneous attributes
 	private String salesOrg;
 	private String orderType;
-	private String netBill;
+	//private String netBill;
+	//Replaced with old and new NetBill fields
 	private double sellPriceExt;
 	private double totChbk;
-	private double gxcb;
+	//private double gxcb;
+	//Removed gxcb
 	//Abd trifecta
 	private double oldAbd;
 	private double curAbd;
 	private double newAbd;
-//	TODO: remove this field once Archit makes the change in Mulesoft API
-//	private String address; 
-	
-	public CorrectionRowNonDate() {
+	//net bill
+	private double oldNetBill;
+	private double newNetBill;
+	//GX program type trifecta
+	private String oldProgType;
+	private String newProgType;
+	private String curProgType;
+	//contr Id trifecta
+	private String oldContrId;
+	private String newContrId;
+	private String curContrId;
+	//cont type trifecta
+	private String oldContType;
+	private String newContType;
+	private String curContType;
+	//rebill customer trifecta
+	private String oldRebillCust;
+	private String newRebillCust;
+	private String curRebillCust;
+	//customer name trifecta (used for rebill)
+	private String oldCustomerName;
+	private String newCustomerName;
+	private String curCustomerName;
+	//distrubution channel
+	private String distrChan;
+	private String division;
+	private String docType;
+
+	public _CorrectionRowNonDate() {
 		try {
 			this.twCorrectionRow = TWObjectFactory.createObject();
 		} catch (Exception e) {
@@ -168,7 +195,7 @@ class CorrectionRowNonDate {
 		}
 	} 
 	
-	public CorrectionRowNonDate(Object twCorrectionRow) {
+	public _CorrectionRowNonDate(Object twCorrectionRow) {
 		this.twCorrectionRow = (TWObject)twCorrectionRow;
 //		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
 //		try {
@@ -274,13 +301,31 @@ class CorrectionRowNonDate {
 			this.country = this.twCorrectionRow.getPropertyValue("country").toString();
 			this.salesOrg = this.twCorrectionRow.getPropertyValue("salesOrg").toString();
 			this.orderType = this.twCorrectionRow.getPropertyValue("orderType").toString();
-			this.netBill = this.twCorrectionRow.getPropertyValue("netBill").toString();
 			this.sellPriceExt = Double.parseDouble(this.twCorrectionRow.getPropertyValue("sellPriceExt").toString());
 			this.totChbk = Double.parseDouble(this.twCorrectionRow.getPropertyValue("totChbk").toString());
-			this.gxcb = Double.parseDouble(this.twCorrectionRow.getPropertyValue("gxcb").toString());
 			this.oldAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldAbd").toString());
 			this.curAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curAbd").toString());
 			this.newAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newAbd").toString());
+			this.oldNetBill = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldNetBill").toString());
+			this.newNetBill = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newNetBill").toString());
+			this.oldProgType = this.twCorrectionRow.getPropertyValue("oldProgType").toString();
+			this.newProgType = this.twCorrectionRow.getPropertyValue("newProgType").toString();
+			this.curProgType = this.twCorrectionRow.getPropertyValue("curProgType").toString();
+			this.oldContrId = this.twCorrectionRow.getPropertyValue("oldContrId").toString();
+			this.newContrId = this.twCorrectionRow.getPropertyValue("newContrId").toString();
+			this.curContrId = this.twCorrectionRow.getPropertyValue("curContrId").toString();
+			this.oldContType = this.twCorrectionRow.getPropertyValue("oldContType").toString();
+			this.newContType = this.twCorrectionRow.getPropertyValue("newContType").toString();
+			this.curContType = this.twCorrectionRow.getPropertyValue("curContType").toString();
+			this.oldRebillCust = this.twCorrectionRow.getPropertyValue("oldRebillCust").toString();
+			this.newRebillCust = this.twCorrectionRow.getPropertyValue("newRebillCust").toString();
+			this.curRebillCust = this.twCorrectionRow.getPropertyValue("curRebillCust").toString();
+			this.oldCustomerName = this.twCorrectionRow.getPropertyValue("oldCustomerName").toString();
+			this.newCustomerName = this.twCorrectionRow.getPropertyValue("newCustomerName").toString();
+			this.curCustomerName = this.twCorrectionRow.getPropertyValue("curCustomerName").toString();
+			this.distrChan = this.twCorrectionRow.getPropertyValue("distrChan").toString();
+			this.division = this.twCorrectionRow.getPropertyValue("division").toString();
+			this.docType = this.twCorrectionRow.getPropertyValue("docType").toString();
 //		} catch (ParseException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
@@ -289,30 +334,55 @@ class CorrectionRowNonDate {
 	} 
 	
 	public String toString() {
+		
 		//return this.getBillQty() + ", " + this.getBillType() + ", " + this.getChainId() + ", " + this.getChainName() + ", " + this.getCreatedOn() + ", " + this.getCrQty() + ", " + this.getCustomerId() + ", " + this.getCustomerName() + ", " + this.getDc() + ", " + this.getDeaNum() + ", " + this.getGroupId() + ", " + this.getGroupName() + ", " + this.getGxcb() + ", " + this.getInvoiceId() + ", " + this.getInvoiceLineItemNum() + ", " + this.getMaterialId() + ", " + this.getMaterialName() + ", " + this.getNdcUpc() + ", " + this.getNetBill() + ", " + this.getOldActivePrice() + ", " + this.getOldAwp() + ", " + this.getOldBid() + ", " + this.getOldCbRef() + ", " + this.getOldChargeBack() + ", " + this.getOldConRef() + ", " + this.getOldContCogPer() + ", " + this.getOldItemMkUpPer() + ", " + this.getOldLead() + ", " + this.getOldListPrice() + ", " + this.getReasonCode() + ", " + this.getOldNoChargeBack() + ", " + this.getOldPrice() + ", " + this.getOldSellCd() + ", " + this.getOldSf() + ", " + this.getOldSsf() + ", " + this.getOldWac() + ", " + this.getOldWacCogPer() + ", " + this.getOrderType() + ", " + this.getOrgDbtMemoId() + ", " + this.getOrgVendorAccAmt() + ", " + this.getPoNumber() + ", " + this.getPricingDate() + ", " + this.getRebillQty() + ", " + this.getRetQty() + ", " + this.getSalesOrg() + ", " + this.getSellPriceExt() + ", " + this.getSubgroupId() + ", " + this.getSubgroupName() + ", " + this.getSupplierId() + ", " + this.supplierName + ", " + this.getTotChbk() + ", " + this.getUom();
-		return "invoiceId: " + this.invoiceId +  ", invoiceLineItemNum: " + this.invoiceLineItemNum +  ", customerId: " + this.customerId +  ", customerName: " + this.customerName +  
-				", materialId: " + this.materialId +  ", materialName: " + this.materialName +  ", supplierId: " + this.supplierId +  ", supplierName: " + this.supplierName +  
-				", billQty: " + this.billQty +  ", retQty: " + this.retQty +  ", crQty: " + this.crQty +  ", rebillQty: " + this.rebillQty +  ", uom: " + this.uom +  
-				", dc: " + this.dc +  ", ndcUpc: " + this.ndcUpc +  ", billType: " + this.billType +  ", chainId: " + this.chainId +  ", chainName: " + this.chainName +  
+		return "twCorrectionRow elements size: " + this.twCorrectionRow.getPropertyNames().size() + 
+				"invoiceId: " + this.invoiceId +  ", invoiceLineItemNum: " + this.invoiceLineItemNum +
+				", customerId: " + this.customerId +  ", customerName: " + this.customerName +  
+				", materialId: " + this.materialId +  ", materialName: " + this.materialName +
+				", supplierId: " + this.supplierId +  ", supplierName: " + this.supplierName +  
+				", billQty: " + this.billQty +  ", retQty: " + this.retQty +  ", crQty: " + this.crQty +  ", rebillQty: " + this.rebillQty + 
+				", uom: " + this.uom + ", dc: " + this.dc +  ", ndcUpc: " + this.ndcUpc +
+				", billType: " + this.billType +  ", chainId: " + this.chainId +  ", chainName: " + this.chainName +  
 				", groupId: " + this.groupId +  ", groupName: " + this.groupName +  ", subgroupId: " + this.subgroupId +  ", subgroupName: " + this.subgroupName +  
-				", reasonCode: " + this.reasonCode +  ", poNumber: " + this.poNumber +  ", oldPrice: " + this.oldPrice +  ", curPrice: " + this.curPrice +  ", newPrice: " + this.newPrice +  
-				", oldWac: " + this.oldWac +  ", curWac: " + this.curWac +  ", newWac: " + this.newWac +  ", oldBid: " + this.oldBid +  ", curBid: " + this.curBid +  
-				", newBid: " + this.newBid +  ", oldLead: " + this.oldLead +  ", curLead: " + this.curLead +  ", newLead: " + this.newLead +  ", oldConRef: " + this.oldConRef +  
-				", curConRef: " + this.curConRef +  ", newConRef: " + this.newConRef +  ", oldCbRef: " + this.oldCbRef +  ", curCbRef: " + this.curCbRef +  ", newCbRef: " + this.newCbRef +  
-				", oldContCogPer: " + this.oldContCogPer +  ", curContCogPer: " + this.curContCogPer +  ", newContCogPer: " + this.newContCogPer +  ", oldItemVarPer: " + this.oldItemVarPer +  
-				", curItemVarPer: " + this.curItemVarPer +  ", newItemVarPer: " + this.newItemVarPer +  ", oldWacCogPer: " + this.oldWacCogPer +  ", curWacCogPer: " + this.curWacCogPer + 
-				", newWacCogPer: " + this.newWacCogPer +  ", oldItemMkUpPer: " + this.oldItemMkUpPer +  ", curItemMkUpPer: " + this.curItemMkUpPer +  ", newItemMkUpPer: " + this.newItemMkUpPer +  
-				", oldChargeBack: " + this.oldChargeBack +  ", curChargeBack: " + this.curChargeBack +  ", newChargeBack: " + this.newChargeBack +  ", oldSellCd: " + this.oldSellCd +  
-				", curSellCd: " + this.curSellCd +  ", newSellCd: " + this.newSellCd +  ", oldNoChargeBack: " + this.oldNoChargeBack +  ", curNoChargeBack: " + this.curNoChargeBack +  
-				", newNoChargeBack: " + this.newNoChargeBack +  ", oldActivePrice: " + this.oldActivePrice +  ", curActivePrice: " + this.curActivePrice +  
-				", newActivePrice: " + this.newActivePrice +  ", oldSsf: " + this.oldSsf +  ", curSsf: " + this.curSsf +  ", newSsf: " + this.newSsf +  ", oldSf: " + this.oldSf +  
-				", curSf: " + this.curSf +  ", newSf: " + this.newSf +  ", oldListPrice: " + this.oldListPrice +  ", curListPrice: " + this.curListPrice +  
+				", reasonCode: " + this.reasonCode +  ", poNumber: " + this.poNumber +
+				", oldPrice: " + this.oldPrice +  ", curPrice: " + this.curPrice +  ", newPrice: " + this.newPrice +  
+				", oldWac: " + this.oldWac +  ", curWac: " + this.curWac +  ", newWac: " + this.newWac +  
+				", oldBid: " + this.oldBid +  ", curBid: " + this.curBid +  
+				", newBid: " + this.newBid +  ", oldLead: " + this.oldLead +  
+				", curLead: " + this.curLead +  ", newLead: " + this.newLead +  ", oldConRef: " + this.oldConRef +  
+				", curConRef: " + this.curConRef +  ", newConRef: " + this.newConRef +  
+				", oldCbRef: " + this.oldCbRef +  ", curCbRef: " + this.curCbRef +  ", newCbRef: " + this.newCbRef +  
+				", oldContCogPer: " + this.oldContCogPer +  ", curContCogPer: " + this.curContCogPer +  
+				", newContCogPer: " + this.newContCogPer +  ", oldItemVarPer: " + this.oldItemVarPer +  
+				", curItemVarPer: " + this.curItemVarPer +  ", newItemVarPer: " + this.newItemVarPer +  
+				", oldWacCogPer: " + this.oldWacCogPer +  ", curWacCogPer: " + this.curWacCogPer + 
+				", newWacCogPer: " + this.newWacCogPer +  ", oldItemMkUpPer: " + this.oldItemMkUpPer +  
+				", curItemMkUpPer: " + this.curItemMkUpPer +  ", newItemMkUpPer: " + this.newItemMkUpPer +  
+				", oldChargeBack: " + this.oldChargeBack +  ", curChargeBack: " + this.curChargeBack +  
+				", newChargeBack: " + this.newChargeBack +  ", oldSellCd: " + this.oldSellCd +  
+				", curSellCd: " + this.curSellCd +  ", newSellCd: " + this.newSellCd +  ", oldNoChargeBack: " + this.oldNoChargeBack +  
+				", curNoChargeBack: " + this.curNoChargeBack +  
+				", newNoChargeBack: " + this.newNoChargeBack +  ", oldActivePrice: " + this.oldActivePrice +  
+				", curActivePrice: " + this.curActivePrice +  
+				", newActivePrice: " + this.newActivePrice +  ", oldSsf: " + this.oldSsf +  
+				", curSsf: " + this.curSsf +  ", newSsf: " + this.newSsf +  ", oldSf: " + this.oldSf +  
+				", curSf: " + this.curSf +  ", newSf: " + this.newSf +  ", oldListPrice: " + this.oldListPrice +  
+				", curListPrice: " + this.curListPrice +  
 				", newListPrice: " + this.newListPrice +  ", oldAwp: " + this.oldAwp +  ", curAwp: " + this.curAwp +  ", newAwp: " + this.newAwp +  
 				", oldOverridePrice: " + this.oldOverridePrice +  ", curOverridePrice: " + this.curOverridePrice +  ", newOverridePrice: " + this.newOverridePrice +  
-				", orgDbtMemoId: " + this.orgDbtMemoId +  ", orgVendorAccAmt: " + this.orgVendorAccAmt +  ", deaNum: " + this.deaNum +  ", hin: " + this.hin + 
+				", orgDbtMemoId: " + this.orgDbtMemoId +  ", orgVendorAccAmt: " + this.orgVendorAccAmt +  
+				", deaNum: " + this.deaNum +  ", hin: " + this.hin + 
 				", street: " + this.street +  ", city: " + this.city +  ", region: " + this.region +  ", postalCode: " + this.postalCode +  ", country: " + this.country +  
-				", salesOrg: " + this.salesOrg +  ", orderType: " + this.orderType +  ", netBill: " + this.netBill +  ", sellPriceExt: " + this.sellPriceExt +  
-				", totChbk: " + this.totChbk +  ", gxcb: " + this.gxcb +  ", oldAbd: " + this.oldAbd +  ", curAbd: " + this.curAbd +  ", newAbd: " + this.newAbd;
+				", salesOrg: " + this.salesOrg +  ", orderType: " + this.orderType +  ", sellPriceExt: " + this.sellPriceExt +  
+				", totChbk: " + this.totChbk +  ", oldAbd: " + this.oldAbd +  ", curAbd: " + this.curAbd +  ", newAbd: " + this.newAbd +  
+				", oldNetBill: " + this.oldNetBill +  ", newNetBill: " + this.newNetBill +  
+				", oldProgType: " + this.oldProgType +  ", newProgType: " + this.newProgType +  ", curProgType: " + this.curProgType +
+				", oldContrId: " + this.oldContrId +  ", newContrId: " + this.newContrId +  ", curContrId: " + this.curContrId + 
+				", oldContType: " + this.oldContType +  ", newContType: " + this.newContType +  ", curContType: " + this.curContType + 
+				", oldRebillCust: " + this.oldRebillCust +  ", newRebillCust: " + this.newRebillCust +  ", curRebillCust: " + this.curRebillCust +
+				", oldCustomerName: " + this.oldCustomerName +  ", newCustomerName: " + this.newCustomerName +  ", curCustomerName: " + this.curCustomerName + 
+				", distrChan: " + this.distrChan +  ", division: " + this.division +  ", docType: " + this.docType;
 	}
 
 	public TWObject getTwCorrectionRow() {
@@ -1150,7 +1220,9 @@ class CorrectionRowNonDate {
 		this.orderType = orderType;
 		this.twCorrectionRow.setPropertyValue("orderType", this.orderType);
 	}
-
+/*
+ * 20171214 akatre: Replaced with oldNetBill and newNetBill
+ * 
 	public String getNetBill() {
 		return netBill;
 	}
@@ -1159,7 +1231,7 @@ class CorrectionRowNonDate {
 		this.netBill = netBill;
 		this.twCorrectionRow.setPropertyValue("netBill", this.netBill);
 	}
-
+*/
 	public double getSellPriceExt() {
 		return sellPriceExt;
 	}
@@ -1177,7 +1249,8 @@ class CorrectionRowNonDate {
 		this.totChbk = totChbk;
 		this.twCorrectionRow.setPropertyValue("totChbk", this.totChbk);
 	}
-
+/*
+ *  20171214 akatre: Removed gxcb as per new mapping sheet
 	public double getGxcb() {
 		return gxcb;
 	}
@@ -1186,13 +1259,14 @@ class CorrectionRowNonDate {
 		this.gxcb = gxcb;
 		this.twCorrectionRow.setPropertyValue("gxcb", this.gxcb);
 	}
-
+*/
 	public double getOldAbd() {
 		return oldAbd;
 	}
 
 	public void setOldAbd(double oldAbd) {
 		this.oldAbd = oldAbd;
+		this.twCorrectionRow.setPropertyValue("oldAbd", this.oldAbd);
 	}
 
 	public double getCurAbd() {
@@ -1201,6 +1275,7 @@ class CorrectionRowNonDate {
 
 	public void setCurAbd(double curAbd) {
 		this.curAbd = curAbd;
+		this.twCorrectionRow.setPropertyValue("curAbd", this.curAbd);
 	}
 
 	public double getNewAbd() {
@@ -1209,5 +1284,186 @@ class CorrectionRowNonDate {
 
 	public void setNewAbd(double newAbd) {
 		this.newAbd = newAbd;
+		this.twCorrectionRow.setPropertyValue("newAbd", this.newAbd);
+	}
+
+	public double getOldNetBill() {
+		return oldNetBill;
+	}
+
+	public void setOldNetBill(double oldNetBill) {
+		this.oldNetBill = oldNetBill;
+		this.twCorrectionRow.setPropertyValue("oldNetBill", this.oldNetBill);
+	}
+
+	public double getNewNetBill() {
+		return newNetBill;
+	}
+
+	public void setNewNetBill(double newNetBill) {
+		this.newNetBill = newNetBill;
+		this.twCorrectionRow.setPropertyValue("newNetBill", this.newNetBill);
+	}
+
+	public String getOldProgType() {
+		return oldProgType;
+	}
+
+	public void setOldProgType(String oldProgType) {
+		this.oldProgType = oldProgType;
+		this.twCorrectionRow.setPropertyValue("oldProgType", this.oldProgType);
+	}
+
+	public String getNewProgType() {
+		return newProgType;
+	}
+
+	public void setNewProgType(String newProgType) {
+		this.newProgType = newProgType;
+		this.twCorrectionRow.setPropertyValue("newProgType", this.newProgType);
+	}
+
+	public String getCurProgType() {
+		return curProgType;
+	}
+
+	public void setCurProgType(String curProgType) {
+		this.curProgType = curProgType;
+		this.twCorrectionRow.setPropertyValue("curProgType", this.curProgType);
+	}
+
+	public String getOldContrId() {
+		return oldContrId;
+	}
+
+	public void setOldContrId(String oldContrId) {
+		this.oldContrId = oldContrId;
+		this.twCorrectionRow.setPropertyValue("oldContrId", this.oldContrId);
+	}
+
+	public String getNewContrId() {
+		return newContrId;
+	}
+
+	public void setNewContrId(String newContrId) {
+		this.newContrId = newContrId;
+		this.twCorrectionRow.setPropertyValue("newContrId", this.newContrId);
+	}
+
+	public String getCurContrId() {
+		return curContrId;
+	}
+
+	public void setCurContrId(String curContrId) {
+		this.curContrId = curContrId;
+		this.twCorrectionRow.setPropertyValue("curContrId", this.curContrId);
+	}
+
+	public String getOldContType() {
+		return oldContType;
+	}
+
+	public void setOldContType(String oldContType) {
+		this.oldContType = oldContType;
+		this.twCorrectionRow.setPropertyValue("oldContType", this.oldContType);
+	}
+
+	public String getNewContType() {
+		return newContType;
+	}
+
+	public void setNewContType(String newContType) {
+		this.newContType = newContType;
+		this.twCorrectionRow.setPropertyValue("newContType", this.newContType);
+	}
+
+	public String getCurContType() {
+		return curContType;
+	}
+
+	public void setCurContType(String curContType) {
+		this.curContType = curContType;
+		this.twCorrectionRow.setPropertyValue("curContType", this.curContType);
+	}
+
+	public String getOldRebillCust() {
+		return oldRebillCust;
+	}
+
+	public void setOldRebillCust(String oldRebillCust) {
+		this.oldRebillCust = oldRebillCust;
+		this.twCorrectionRow.setPropertyValue("oldRebillCust", this.oldRebillCust);
+	}
+
+	public String getNewRebillCust() {
+		return newRebillCust;
+	}
+
+	public void setNewRebillCust(String newRebillCust) {
+		this.newRebillCust = newRebillCust;
+		this.twCorrectionRow.setPropertyValue("newRebillCust", this.newRebillCust);
+	}
+
+	public String getCurRebillCust() {
+		return curRebillCust;
+	}
+
+	public void setCurRebillCust(String curRebillCust) {
+		this.curRebillCust = curRebillCust;
+		this.twCorrectionRow.setPropertyValue("curRebillCust", this.curRebillCust);
+	}
+
+	public String getOldCustomerName() {
+		return oldCustomerName;
+	}
+
+	public void setOldCustomerName(String oldCustomerName) {
+		this.oldCustomerName = oldCustomerName;
+		this.twCorrectionRow.setPropertyValue("oldCustomerName", this.oldCustomerName);
+	}
+
+	public String getNewCustomerName() {
+		return newCustomerName;
+	}
+
+	public void setNewCustomerName(String newCustomerName) {
+		this.newCustomerName = newCustomerName;
+		this.twCorrectionRow.setPropertyValue("newCustomerName", this.newCustomerName);
+	}
+
+	public String getCurCustomerName() {
+		return curCustomerName;
+	}
+
+	public void setCurCustomerName(String curCustomerName) {
+		this.curCustomerName = curCustomerName;
+		this.twCorrectionRow.setPropertyValue("curCustomerName", this.curCustomerName);
+	}
+
+	public String getDistrChan() {
+		return distrChan;
+	}
+
+	public void setDistrChan(String distrChan) {
+		this.distrChan = distrChan;
+		this.twCorrectionRow.setPropertyValue("distrChan", this.distrChan);
+	}
+
+	public String getDivision() {
+		return division;
+	}
+
+	public void setDivision(String division) {
+		this.division = division;
+		this.twCorrectionRow.setPropertyValue("division", this.division);
+	}
+
+	public String getDocType() {
+		return docType;
+	}
+
+	public void setDocType(String docType) {
+		this.docType = docType;
+		this.twCorrectionRow.setPropertyValue("docType", this.docType);
 	}
 }

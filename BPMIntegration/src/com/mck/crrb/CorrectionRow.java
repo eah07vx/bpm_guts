@@ -12,7 +12,7 @@ import teamworks.TWObject;
  * @author akatre
  *
  */
-public class CorrectionRow extends CorrectionRowNonDate {
+public class CorrectionRow extends _CorrectionRowNonDate {
 
 		private Date pricingDate;
 		private Date createdOn;

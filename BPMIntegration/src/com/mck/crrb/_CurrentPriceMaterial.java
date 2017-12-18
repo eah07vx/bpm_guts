@@ -7,7 +7,7 @@ package com.mck.crrb;
  * @author akatre
  *
  */
-class CurrentPriceMaterial extends Material {
+class _CurrentPriceMaterial extends Material {
 
 	private String curSellCd;
 	private String curNoChargeBack;

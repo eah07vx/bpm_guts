@@ -24,8 +24,8 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-public class SalesHistory {
-	private SalesHistoryResp salesHistory;
+public class _SalesHistory {
+	private _SalesHistoryResp salesHistory;
 	
 	public TWList getSalesHistory(String invoiceURL, String curPriceURL, String histPriceURL, 
 			String httpMethod, String sslAlias, String filtersJSON, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
@@ -49,7 +49,7 @@ public class SalesHistory {
 			System.out.println("\r\nSalesHistory.getSalesHistory() Start invoiceLookup API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
 		}
 		try {
-			salesHistory = Invoice.lookupInvoices(invoiceURL, httpMethod, sslAlias, filtersJSON, sopDebug);
+			salesHistory = Invoice.lookupOldInvoices(invoiceURL, httpMethod, sslAlias, filtersJSON, sopDebug);
 			if(sopDebug) {
 				d2 = new Date();
 				System.out.println("End invoiceLookup API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
@@ -65,7 +65,7 @@ public class SalesHistory {
 				System.out.println("Total time to prepReq call JSON (ms): " + (d1.getTime() - d2.getTime()));
 				System.out.println("SalesHistory.getSalesHistory() Start currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
 			}
-			CurrentPriceResp currentPriceLookupResp = CurrentPrice.getCurrentPrices(curPriceURL, httpMethod, sslAlias, currentPriceReqJSON, sopDebug);
+			_CurrentPriceResp currentPriceLookupResp = _CurrentPrice.getCurrentPrices(curPriceURL, httpMethod, sslAlias, currentPriceReqJSON, sopDebug);
 			if(sopDebug) {
 				d2 = new Date();
 				System.out.println("End currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
@@ -96,16 +96,16 @@ public class SalesHistory {
 		}
 	}
 	
-	private void mergeResponse(CurrentPriceResp currentPriceLookupResp, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
+	private void mergeResponse(_CurrentPriceResp currentPriceLookupResp, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
 		CorrectionRow[] corrRows = salesHistory.getInvoiceLookupResp();
-		CurrentPriceRow[] cpRows = currentPriceLookupResp.getCurrentPriceResp();
+		_CurrentPriceRow[] cpRows = currentPriceLookupResp.getCurrentPriceResp();
 		boolean corrRowHydrated = false;
 		if (cpRows != null && cpRows.length > 0) {
 			int i, j, k;
 			for (i = 0; i < corrRows.length; i++) {
 				corrRowHydrated = false;
 				for (j = 0; j < cpRows.length; j++) {
-					CurrentPriceMaterial[] materials = cpRows[j].getMaterials();
+					_CurrentPriceMaterial[] materials = cpRows[j].getMaterials();
 					for (k = 0; materials != null && k < materials.length; k++) {
 						/*System.out.println("COMPARISON: " + ((corrRows[i].getCustomerId().equals(cpRows[j].getCustomerId())) && (corrRows[i].getPricingDate().compareTo(cpRows[j].getPricingDate()) == 0) && (corrRows[i].getMaterialId().equals(materials[k].getMaterialId()))) + 
 								"corrRows["+i+"].getCustomerId(): " + corrRows[i].getCustomerId() + 
@@ -131,7 +131,7 @@ public class SalesHistory {
 		salesHistory.setInvoiceLookupResp(corrRows);
 	}
 	
-	private void hydrateCurrentValuesOfCorrectionRow(CorrectionRow correctionRow, CurrentPriceMaterial cpMaterial, boolean isCurrentCorrection) {
+	private void hydrateCurrentValuesOfCorrectionRow(CorrectionRow correctionRow, _CurrentPriceMaterial cpMaterial, boolean isCurrentCorrection) {
 		correctionRow.setCurSellCd(cpMaterial.getCurSellCd());
 		correctionRow.setCurNoChargeBack(cpMaterial.getCurNoChargeBack());
 	    correctionRow.setCurActivePrice(cpMaterial.getCurActivePrice());
@@ -206,17 +206,17 @@ public class SalesHistory {
 		return priceMap;
 	}
 	
-	static String prepCurrentPriceReq(SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
+	static String prepCurrentPriceReq(_SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
 		return prepPriceReq(salesHistoryResp, "currentPriceReq", startIndex, endIndex); 
 	}
 
 	//TODO: Uncomment when implementing historical price lookup
-	static String prepHistoricalPriceReq(SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
+	static String prepHistoricalPriceReq(_SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
 		return prepPriceReq(salesHistoryResp, "historicalPriceReq", startIndex, endIndex);
 	}
 
 
-	private static String prepPriceReq(SalesHistoryResp salesHistoryResp, String containerName, int startIndex, int endIndex) {
+	private static String prepPriceReq(_SalesHistoryResp salesHistoryResp, String containerName, int startIndex, int endIndex) {
 		String priceReqJSON = null; 
 		//String priceReqJSON = "{\"CurrentPriceReq\":[";
 		TreeMap<NameValuePair<String, String>, TreeMap<String, String>> priceMap = bucketizePriceMap(salesHistoryResp.getInvoiceLookupResp());

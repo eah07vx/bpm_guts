@@ -11,19 +11,19 @@ package com.mck.crrb;
  */
 class PriceResp {
 	
-	private IndexedResultStatus[] results;
+	private IndexedResult[] results;
 	
 	/**
 	 * @return the results
 	 */
-	public IndexedResultStatus[] getResults() {
+	public IndexedResult[] getResults() {
 		return results;
 	}
 
 	/**
 	 * @param results the results to set
 	 */
-	public void setResults(IndexedResultStatus[] results) {
+	public void setResults(IndexedResult[] results) {
 		this.results = results;
 	}
 }

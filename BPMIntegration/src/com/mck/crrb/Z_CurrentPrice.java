@@ -18,7 +18,7 @@ import teamworks.TWObject;
  * @author akatre
  *
  */
-class Z_CurrentPrice extends _API {
+abstract class Z_CurrentPrice extends _API {
 
 	public static Z_CurrentPriceResp getCurrentPrices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
 		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);

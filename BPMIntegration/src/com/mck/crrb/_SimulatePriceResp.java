@@ -4,7 +4,6 @@
 package com.mck.crrb;
 
 import teamworks.TWList;
-//import teamworks.TWObjectFactory;
 
 /**
  * @author akatre
@@ -35,11 +34,11 @@ public class _SimulatePriceResp extends _APIResp {
 		return (priceSimulationResp != null) ? priceSimulationResp.length : 0;
 	}
 /*
-	public void updateTwCorrectionRows(CorrectionRow[] priceSimulationResp) throws Exception {
+	public void updateTwCorrectionRows(_SimulatePriceRow[] priceSimulationResp) throws Exception {
 		this.twCorrectionRows = TWObjectFactory.createList();
-		int size = invoiceLookupResp.length;
+		int size = priceSimulationResp.length;
 		for (int i = 0; i < size; i++) {
-			this.twCorrectionRows.addArrayData(invoiceLookupResp[i].getTwCorrectionRow());
+			this.twCorrectionRows.addArrayData(priceSimulationResp[i].getTwCorrectionRow());
 		}
 	}
 */

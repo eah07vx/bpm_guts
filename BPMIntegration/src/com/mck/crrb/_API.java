@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -25,10 +27,42 @@ import teamworks.TWObject;
  *
  */
 public abstract class _API {
-	public final static String DATE_FORMAT = "yyyyMMdd";
+	public static final int FETCH_SIZE = 10000;
+	public static final String DATE_FORMAT = "yyyyMMdd";
+	
 	//final template method providing unalterable boiler plate sequence of calls
 	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
+		Date d1 = null;
+		Date d2 = null;
+		String className = this.getClass().getName();
+		if(sopDebug) {
+			System.out.println(className + ".process() input parameters:");
+			System.out.println("> url: " + url);
+			System.out.println("> httpMethod: " + httpMethod);
+			System.out.println("> sslAlias: " + sslAlias);
+			System.out.println("> requestJSON: " + requestJSON);
+			System.out.println("> sopDebug: " + sopDebug);
+
+			d1 = new Date();
+			System.out.println("\r\n" + className + ".process() Start prep of call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+		}
+		//#1 Prepare request
+		requestJSON = prepRequest(requestJSON, sopDebug);
+		if(sopDebug) {
+			d2 = new Date();
+			System.out.println("End prep of SimulatePrice call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
+			System.out.println("Total prep time (ms): " + (d2.getTime() - d1.getTime()));
+			System.out.println(className + ".process() requestJSON: " + requestJSON);
+		}
+		//#2 Call the API
 		String rawResp = call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		if (sopDebug) {
+			d1 = new Date();
+			System.out.println("\r\n" + className + ".process() End call(): " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+			System.out.println("Total call time (ms): " + (d1.getTime() - d2.getTime()));
+			System.out.println(className + ".process() response: " + rawResp);
+		}
+		//#3 Parse the API response
 		TWObject parsedResp = parseResponse(rawResp, sopDebug);
 		return parsedResp;
 	}
@@ -43,7 +77,7 @@ public abstract class _API {
 			
 			URL restUrl = new URL(url);                           
 			HttpsURLConnection connection = (HttpsURLConnection) restUrl.openConnection();
-			if (sopDebug) { System.out.println("API.callAPI() After restUrl.openConnection."); }
+			if (sopDebug) { System.out.println("_API.call() After restUrl.openConnection."); }
 			connection.setDoOutput(true);
 			connection.setRequestMethod(httpMethod);
 			connection.setRequestProperty("Accept", "application/json");
@@ -52,7 +86,7 @@ public abstract class _API {
 			OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
 			writer.write(requestJSON); 
 			writer.close();
-			if (sopDebug) { System.out.println("API.callAPI() After writing requestJSON.");}
+			if (sopDebug) { System.out.println("_API.call() After writing requestJSON.");}
 			
 			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			StringBuffer jsonString = new StringBuffer();
@@ -76,8 +110,19 @@ public abstract class _API {
 		}
 		return rawResp;
 	}
+	
+	/**
+	 * Transform the input request object into appropriate request JSON
+	 *  
+	 * @param requestJSON A JSON string representation of the request object
+	 * 
+	 * @return String Transformed JSON string that is needed for this specific API call 
+	 */
+	abstract String prepRequest(String requestJSON, boolean sopDebug) throws Exception;
 
 	/**
+	 * Parse the JSON output of the API call into TWObject representation
+	 *  
 	 * @param rawResp As returned by the API call @see {@link #call(String, String, String, String, boolean)}
 	 * 
 	 * @return TWObject An object of type TWObject ready to be mapped to a BPM Object with same attributes

@@ -9,7 +9,7 @@ import teamworks.TWObject;
  * @author akatre
  *
  */
-class IndexedResult {
+class _IndexedResult {
 	private int index;
 	private String status;
 	private String message;

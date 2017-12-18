@@ -24,8 +24,8 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-public class _SalesHistory {
-	private _SalesHistoryResp salesHistory;
+public class Z_SalesHistory {
+	private Z_SalesHistoryResp salesHistory;
 	
 	public TWList getSalesHistory(String invoiceURL, String curPriceURL, String histPriceURL, 
 			String httpMethod, String sslAlias, String filtersJSON, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
@@ -65,7 +65,7 @@ public class _SalesHistory {
 				System.out.println("Total time to prepReq call JSON (ms): " + (d1.getTime() - d2.getTime()));
 				System.out.println("SalesHistory.getSalesHistory() Start currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
 			}
-			_CurrentPriceResp currentPriceLookupResp = _CurrentPrice.getCurrentPrices(curPriceURL, httpMethod, sslAlias, currentPriceReqJSON, sopDebug);
+			Z_CurrentPriceResp currentPriceLookupResp = Z_CurrentPrice.getCurrentPrices(curPriceURL, httpMethod, sslAlias, currentPriceReqJSON, sopDebug);
 			if(sopDebug) {
 				d2 = new Date();
 				System.out.println("End currentPrice API call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
@@ -76,7 +76,7 @@ public class _SalesHistory {
 				mergeResponse(currentPriceLookupResp, isCurrentCorrection, sopDebug);
 			}
 			if(sopDebug) {
-				CorrectionRow[] debugRows = salesHistory.getInvoiceLookupResp();
+				_CorrectionRow[] debugRows = salesHistory.getInvoiceLookupResp();
 				System.out.println("SalesHistory.getSalesHistory() response merged: " + (debugRows != null ? debugRows.length : -1));
 				TWList twDebugRows = salesHistory.getTwCorrectionRows();
 				System.out.println("SalesHistory.getSalesHistory().getTwCorrectionRows(): " + (twDebugRows != null ? twDebugRows.getArraySize() : -1));
@@ -96,16 +96,16 @@ public class _SalesHistory {
 		}
 	}
 	
-	private void mergeResponse(_CurrentPriceResp currentPriceLookupResp, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
-		CorrectionRow[] corrRows = salesHistory.getInvoiceLookupResp();
-		_CurrentPriceRow[] cpRows = currentPriceLookupResp.getCurrentPriceResp();
+	private void mergeResponse(Z_CurrentPriceResp currentPriceLookupResp, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
+		_CorrectionRow[] corrRows = salesHistory.getInvoiceLookupResp();
+		Z_CurrentPriceRow[] cpRows = currentPriceLookupResp.getCurrentPriceResp();
 		boolean corrRowHydrated = false;
 		if (cpRows != null && cpRows.length > 0) {
 			int i, j, k;
 			for (i = 0; i < corrRows.length; i++) {
 				corrRowHydrated = false;
 				for (j = 0; j < cpRows.length; j++) {
-					_CurrentPriceMaterial[] materials = cpRows[j].getMaterials();
+					Z_CurrentPriceMaterial[] materials = cpRows[j].getMaterials();
 					for (k = 0; materials != null && k < materials.length; k++) {
 						/*System.out.println("COMPARISON: " + ((corrRows[i].getCustomerId().equals(cpRows[j].getCustomerId())) && (corrRows[i].getPricingDate().compareTo(cpRows[j].getPricingDate()) == 0) && (corrRows[i].getMaterialId().equals(materials[k].getMaterialId()))) + 
 								"corrRows["+i+"].getCustomerId(): " + corrRows[i].getCustomerId() + 
@@ -131,7 +131,7 @@ public class _SalesHistory {
 		salesHistory.setInvoiceLookupResp(corrRows);
 	}
 	
-	private void hydrateCurrentValuesOfCorrectionRow(CorrectionRow correctionRow, _CurrentPriceMaterial cpMaterial, boolean isCurrentCorrection) {
+	private void hydrateCurrentValuesOfCorrectionRow(_CorrectionRow correctionRow, Z_CurrentPriceMaterial cpMaterial, boolean isCurrentCorrection) {
 		correctionRow.setCurSellCd(cpMaterial.getCurSellCd());
 		correctionRow.setCurNoChargeBack(cpMaterial.getCurNoChargeBack());
 	    correctionRow.setCurActivePrice(cpMaterial.getCurActivePrice());
@@ -178,14 +178,14 @@ public class _SalesHistory {
 		}
 	}
 
-	private static TreeMap<NameValuePair<String, String>, TreeMap<String, String>> bucketizePriceMap(CorrectionRow[] invoices) {
-		TreeMap<NameValuePair<String, String>, TreeMap<String, String>> priceMap = new TreeMap<NameValuePair<String, String>, TreeMap<String, String>>();
+	private static TreeMap<_NameValuePair<String, String>, TreeMap<String, String>> bucketizePriceMap(_CorrectionRow[] invoices) {
+		TreeMap<_NameValuePair<String, String>, TreeMap<String, String>> priceMap = new TreeMap<_NameValuePair<String, String>, TreeMap<String, String>>();
 		//System.out.println("TestRow[] invoices.length: " + invoices.length);
 		int i = 0;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		for (; i < invoices.length; i++) {
 			//String key = invoices[i].getCustomerId() + "|" + sdf.format(invoices[i].getPricingDate());
-			NameValuePair<String, String> key = new NameValuePair<String, String>(invoices[i].getCustomerId(), sdf.format(invoices[i].getPricingDate()));
+			_NameValuePair<String, String> key = new _NameValuePair<String, String>(invoices[i].getCustomerId(), sdf.format(invoices[i].getPricingDate()));
 			String value = invoices[i].getMaterialId();
 			//System.out.println("NameValuePair[" + i + "]: " + key + ", materialId[" + i + "]: " + value);
 			
@@ -206,27 +206,27 @@ public class _SalesHistory {
 		return priceMap;
 	}
 	
-	static String prepCurrentPriceReq(_SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
+	static String prepCurrentPriceReq(Z_SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
 		return prepPriceReq(salesHistoryResp, "currentPriceReq", startIndex, endIndex); 
 	}
 
 	//TODO: Uncomment when implementing historical price lookup
-	static String prepHistoricalPriceReq(_SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
+	static String prepHistoricalPriceReq(Z_SalesHistoryResp salesHistoryResp, int startIndex, int endIndex) {
 		return prepPriceReq(salesHistoryResp, "historicalPriceReq", startIndex, endIndex);
 	}
 
 
-	private static String prepPriceReq(_SalesHistoryResp salesHistoryResp, String containerName, int startIndex, int endIndex) {
+	private static String prepPriceReq(Z_SalesHistoryResp salesHistoryResp, String containerName, int startIndex, int endIndex) {
 		String priceReqJSON = null; 
 		//String priceReqJSON = "{\"CurrentPriceReq\":[";
-		TreeMap<NameValuePair<String, String>, TreeMap<String, String>> priceMap = bucketizePriceMap(salesHistoryResp.getInvoiceLookupResp());
+		TreeMap<_NameValuePair<String, String>, TreeMap<String, String>> priceMap = bucketizePriceMap(salesHistoryResp.getInvoiceLookupResp());
 		
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
-		for (Map.Entry<NameValuePair<String, String>, TreeMap<String, String>> entry : priceMap.entrySet()) {
+		for (Map.Entry<_NameValuePair<String, String>, TreeMap<String, String>> entry : priceMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
-			NameValuePair<String, String> custPricingDatePair = entry.getKey();
+			_NameValuePair<String, String> custPricingDatePair = entry.getKey();
 			if (custPricingDatePair != null && custPricingDatePair.getKey() != null && custPricingDatePair.getValue() != null) {
 				pricingReq.put("index", i++);
 				pricingReq.put("customerId", custPricingDatePair.getKey());

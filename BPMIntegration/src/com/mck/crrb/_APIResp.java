@@ -10,9 +10,9 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-class APIResp {
+class _APIResp {
 
-	private IndexedResult[] results;
+	private _IndexedResult[] results;
 	private int startIndex;
 	private int endIndex;
 	private int totalNumberOfRecords;
@@ -21,14 +21,14 @@ class APIResp {
 	/**
 	 * @return the results
 	 */
-	public IndexedResult[] getResults() {
+	public _IndexedResult[] getResults() {
 		return results;
 	}
 
 	/**
 	 * @param results the results to set
 	 */
-	public void setResults(IndexedResult[] results) {
+	public void setResults(_IndexedResult[] results) {
 		this.results = results;
 		try {
 			updateTwResults(results);
@@ -88,7 +88,7 @@ class APIResp {
 		this.twResults = twResults;
 	}
 
-	public void updateTwResults(IndexedResult[] results) throws Exception {
+	public void updateTwResults(_IndexedResult[] results) throws Exception {
 		this.twResults = TWObjectFactory.createList();
 		int size = results.length;
 		for (int i = 0; i < size; i++) {

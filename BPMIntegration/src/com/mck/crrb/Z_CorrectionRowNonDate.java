@@ -22,7 +22,7 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-class _CorrectionRowNonDate {
+class Z_CorrectionRowNonDate {
 	private TWObject twCorrectionRow;
 	//invoice
 	private String invoiceId;
@@ -186,7 +186,7 @@ class _CorrectionRowNonDate {
 	private String division;
 	private String docType;
 
-	public _CorrectionRowNonDate() {
+	public Z_CorrectionRowNonDate() {
 		try {
 			this.twCorrectionRow = TWObjectFactory.createObject();
 		} catch (Exception e) {
@@ -195,7 +195,7 @@ class _CorrectionRowNonDate {
 		}
 	} 
 	
-	public _CorrectionRowNonDate(Object twCorrectionRow) {
+	public Z_CorrectionRowNonDate(Object twCorrectionRow) {
 		this.twCorrectionRow = (TWObject)twCorrectionRow;
 //		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
 //		try {
@@ -416,7 +416,7 @@ class _CorrectionRowNonDate {
 	}
 
 	public void setCustomerId(String customerId) {
-		this.customerId = Utility.trimLeadingChars(customerId, "0");
+		this.customerId = _Utility.trimLeadingChars(customerId, "0");
 		this.twCorrectionRow.setPropertyValue("customerId", this.customerId);
 	}
 
@@ -434,7 +434,7 @@ class _CorrectionRowNonDate {
 	}
 
 	public void setMaterialId(String materialId) {
-		this.materialId = Utility.trimLeadingChars(materialId, "0");
+		this.materialId = _Utility.trimLeadingChars(materialId, "0");
 		this.twCorrectionRow.setPropertyValue("materialId", this.materialId);
 	}
 
@@ -452,7 +452,7 @@ class _CorrectionRowNonDate {
 	}
 
 	public void setSupplierId(String supplierId) {
-		this.supplierId = Utility.trimLeadingChars(supplierId, "0");
+		this.supplierId = _Utility.trimLeadingChars(supplierId, "0");
 		this.twCorrectionRow.setPropertyValue("supplierId", this.supplierId);
 	}
 
@@ -695,7 +695,7 @@ class _CorrectionRowNonDate {
 	}
 
 	public void setOldLead(String oldLead) {
-		this.oldLead = Utility.trimLeadingChars(oldLead, "0");
+		this.oldLead = _Utility.trimLeadingChars(oldLead, "0");
 		this.twCorrectionRow.setPropertyValue("oldLead", this.oldLead);
 	}
 
@@ -704,7 +704,7 @@ class _CorrectionRowNonDate {
 	}
 
 	public void setCurLead(String curLead) {
-		this.curLead = Utility.trimLeadingChars(curLead, "0");
+		this.curLead = _Utility.trimLeadingChars(curLead, "0");
 		this.twCorrectionRow.setPropertyValue("curLead", this.curLead);
 	}
 
@@ -713,7 +713,7 @@ class _CorrectionRowNonDate {
 	}
 
 	public void setNewLead(String newLead) {
-		this.newLead = Utility.trimLeadingChars(newLead, "0");
+		this.newLead = _Utility.trimLeadingChars(newLead, "0");
 		this.twCorrectionRow.setPropertyValue("newLead", this.newLead);
 	}
 
@@ -1190,7 +1190,7 @@ class _CorrectionRowNonDate {
 	}
 
 	public void setPostalCode(String postalCode) {
-		this.postalCode = Utility.trimLeadingChars(postalCode, "0");
+		this.postalCode = _Utility.trimLeadingChars(postalCode, "0");
 		this.twCorrectionRow.setPropertyValue("postalCode", this.postalCode);
 	}
 

@@ -12,7 +12,7 @@ import teamworks.TWObject;
  * @author akatre
  *
  */
-public class Utility {
+public class _Utility {
 	public static final int INDEX_NOT_FOUND = -1;
 	public static final int FETCH_SIZE = 10000;
 	/*

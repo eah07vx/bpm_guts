@@ -7,7 +7,7 @@ package com.mck.crrb;
  * @author akatre
  *
  */
-class _HistoricalPriceMaterial extends Material {
+class Z_HistoricalPriceMaterial extends _Material {
 
 	private String newSellCd;
 	private String newNoChargeBack;

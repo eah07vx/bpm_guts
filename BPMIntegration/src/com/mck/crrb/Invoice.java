@@ -29,7 +29,7 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-public class Invoice extends API {
+public class Invoice extends _API {
 	/**
 	 * Convenience method that does the same job as process method inherited from API. 
 	 * 
@@ -41,7 +41,6 @@ public class Invoice extends API {
 	 * @return teamworks.TWObject to be mapped to BPM BO with same properties/parameters 
 	 *  
 	 */
-
 	public TWObject lookup(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
 		return super.process(url, httpMethod, sslAlias, requestJSON, sopDebug);
 	}
@@ -51,12 +50,12 @@ public class Invoice extends API {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		InvoiceLookupResp invoices = null;
+		_InvoiceLookupResp invoices = null;
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat(API.DATE_FORMAT);
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.DATE_FORMAT);
 			jacksonMapper.setDateFormat(sdf);
 			
-			invoices = jacksonMapper.readValue(rawResp, InvoiceLookupResp.class);
+			invoices = jacksonMapper.readValue(rawResp, _InvoiceLookupResp.class);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -94,7 +93,7 @@ public class Invoice extends API {
 	public static TWObject lookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
 		String resp = call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.lookupInvoices response: " + resp);
-		InvoiceLookupResp invoices = parseInvoiceLookupResp(resp);
+		_InvoiceLookupResp invoices = parseInvoiceLookupResp(resp);
 		
 		TWObject invoiceLookupResp = TWObjectFactory.createObject();
 		TWList corRows = null;
@@ -126,11 +125,11 @@ public class Invoice extends API {
 	 * 				use {@link #lookup(String, String, String, String, boolean)} instead
 	 */
 	@Deprecated
-	public static _SalesHistoryResp lookupOldInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
-		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+	public static Z_SalesHistoryResp lookupOldInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
+		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.lookupInvoices response: " + resp);
 		//return parseInvoiceLookupResp(resp);
-		return new _SalesHistoryResp();
+		return new Z_SalesHistoryResp();
 	}
 	
 	/*
@@ -151,17 +150,17 @@ public class Invoice extends API {
 			System.out.println("\r\nInvoice.simulatePrice() Start prep of SimulatePrice call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
 		}		
 
-		CorrectionRowISO[] invoiceLines = new CorrectionRowISO[correctionRows.getArraySize()];
+		_CorrectionRowISO[] invoiceLines = new _CorrectionRowISO[correctionRows.getArraySize()];
 		for (int i = 0; i < correctionRows.getArraySize(); i++) {
 			if(sopDebug) System.out.println("Invoice.simulatePrice() correctionRows.getArrayData(i).getClass().getName(): " + correctionRows.getArrayData(i).getClass().getName());
-			invoiceLines[i] = new CorrectionRowISO(correctionRows.getArrayData(i));
+			invoiceLines[i] = new _CorrectionRowISO(correctionRows.getArrayData(i));
 			if (invoiceLines[i] != null) {
 				System.out.println("Invoice.simulatePrice() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
 			}
 		}
-		String requestJSON = prepSimulatePriceCall(invoiceLines, "priceSimulationReq", 1, Utility.FETCH_SIZE, sopDebug);
+		String requestJSON = prepSimulatePriceCall(invoiceLines, "priceSimulationReq", 1, _Utility.FETCH_SIZE, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePrice requestJSON" + requestJSON);
-		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePrice response: " + resp);
 		mergeSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
 		TWList twCorrectionRows = null;
@@ -197,13 +196,13 @@ public class Invoice extends API {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		CorrectionRowISO[] invoiceLines = null;
+		_CorrectionRowISO[] invoiceLines = null;
 		try {
 			//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");			
 			//jacksonMapper.setDateFormat(sdf);
 			//OffsetDateTime
 			
-			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, CorrectionRowISO[].class);
+			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, _CorrectionRowISO[].class);
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
@@ -223,7 +222,7 @@ public class Invoice extends API {
 				}
 			}
 		}
-		String requestJSON = prepSimulatePriceCall(invoiceLines, "priceSimulationReq", 1, Utility.FETCH_SIZE, sopDebug);
+		String requestJSON = prepSimulatePriceCall(invoiceLines, "priceSimulationReq", 1, _Utility.FETCH_SIZE, sopDebug);
 		if(sopDebug) {
 			d2 = new Date();
 			System.out.println("End prep of SimulatePrice call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
@@ -231,7 +230,7 @@ public class Invoice extends API {
 			System.out.println("Invoice.simulatePriceJSON() requestJSON: " + requestJSON);
 		}
 
-		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.simulatePriceJSON() response: " + resp);
 		mergeSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
 		TWList twCorrectionRows = null;
@@ -268,9 +267,9 @@ public class Invoice extends API {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		CorrectionRowISO[] invoiceLines = null;
+		_CorrectionRowISO[] invoiceLines = null;
 		try {
-			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, CorrectionRowISO[].class);
+			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, _CorrectionRowISO[].class);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -290,7 +289,7 @@ public class Invoice extends API {
 			}
 		}
 
-		String requestJSON = prepSubmitPriceCorrectionCall(invoiceLines, correlationId, "priceCorrectionReq", 1, Utility.FETCH_SIZE, sopDebug);
+		String requestJSON = prepSubmitPriceCorrectionCall(invoiceLines, correlationId, "priceCorrectionReq", 1, _Utility.FETCH_SIZE, sopDebug);
 		if(sopDebug) {
 			d2 = new Date();
 			System.out.println("End prep of submitPriceCorrection call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
@@ -298,9 +297,9 @@ public class Invoice extends API {
 			System.out.println("Invoice.submitPriceCorrection() requestJSON: " + requestJSON);
 		}
 
-		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.submitPriceCorrection() response: " + resp);
-		PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(resp);
+		_PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(resp);
 		
 		/*
 		try {
@@ -325,19 +324,19 @@ public class Invoice extends API {
 		}
 	}
 	
-	private static String prepSimulatePriceCall(CorrectionRowISO[] invoiceLines, String containerName, int startIndex, int endIndex, boolean sopDebug) {
+	private static String prepSimulatePriceCall(_CorrectionRowISO[] invoiceLines, String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
 		//String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"billType\": \"ZPF2\",        \"materials\":[			{                \"recordKey\": \"7840363909-000001\",            	\"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
 		String simulatePriceReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		
-		TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> priceMap = bucketizePriceMap(invoiceLines);
+		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(invoiceLines);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		for (Map.Entry<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> entry : priceMap.entrySet()) {
+		for (Map.Entry<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> entry : priceMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
-			SimulatePriceRowHeader simulatePriceRowHeader = entry.getKey();
+			_SimulatePriceRowHeader simulatePriceRowHeader = entry.getKey();
 			if (simulatePriceRowHeader != null) {
 				pricingReq.put("index", i++);
 				pricingReq.put("customerId", simulatePriceRowHeader.getCustomerId());
@@ -369,19 +368,19 @@ public class Invoice extends API {
 		return simulatePriceReqJSON;
 	}
 	
-	private static String prepSubmitPriceCorrectionCall(CorrectionRowISO[] invoiceLines, String correlationId, String containerName, int startIndex, int endIndex, boolean sopDebug) {
+	private static String prepSubmitPriceCorrectionCall(_CorrectionRowISO[] invoiceLines, String correlationId, String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		
 		//TODO: Loop over bucketized object (each customerId) and make API call for each
-		TreeMap<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
+		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
 
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
-		for (Entry<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>> entry : submitMap.entrySet()) {
+		for (Entry<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> entry : submitMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
-			SubmitPriceReqHeader priceCorrectionRowHeader = entry.getKey();
+			_SubmitPriceReqHeader priceCorrectionRowHeader = entry.getKey();
 			if (priceCorrectionRowHeader != null) {
 				pricingReq.put("index", i++);
 				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
@@ -412,8 +411,8 @@ public class Invoice extends API {
 		return submitPriceCorrectionReqJSON;
 	}
 	
-	static TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> bucketizePriceMap(CorrectionRowISO[] invoiceLines) {
-		TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>> priceMap = new TreeMap<SimulatePriceRowHeader, TreeMap<String, CreditRebillMaterial>>();
+	static TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines) {
+		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>>();
 		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -421,23 +420,23 @@ public class Invoice extends API {
 			//NameValuePair<String, String> key = new NameValuePair<String, String>(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()));
 
 			//Hydrate key as SimulatePriceRowHeader
-			SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], i); //new SimulatePriceRowHeader(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()), ...);
+			_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], i); //new SimulatePriceRowHeader(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()), ...);
 			//TODO: Remove SOP debug statement below
 			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
  			
 			//Hydrate creditRebillMaterial
-			CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i]);
+			_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i]);
 			String materialKey = creditRebillMaterial.getRecordKey();
 			
 			//TODO: Remove SOP debug statement below
 			System.out.println("Invoice.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + creditRebillMaterial.getMaterialId());
 			
-			TreeMap<String, CreditRebillMaterial> materialList = priceMap.get(headerKey);
+			TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
 			//TODO: Remove SOP debug
 			System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
 			
 			if (materialList == null) { // Key not in TreeMap - new key found
-				materialList = new TreeMap<String, CreditRebillMaterial>();
+				materialList = new TreeMap<String, _CreditRebillMaterial>();
 				materialList.put(materialKey, creditRebillMaterial);	// First material in list
 				priceMap.put(headerKey, materialList);
 			}
@@ -450,28 +449,28 @@ public class Invoice extends API {
 		return priceMap;
 	}
 
-	static TreeMap<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>> bucketizeSubmitMap(CorrectionRowISO[] invoiceLines, String correlationId) {
-		TreeMap<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>> priceMap = new TreeMap<SubmitPriceReqHeader, TreeMap<String, PriceCorrectionMaterial>>();
+	static TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, String correlationId) {
+		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> priceMap = new TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>>();
 		
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//Hydrate key as SubmitPriceReqHeader
-			SubmitPriceReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], correlationId, i); 
+			_SubmitPriceReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], correlationId, i); 
 			//TODO: Remove SOP debug statement below
 			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
  			
 			//Hydrate priceCorrectionMaterial
-			PriceCorrectionMaterial priceCorrectionMaterial = hydratePriceCorrectionMaterial(invoiceLines[i]);
+			_PriceCorrectionMaterial priceCorrectionMaterial = hydratePriceCorrectionMaterial(invoiceLines[i]);
 			String materialKey = priceCorrectionMaterial.getRecordKey();
 			
 			//TODO: Remove SOP debug statement below
 			System.out.println("Invoice.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + priceCorrectionMaterial.getMaterialId());
 			
-			TreeMap<String, PriceCorrectionMaterial> materialList = priceMap.get(headerKey);
+			TreeMap<String, _PriceCorrectionMaterial> materialList = priceMap.get(headerKey);
 			//TODO: Remove SOP debug
 			System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
 			
 			if (materialList == null) { // Key not in TreeMap - new key found
-				materialList = new TreeMap<String, PriceCorrectionMaterial>();
+				materialList = new TreeMap<String, _PriceCorrectionMaterial>();
 				materialList.put(materialKey, priceCorrectionMaterial);	// First material in list
 				priceMap.put(headerKey, materialList);
 			}
@@ -484,16 +483,16 @@ public class Invoice extends API {
 		return priceMap;
 	}
 	
-	private static InvoiceLookupResp parseInvoiceLookupResp(String resp) {
+	private static _InvoiceLookupResp parseInvoiceLookupResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		InvoiceLookupResp invoiceLookupResp = null;
+		_InvoiceLookupResp invoiceLookupResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			jacksonMapper.setDateFormat(sdf);
 			
-			invoiceLookupResp = jacksonMapper.readValue(resp, InvoiceLookupResp.class);
+			invoiceLookupResp = jacksonMapper.readValue(resp, _InvoiceLookupResp.class);
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
@@ -509,16 +508,16 @@ public class Invoice extends API {
 		return invoiceLookupResp;
 	}
 	
-	private static SimulatePriceResp parseSimulatePriceResp(String resp) {
+	private static _SimulatePriceResp parseSimulatePriceResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		SimulatePriceResp simulatePriceResp = null;
+		_SimulatePriceResp simulatePriceResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			jacksonMapper.setDateFormat(sdf);
 			
-			simulatePriceResp = jacksonMapper.readValue(resp, SimulatePriceResp.class);
+			simulatePriceResp = jacksonMapper.readValue(resp, _SimulatePriceResp.class);
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
@@ -534,16 +533,16 @@ public class Invoice extends API {
 		return simulatePriceResp;
 	}
 	
-	private static PriceCorrectionResp parseSubmitPriceCorrectionResp(String resp) {
+	private static _PriceCorrectionResp parseSubmitPriceCorrectionResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		PriceCorrectionResp submitPriceResp = null;
+		_PriceCorrectionResp submitPriceResp = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			jacksonMapper.setDateFormat(sdf);
 			
-			submitPriceResp = jacksonMapper.readValue(resp, PriceCorrectionResp.class);
+			submitPriceResp = jacksonMapper.readValue(resp, _PriceCorrectionResp.class);
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
@@ -559,8 +558,8 @@ public class Invoice extends API {
 		return submitPriceResp;
 	}	
 	
-	private static SimulatePriceRowHeader hydrateSimulatePriceRowHeader(CorrectionRowISO invoiceLine, int index){
-		SimulatePriceRowHeader headerKey = new SimulatePriceRowHeader();
+	private static _SimulatePriceRowHeader hydrateSimulatePriceRowHeader(_CorrectionRowISO invoiceLine, int index){
+		_SimulatePriceRowHeader headerKey = new _SimulatePriceRowHeader();
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
 		headerKey.setPricingDate(invoiceLine.getPricingDate());
@@ -570,8 +569,8 @@ public class Invoice extends API {
 		return headerKey;
 	}
 
-	private static SubmitPriceReqHeader hydrateSubmitPriceReqHeader(CorrectionRowISO invoiceLine, String correlationId, int index) {
-		SubmitPriceReqHeader headerKey = new SubmitPriceReqHeader();
+	private static _SubmitPriceReqHeader hydrateSubmitPriceReqHeader(_CorrectionRowISO invoiceLine, String correlationId, int index) {
+		_SubmitPriceReqHeader headerKey = new _SubmitPriceReqHeader();
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
 		headerKey.setCorrelationId(correlationId);
@@ -580,8 +579,8 @@ public class Invoice extends API {
 		return headerKey;
 	}
 	
-	private static CreditRebillMaterial hydrateCreditRebillMaterial(CorrectionRowISO invoiceLine) {
-		CreditRebillMaterial creditRebillMaterial = new CreditRebillMaterial();
+	private static _CreditRebillMaterial hydrateCreditRebillMaterial(_CorrectionRowISO invoiceLine) {
+		_CreditRebillMaterial creditRebillMaterial = new _CreditRebillMaterial();
 		creditRebillMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
 		creditRebillMaterial.setMaterialId(invoiceLine.getMaterialId());
 		creditRebillMaterial.setDc(invoiceLine.getDc());
@@ -610,8 +609,8 @@ public class Invoice extends API {
 		return creditRebillMaterial;
 	}
 
-	private static PriceCorrectionMaterial hydratePriceCorrectionMaterial(CorrectionRowISO invoiceLine) {
-		PriceCorrectionMaterial priceCorrectionMaterial = new PriceCorrectionMaterial();
+	private static _PriceCorrectionMaterial hydratePriceCorrectionMaterial(_CorrectionRowISO invoiceLine) {
+		_PriceCorrectionMaterial priceCorrectionMaterial = new _PriceCorrectionMaterial();
 		priceCorrectionMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
 		priceCorrectionMaterial.setMaterialId(invoiceLine.getMaterialId());
 		priceCorrectionMaterial.setDc(invoiceLine.getDc());
@@ -662,15 +661,15 @@ public class Invoice extends API {
 		return priceCorrectionMaterial;
 	}
 
-	private static CorrectionRowISO[] mergeSimulatePriceValues(CorrectionRowISO[] invoiceLines, SimulatePriceResp simulatePriceResp) {
+	private static _CorrectionRowISO[] mergeSimulatePriceValues(_CorrectionRowISO[] invoiceLines, _SimulatePriceResp simulatePriceResp) {
 		if (invoiceLines != null && invoiceLines.length > 0 && simulatePriceResp != null 
 				&& simulatePriceResp.getPriceSimulationResp() != null && simulatePriceResp.getPriceSimulationResp().length > 0) {
-			SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();
+			_SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();
 			for(int i = 0; i < invoiceLines.length; i++) {
 				for(int j = 0; j < simulatePriceRows.length; j++){
 					if (invoiceLines[i].getCustomerId() != null && invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
 							&& invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
-						CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
+						_CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
 						for(int k = 0; k < crMaterials.length; k++) {
 							String invoiceLineRecordKey = invoiceLines[i].getInvoiceId() + "-" + invoiceLines[i].getInvoiceLineItemNum();
 							if (invoiceLineRecordKey.equals(crMaterials[k].getRecordKey())) {
@@ -710,7 +709,7 @@ public class Invoice extends API {
 	public static void main(String[] args) {
 		
 		String simulatePriceResp = "{    \"priceSimulationResp\": [        {            \"index\": \"0\",            \"customerId\": \"\",            \"salesOrg\": \"\",            \"billType\": \"\",            \"pricingDate\": \"\",            \"materials\": [                {                    \"materialId\": \"\",					\"recordKey\": \"7840363909-000001\",                    \"rebillQty\": \"0.000\",                    \"uom\": \"\",                    \"dc\": \"\",                    \"newLead\": \"\",                    \"newConRef\": \"\",                    \"newNoChargeBack\": \"\",                    \"newCbRef\": \"\",                    \"newSellCd\": \"\",                    \"newActivePrice\": \"\",                    \"newWac\": \"435.39\",                    \"newBid\": \"64.65\",                    \"newContCogPer\": \"-2.50\",                    \"newItemVarPer\": \"3.00\",                    \"newWacCogPer\": \"0.00\",                    \"newItemMkUpPer\": \"1.00\",                    \"newAwp\": \"608.93\",                    \"newOverridePrice\": \"0.00\"                }            ]        }    ],    \"results\": [        {            \"index\": \"0\",            \"status\": \"success\"        }    ]}";
-		SimulatePriceResp spr = parseSimulatePriceResp(simulatePriceResp);
+		_SimulatePriceResp spr = parseSimulatePriceResp(simulatePriceResp);
 		System.out.println("Parsed output: " + spr);
 		String url = "https://esswsqdpz01.mckesson.com/MckWebServices/1.0.0/crrb/pricesimulation";
 		String httpMethod = "POST";
@@ -751,12 +750,10 @@ public class Invoice extends API {
 		*/
 	}
 	
-	//@VisibleForTesting
+	//@Test
 	public static TWList testLookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws IOException, JsonMappingException, JsonParseException {
-		String resp = API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		//System.out.println("testLookupInvoices() response: " + resp);
 		return parseInvoiceLookupResp(resp).getTwCorrectionRows();
 	}
-
-
 }

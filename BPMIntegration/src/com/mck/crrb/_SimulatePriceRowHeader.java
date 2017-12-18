@@ -7,7 +7,7 @@ package com.mck.crrb;
  * @author akatre
  *
  */
-public class SimulatePriceRowHeader extends PriceRow implements Comparable<SimulatePriceRowHeader> {
+public class _SimulatePriceRowHeader extends _PriceRow implements Comparable<_SimulatePriceRowHeader> {
 	private int index; 
 	private String salesOrg;
 	private String billType;
@@ -58,7 +58,7 @@ public class SimulatePriceRowHeader extends PriceRow implements Comparable<Simul
 		return str;
 	}
 	@Override
-	public int compareTo(SimulatePriceRowHeader arg0) {
+	public int compareTo(_SimulatePriceRowHeader arg0) {
 		int comparison = -1;
 		if ((this.getCustomerId()).equals((String)arg0.getCustomerId()) && (this.getPricingDate()).compareTo(arg0.getPricingDate()) == 0) {
 			comparison = 0;

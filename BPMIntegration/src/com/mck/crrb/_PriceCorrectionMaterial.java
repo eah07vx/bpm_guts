@@ -9,7 +9,7 @@ import java.util.Date;
  * @author akatre
  *
  */
-public class PriceCorrectionMaterial extends CreditRebillMaterial {
+public class _PriceCorrectionMaterial extends _CreditRebillMaterial {
 	private Date pricingDate;
 	private double oldWac;
 	private double oldBid;

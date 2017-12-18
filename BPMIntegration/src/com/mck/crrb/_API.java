@@ -24,7 +24,7 @@ import teamworks.TWObject;
  * @author akatre
  *
  */
-public abstract class API {
+public abstract class _API {
 	public final static String DATE_FORMAT = "yyyyMMdd";
 	//final template method providing unalterable boiler plate sequence of calls
 	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
@@ -94,7 +94,7 @@ public abstract class API {
 		String sslAlias = "CellDefaultSSLSettings";
 		String requestJSON = "{	\"invoiceLookupReq\": [{		\"index\": 0,		\"bepFrom\": \"20170101\",		\"bepTo\": \"20170102\",		\"customers\": [\"045333\", \"066742\", \"066903\", \"067386\", \"067708\"],		\"storeNumbers\": [\"4153\"],		\"orgIdSequence\": \"05118-50-00643\",		\"invoiceIds\": [\"786599102\"],		\"materials\": [\"1101856\", \"1107689\", \"1102345\"],		\"lead\": \"0000586432\",		\"chainIds\": [\"8082\"]	}],	\"startIndex\": 0,	\"endIndex\": 999,	\"totalNumberOfRecords\": 1500}";
 		
-		String rawInvoiceLookupResp = API.call(url, httpMethod, sslAlias, requestJSON, true);
+		String rawInvoiceLookupResp = _API.call(url, httpMethod, sslAlias, requestJSON, true);
 		System.out.println(rawInvoiceLookupResp);
 	}
 	

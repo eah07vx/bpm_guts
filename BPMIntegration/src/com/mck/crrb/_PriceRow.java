@@ -11,7 +11,7 @@ import java.util.Date;
  * @author akatre
  *
  */
-class PriceRow {
+class _PriceRow {
 	private String customerId;
 	private Date pricingDate;
 	
@@ -19,7 +19,7 @@ class PriceRow {
 		return customerId;
 	}
 	public void setCustomerId(String customerId) {
-		this.customerId = Utility.trimLeadingChars(customerId, "0");
+		this.customerId = _Utility.trimLeadingChars(customerId, "0");
 	}
 	public Date getPricingDate() {
 		return pricingDate;

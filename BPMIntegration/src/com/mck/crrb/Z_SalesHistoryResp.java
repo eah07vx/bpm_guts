@@ -10,14 +10,14 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-public class _SalesHistoryResp extends APIResp {
-	private CorrectionRow[] invoiceLookupResp;  // Named to match response from invoiceLookup call 
+public class Z_SalesHistoryResp extends _APIResp {
+	private _CorrectionRow[] invoiceLookupResp;  // Named to match response from invoiceLookup call 
 	private TWList twCorrectionRows;
 
 	/**
 	 * @return the invoiceLookupResp
 	 */
-	public CorrectionRow[] getInvoiceLookupResp() {
+	public _CorrectionRow[] getInvoiceLookupResp() {
 		return invoiceLookupResp;
 	}
 
@@ -25,7 +25,7 @@ public class _SalesHistoryResp extends APIResp {
 	 * @param invoiceLookupResp the invoiceLookupResp to set
 	 * @throws Exception 
 	 */
-	public void setInvoiceLookupResp(CorrectionRow[] invoiceLookupResp) throws Exception {
+	public void setInvoiceLookupResp(_CorrectionRow[] invoiceLookupResp) throws Exception {
 		this.invoiceLookupResp = invoiceLookupResp;
 		updateTwCorrectionRows(invoiceLookupResp);
 	}
@@ -38,7 +38,7 @@ public class _SalesHistoryResp extends APIResp {
 		this.twCorrectionRows = twCorrectionRows;
 	}
 
-	public void updateTwCorrectionRows(CorrectionRow[] invoiceLookupResp) throws Exception {
+	public void updateTwCorrectionRows(_CorrectionRow[] invoiceLookupResp) throws Exception {
 		this.twCorrectionRows = TWObjectFactory.createList();
 		int size = invoiceLookupResp.length;
 		for (int i = 0; i < size; i++) {

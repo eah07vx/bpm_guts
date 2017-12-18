@@ -9,13 +9,13 @@ package com.mck.crrb;
  * @author akatre
  *
  */
-public class SimulatePriceRow extends SimulatePriceRowHeader {
-	private CreditRebillMaterial[] materials;
+public class _SimulatePriceRow extends _SimulatePriceRowHeader {
+	private _CreditRebillMaterial[] materials;
 	
-	public CreditRebillMaterial[] getMaterials() {
+	public _CreditRebillMaterial[] getMaterials() {
 		return materials;
 	}
-	public void setMaterials(CreditRebillMaterial[] materials) {
+	public void setMaterials(_CreditRebillMaterial[] materials) {
 		this.materials = materials;
 	}
 	

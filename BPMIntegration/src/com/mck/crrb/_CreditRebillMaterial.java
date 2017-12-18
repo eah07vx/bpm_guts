@@ -9,7 +9,7 @@ package com.mck.crrb;
  * @author akatre
  *
  */
-public class CreditRebillMaterial extends Material {
+public class _CreditRebillMaterial extends _Material {
 
 	private String recordKey; // Consists of invoiceId-invoiceLineItemNum
 //	TODO: Check why privingDate is needed at the material level if it is already at the header level?

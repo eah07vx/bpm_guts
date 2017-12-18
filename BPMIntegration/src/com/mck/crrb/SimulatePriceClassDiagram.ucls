@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class-diagram version="1.2.2" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
   associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
-  <class id="1" language="java" name="com.mck.crrb.SimulatePriceResp" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/SimulatePriceResp.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="1" language="java" name="com.mck.crrb._SimulatePriceResp" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/_SimulatePriceResp.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="857" y="-58"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -10,8 +10,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="2" language="java" name="com.mck.crrb.SimulatePriceRow" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/SimulatePriceRow.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="2" language="java" name="com.mck.crrb._SimulatePriceRow" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/_SimulatePriceRow.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="484" y="-180"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -19,8 +19,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="3" language="java" name="com.mck.crrb.CreditRebillMaterial" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/CreditRebillMaterial.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="3" language="java" name="com.mck.crrb._CreditRebillMaterial" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/_CreditRebillMaterial.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="217" y="-180"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -28,8 +28,8 @@
       <operations public="false" package="false" protected="false" private="false" static="true"/>    
     </display>  
   </class>  
-  <class id="4" language="java" name="com.mck.crrb.SimulatePriceRowHeader" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/SimulatePriceRowHeader.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="4" language="java" name="com.mck.crrb._SimulatePriceRowHeader" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/_SimulatePriceRowHeader.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="486" y="-416"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -37,8 +37,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="5" language="java" name="com.mck.crrb.PriceRow" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/PriceRow.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="5" language="java" name="com.mck.crrb._PriceRow" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/_PriceRow.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="488" y="-691"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -46,8 +46,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="6" language="java" name="com.mck.crrb.APIResp" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/APIResp.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="6" language="java" name="com.mck.crrb._APIResp" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/_APIResp.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="857" y="-361"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -55,8 +55,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="com.mck.crrb.IndexedResult" project="BPMIntegration" 
-    file="/BPMIntegration/src/com/mck/crrb/IndexedResult.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="7" language="java" name="com.mck.crrb._IndexedResult" project="BPMIntegration" 
+    file="/BPMIntegration/src/com/mck/crrb/_IndexedResult.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="858" y="-674"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -74,53 +74,53 @@
     </display>  
   </class>  
   <association id="9">    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="10" name="priceSimulationResp">        
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="10" name="materials">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
       <multiplicity id="11" minimum="0" maximum="2147483647">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="2" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <generalization id="12">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="6"/>  
-  </generalization>  
-  <generalization id="13">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="4"/>  
-  </generalization>  
-  <association id="14">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="15" name="materials">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="16" minimum="0" maximum="2147483647">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
-    </end>    
     <end type="TARGET" refId="3" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <generalization id="17">    
+  <generalization id="12">    
     <end type="SOURCE" refId="4"/>    
     <end type="TARGET" refId="5"/>  
   </generalization>  
-  <association id="18">    
+  <association id="13">    
     <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="19" name="results">        
+      <attribute id="14" name="results">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="20" minimum="0" maximum="2147483647">        
+      <multiplicity id="15" minimum="0" maximum="2147483647">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="7" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
+  <association id="16">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="17" name="priceSimulationResp">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="18" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="19">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="6"/>  
+  </generalization>  
+  <generalization id="20">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </generalization>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     sort-features="false" accessors="true" visibility="true">    
     <attributes public="true" package="true" protected="true" private="true" static="true"/>    

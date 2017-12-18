@@ -7,14 +7,14 @@ package com.mck.crrb;
  * @author akatre
  *
  */
-class _CurrentPriceRow extends PriceRow {
-	private _CurrentPriceMaterial[] materials;
+class Z_CurrentPriceRow extends _PriceRow {
+	private Z_CurrentPriceMaterial[] materials;
 
-	public _CurrentPriceMaterial[] getMaterials() {
+	public Z_CurrentPriceMaterial[] getMaterials() {
 		return materials;
 	}
 
-	public void setMaterials(_CurrentPriceMaterial[] materials) {
+	public void setMaterials(Z_CurrentPriceMaterial[] materials) {
 		this.materials = materials;
 	}
 	

@@ -7,7 +7,7 @@ package com.mck.crrb;
  * @author akatre
  *
  */
-public class SubmitPriceReqHeader implements Comparable<SubmitPriceReqHeader> {
+public class _SubmitPriceReqHeader implements Comparable<_SubmitPriceReqHeader> {
 	private int index; 
 	private String customerId;
 	private String correlationId;
@@ -59,7 +59,7 @@ public class SubmitPriceReqHeader implements Comparable<SubmitPriceReqHeader> {
 	}
 	
 	@Override
-	public int compareTo(SubmitPriceReqHeader arg0) {
+	public int compareTo(_SubmitPriceReqHeader arg0) {
 		int comparison = -1;
 		if ((this.getCustomerId()).equals((String)arg0.getCustomerId()) && (this.getBillType()).compareTo(arg0.getBillType()) == 0) {
 			comparison = 0;

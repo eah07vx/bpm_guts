@@ -10,16 +10,16 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-public class PriceCorrectionResp extends APIResp {
+public class _PriceCorrectionResp extends _APIResp {
 	
-	private PriceCorrectionRow[] priceCorrectionResp; // Named to match response from submitPriceCorrection call 
+	private _PriceCorrectionRow[] priceCorrectionResp; // Named to match response from submitPriceCorrection call 
 	private TWList twPriceCorrectionRows;
 
-	public PriceCorrectionRow[] getPriceCorrectionResp() {
+	public _PriceCorrectionRow[] getPriceCorrectionResp() {
 		return priceCorrectionResp;
 	}
 
-	public void setPriceCorrectionResp(PriceCorrectionRow[] priceCorrectionResp) throws Exception {
+	public void setPriceCorrectionResp(_PriceCorrectionRow[] priceCorrectionResp) throws Exception {
 		this.priceCorrectionResp = priceCorrectionResp;
 		updateTwPriceCorrectionRows(priceCorrectionResp);
 	}
@@ -36,7 +36,7 @@ public class PriceCorrectionResp extends APIResp {
 		this.twPriceCorrectionRows = twPriceCorrectionRows;
 	}
 
-	public void updateTwPriceCorrectionRows(PriceCorrectionRow[] priceCorrectionResp) throws Exception {
+	public void updateTwPriceCorrectionRows(_PriceCorrectionRow[] priceCorrectionResp) throws Exception {
 		this.twPriceCorrectionRows = TWObjectFactory.createList();
 		int size = priceCorrectionResp.length;
 		for (int i = 0; i < size; i++) {

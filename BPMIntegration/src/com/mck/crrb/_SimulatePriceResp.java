@@ -10,15 +10,15 @@ import teamworks.TWList;
  * @author akatre
  *
  */
-public class SimulatePriceResp extends APIResp {
-	private SimulatePriceRow[] priceSimulationResp;
+public class _SimulatePriceResp extends _APIResp {
+	private _SimulatePriceRow[] priceSimulationResp;
 	private TWList twCorrectionRows;
 
-	public SimulatePriceRow[] getPriceSimulationResp() {
+	public _SimulatePriceRow[] getPriceSimulationResp() {
 		return priceSimulationResp;
 	}
 
-	public void setPriceSimulationResp(SimulatePriceRow[] priceSimulationResp) {
+	public void setPriceSimulationResp(_SimulatePriceRow[] priceSimulationResp) {
 		this.priceSimulationResp = priceSimulationResp;
 		//updateTwCorrectionRows(priceSimulationResp);
 	}

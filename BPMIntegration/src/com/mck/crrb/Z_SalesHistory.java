@@ -27,6 +27,7 @@ import teamworks.TWObjectFactory;
 public class Z_SalesHistory {
 	private Z_SalesHistoryResp salesHistory;
 	
+	@SuppressWarnings("deprecation")
 	public TWList getSalesHistory(String invoiceURL, String curPriceURL, String histPriceURL, 
 			String httpMethod, String sslAlias, String filtersJSON, boolean isCurrentCorrection, boolean sopDebug) throws Exception {
 

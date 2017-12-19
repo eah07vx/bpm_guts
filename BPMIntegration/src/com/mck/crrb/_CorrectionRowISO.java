@@ -34,11 +34,11 @@ public class _CorrectionRowISO extends _CorrectionRow {
 
 			try {
 				//TODO: Remove SOP debug
-				System.out.println("CorrectionRow.pricingDate input string: " + twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 9));
-				this.setPricingDate(dateFormater.parse(twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 9)));
+				System.out.println("CorrectionRow.pricingDate input string: " + twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 10));
+				this.setPricingDate(dateFormater.parse(twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 10)));
 				//TODO: Remove SOP debug
-				System.out.println("CorrectionRow.createdOn input string: " + twCorrRow.getPropertyValue("createdOn").toString().substring(0, 9));
-				this.setCreatedOn(dateFormater.parse(twCorrRow.getPropertyValue("createdOn").toString().substring(0, 9)));
+				System.out.println("CorrectionRow.createdOn input string: " + twCorrRow.getPropertyValue("createdOn").toString().substring(0, 10));
+				this.setCreatedOn(dateFormater.parse(twCorrRow.getPropertyValue("createdOn").toString().substring(0, 10)));
 			} catch (ParseException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
@@ -50,10 +50,15 @@ public class _CorrectionRowISO extends _CorrectionRow {
 			return pricingDate;
 		}
 
-		@Override
-		public void setPricingDate(Date pricingDate) {
-			this.pricingDate = pricingDate;
-			super.getTwCorrectionRow().setPropertyValue("pricingDate", this.pricingDate);
+		public void setPricingDate(String pricingDate) {
+			SimpleDateFormat dateFormater = new SimpleDateFormat(_API.SHORT_DASHED_DATE_FORMAT);
+			try {
+				this.pricingDate = (pricingDate != null ? (dateFormater.parse(pricingDate.substring(0, 10))) : null);
+				super.getTwCorrectionRow().setPropertyValue("pricingDate", this.pricingDate);
+			} catch (ParseException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}			
 		}
 
 		@Override
@@ -61,9 +66,14 @@ public class _CorrectionRowISO extends _CorrectionRow {
 			return createdOn;
 		}
 
-		@Override
-		public void setCreatedOn(Date createdOn) {
-			this.createdOn = createdOn;
-			super.getTwCorrectionRow().setPropertyValue("createdOn", this.createdOn);
+		public void setCreatedOn(String createdOn) {
+			SimpleDateFormat dateFormater = new SimpleDateFormat(_API.SHORT_DASHED_DATE_FORMAT);
+			try {
+				this.createdOn = (createdOn != null ? (dateFormater.parse(createdOn.substring(0, 10))) : null);
+				super.getTwCorrectionRow().setPropertyValue("createdOn", this.createdOn);
+			} catch (ParseException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}
 		}
 }

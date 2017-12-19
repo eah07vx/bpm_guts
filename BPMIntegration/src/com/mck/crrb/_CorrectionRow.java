@@ -206,7 +206,6 @@ public class _CorrectionRow {
 		SimpleDateFormat dateFormater = new SimpleDateFormat(_API.SHORT_DASHED_DATE_FORMAT);
 
 		this.invoiceId = this.twCorrectionRow.getPropertyValue("invoiceId").toString();
-		this.invoiceId = this.twCorrectionRow.getPropertyValue("invoiceId").toString();
 		this.invoiceLineItemNum = this.twCorrectionRow.getPropertyValue("invoiceLineItemNum").toString();
 		this.customerId = this.twCorrectionRow.getPropertyValue("customerId").toString();
 		this.customerName = this.twCorrectionRow.getPropertyValue("customerName").toString();
@@ -1561,4 +1560,5 @@ public class _CorrectionRow {
 				", idtCaseNumber: " + idtCaseNumber + 
 				", pricingDate: " + this.getPricingDate() + ", createdOn: " + this.getCreatedOn();
 	}
+
 }

@@ -80,7 +80,7 @@ public abstract class _API {
 			d2 = new Date();
 			System.out.println("End parse request: " + sdf.format(d2));
 			System.out.println("Total parse time (ms): " + (d2.getTime() - d1.getTime()));
-			System.out.println(className + ".process() Is parsedResp null? " + (parsedResp != null));
+			System.out.println(className + ".process() Is parsedResp null? " + (parsedResp == null));
 		}
 		return parsedResp;
 	}

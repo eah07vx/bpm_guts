@@ -75,7 +75,7 @@ public class Invoice extends _API {
 			TWObject twInvoiceLookupResp = TWObjectFactory.createObject();
 			TWList corRows = null;
 			TWList lookupResults = null;
-			if (invoices != null && (corRows = invoices.getTwCorrectionRows()) != null && (lookupResults = invoices.getTwResults()) != null) {
+			if ((invoices != null) && ((corRows = invoices.getTwCorrectionRows()) != null) && ((lookupResults = invoices.getTwResults()) != null)) {
 				if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning non empty response!");
 				twInvoiceLookupResp.setPropertyValue("correctionRows", corRows);
 				twInvoiceLookupResp.setPropertyValue("results", lookupResults);

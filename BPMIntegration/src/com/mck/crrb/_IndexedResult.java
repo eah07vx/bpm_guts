@@ -23,6 +23,18 @@ class _IndexedResult {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public _IndexedResult(int index, String status, String message) {
+		try {
+			this.twResult = TWObjectFactory.createObject();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.setIndex(index);
+		this.setStatus(status);
+		this.setMessage(message);
 	} 
 
 	public int getIndex() {

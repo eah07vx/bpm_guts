@@ -30,23 +30,6 @@ import teamworks.TWObjectFactory;
  */
 public class CreditRebill extends _API {
 	
-	/**
-	 * Convenience method that does the same job as process method inherited from _API. 
-	 * @see _API#process(String, String, String, String, boolean) 
-	 * 
-	 * @param url
-	 * @param httpMethod
-	 * @param sslAlias
-	 * @param requestJSON
-	 * @param sopDebug
-	 * @return teamworks.TWObject to be mapped to BPM BO with same properties/parameters 
-	 * @throws Exception 
-	 *  
-	 */
-	public TWObject submit(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
-		return super.process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
-	}
-	
 	/* (non-Javadoc)
 	 * @see com.mck.crrb._API#prepRequest(java.lang.String, boolean)
 	 */

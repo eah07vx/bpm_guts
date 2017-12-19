@@ -30,20 +30,6 @@ import teamworks.TWObjectFactory;
  *
  */
 public class Invoice extends _API {
-	/**
-	 * Convenience method that does the same job as process method inherited from API. 
-	 * 
-	 * @param url
-	 * @param httpMethod
-	 * @param sslAlias
-	 * @param requestJSON
-	 * @param sopDebug
-	 * @return teamworks.TWObject to be mapped to BPM BO with same properties/parameters 
-	 *  
-	 */
-	public TWObject lookup(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
-		return super.process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
-	}
 	
 	@Override
 	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {

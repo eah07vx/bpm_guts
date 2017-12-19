@@ -29,23 +29,6 @@ import teamworks.TWObjectFactory;
 public class Price extends _API {
 	_CorrectionRowISO[] invoiceLines;
 
-	/**
-	 * Convenience method that does the same job as process method inherited from API. 
-	 * @see _API#process(String, String, String, String, boolean) 
-	 * 
-	 * @param url
-	 * @param httpMethod
-	 * @param sslAlias
-	 * @param requestJSON
-	 * @param sopDebug
-	 * @return teamworks.TWObject to be mapped to BPM BO with same properties/parameters 
-	 * @throws Exception 
-	 *  
-	 */
-	public TWObject simulate(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
-		return super.process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
-	}
-
 	@Override
 	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {
 		//Read and Hold original correction rows invoice lines to be overlaid with price simulation values from the response

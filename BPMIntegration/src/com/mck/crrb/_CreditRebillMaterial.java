@@ -27,7 +27,7 @@ public class _CreditRebillMaterial extends _Material {
     private float newWacCogPer;
     private float newItemMkUpPer;
     private double newAwp;
-    private String newAbd;
+    private double newAbd;
 	private String newNoChargeBack;
 	private double newChargeBack;
     private double newListPrice;
@@ -52,7 +52,7 @@ public class _CreditRebillMaterial extends _Material {
     private float oldWacCogPer;
     private float oldItemMkUpPer;
     private double oldAwp;
-	private String oldAbd;
+	private double oldAbd;
 	private String oldNoChargeBack;
 	private double oldChargeBack;
     private double oldListPrice;
@@ -177,10 +177,10 @@ public class _CreditRebillMaterial extends _Material {
 	public void setNewAwp(double newAwp) {
 		this.newAwp = newAwp;
 	}
-	public String getNewAbd() {
+	public double getNewAbd() {
 		return newAbd;
 	}
-	public void setNewAbd(String newAbd) {
+	public void setNewAbd(double newAbd) {
 		this.newAbd = newAbd;
 	}
 	public String getNewNoChargeBack() {
@@ -327,10 +327,10 @@ public class _CreditRebillMaterial extends _Material {
 	public void setOldAwp(double oldAwp) {
 		this.oldAwp = oldAwp;
 	}
-	public String getOldAbd() {
+	public double getOldAbd() {
 		return oldAbd;
 	}
-	public void setOldAbd(String oldAbd) {
+	public void setOldAbd(double oldAbd) {
 		this.oldAbd = oldAbd;
 	}
 	public String getOldNoChargeBack() {

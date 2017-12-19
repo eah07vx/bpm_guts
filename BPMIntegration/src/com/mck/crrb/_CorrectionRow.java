@@ -146,9 +146,9 @@ public class _CorrectionRow {
 	//private double gxcb;
 	//Removed gxcb
 	//Abd trifecta
-	private String oldAbd;
-	private String curAbd;
-	private String newAbd;
+	private double oldAbd;
+	private double curAbd;
+	private double newAbd;
 	//net bill trifecta
 	private String oldNetBill;
 	private String curNetBill;
@@ -299,9 +299,9 @@ public class _CorrectionRow {
 		this.orderType = this.twCorrectionRow.getPropertyValue("orderType").toString();
 		this.sellPriceExt = Double.parseDouble(this.twCorrectionRow.getPropertyValue("sellPriceExt").toString());
 		this.totChbk = Double.parseDouble(this.twCorrectionRow.getPropertyValue("totChbk").toString());
-		this.oldAbd = this.twCorrectionRow.getPropertyValue("oldAbd").toString();
-		this.curAbd = this.twCorrectionRow.getPropertyValue("curAbd").toString();
-		this.newAbd = this.twCorrectionRow.getPropertyValue("newAbd").toString();
+		this.oldAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldAbd").toString());
+		this.curAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curAbd").toString());
+		this.newAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newAbd").toString());
 		this.oldNetBill = this.twCorrectionRow.getPropertyValue("oldNetBill").toString();
 		this.curNetBill = this.twCorrectionRow.getPropertyValue("curNetBill").toString();
 		this.newNetBill = this.twCorrectionRow.getPropertyValue("newNetBill").toString();
@@ -1210,29 +1210,29 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("gxcb", this.gxcb);
 	}
 */
-	public String getOldAbd() {
+	public double getOldAbd() {
 		return oldAbd;
 	}
 
-	public void setOldAbd(String oldAbd) {
+	public void setOldAbd(double oldAbd) {
 		this.oldAbd = oldAbd;
 		this.twCorrectionRow.setPropertyValue("oldAbd", this.oldAbd);
 	}
 
-	public String getCurAbd() {
+	public double getCurAbd() {
 		return curAbd;
 	}
 
-	public void setCurAbd(String curAbd) {
+	public void setCurAbd(double curAbd) {
 		this.curAbd = curAbd;
 		this.twCorrectionRow.setPropertyValue("curAbd", this.curAbd);
 	}
 
-	public String getNewAbd() {
+	public double getNewAbd() {
 		return newAbd;
 	}
 
-	public void setNewAbd(String newAbd) {
+	public void setNewAbd(double newAbd) {
 		this.newAbd = newAbd;
 		this.twCorrectionRow.setPropertyValue("newAbd", this.newAbd);
 	}

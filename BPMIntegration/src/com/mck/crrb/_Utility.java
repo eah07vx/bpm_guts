@@ -58,6 +58,7 @@ public class _Utility {
         }
         return str.substring(start);	
 	}
+	
 	/*
 	public CorrectionRow TWtoJavaCorrectionRow(TWObject twCorrectionRow) {
 		this.twCorrectionRow = twCorrectionRow;

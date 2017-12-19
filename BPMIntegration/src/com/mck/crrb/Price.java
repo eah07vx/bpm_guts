@@ -6,7 +6,6 @@ package com.mck.crrb;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,7 @@ public class Price extends _API {
 	}
 
 	@Override
-	String prepRequest(String requestJSON, boolean sopDebug) throws Exception {
+	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {
 		//Read and Hold original correction rows invoice lines to be overlaid with price simulation values from the response
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
@@ -122,7 +121,7 @@ public class Price extends _API {
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		_SimulatePriceResp simulatePriceResp = null;
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat(_API.DATE_FORMAT);
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 			jacksonMapper.setDateFormat(sdf);
 			
 			simulatePriceResp = jacksonMapper.readValue(rawResp, _SimulatePriceResp.class);

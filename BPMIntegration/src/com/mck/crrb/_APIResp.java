@@ -101,8 +101,11 @@ class _APIResp {
 	}
 	
 	public String toString() {
-		String str = "";
-		str += "META: {startIndex: " + this.startIndex + ", endIndex: " + this.endIndex + ", totalNumberOfRecords: " + this.totalNumberOfRecords + "}\r\n";
+		String str = "startIndex: " + this.startIndex + ", endIndex: " + this.endIndex + ", totalNumberOfRecords: " + this.totalNumberOfRecords + 
+				", results.length: " + results.length + ", results: ";
+		for (int i = 0; i < results.length; i++) {
+			str += "\r\n  results[" + i + "]: " + results[i].toString();
+		}
 		return str;
 	}
 }

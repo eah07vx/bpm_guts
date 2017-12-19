@@ -51,9 +51,34 @@ public class CreditRebill extends _API {
 	 * @see com.mck.crrb._API#prepRequest(java.lang.String, boolean)
 	 */
 	@Override
-	String prepRequest(String requestJSON, boolean sopDebug) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {
+		ObjectMapper jacksonMapper = new ObjectMapper();
+		jacksonMapper.configure(
+			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		_CorrectionRowISO[] invoiceLines = null;
+		try {
+			invoiceLines = jacksonMapper.readValue(requestJSON, _CorrectionRowISO[].class);
+		} catch (JsonParseException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		//TODO: Remove sopDebug statements
+		if (sopDebug) {
+			for (int i = 0; invoiceLines != null && i < invoiceLines.length; i++) {
+				if (invoiceLines[i] != null) {
+					System.out.println("Invoice.submitPriceCorrection() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
+				}
+			}
+		}
+
+		return prepSubmitPriceCorrectionCall(invoiceLines, correlationId, "priceCorrectionReq", 1, _API.FETCH_SIZE, sopDebug);
+		
 	}
 
 	/* (non-Javadoc)
@@ -61,16 +86,36 @@ public class CreditRebill extends _API {
 	 */
 	@Override
 	TWObject parseResponse(String rawResp, boolean sopDebug) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		_PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(rawResp);
+		
+		try {
+			TWObject twPriceCorrectionResp = TWObjectFactory.createObject();
+			TWList twPriceCorrectionRows = null;
+			//TWList lookupResults = null;
+			if (priceCorrectionResp != null && (twPriceCorrectionRows = priceCorrectionResp.getTwPriceCorrectionRows()) != null) {
+				if(sopDebug) System.out.println("CreditRebill.parseResponse() Returning non empty response!");
+				twPriceCorrectionResp.setPropertyValue("priceCorrectionRows", twPriceCorrectionRows);
+				//twPriceCorrectionResp.setPropertyValue("results", lookupResults);
+			}
+			else {
+				// Return empty object but not a null object
+				if(sopDebug) System.out.println("CreditRebill.parseResponse() Returning empty response!");
+				twPriceCorrectionResp.setPropertyValue("priceCorrectionRows", TWObjectFactory.createList());
+				//twPriceCorrectionResp.setPropertyValue("results", TWObjectFactory.createList());
+			}
+			return twPriceCorrectionResp;
+		} catch (Exception e) {
+			e.getMessage();
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		System.out.println("CreditRebill.main() invoked.");
 	}
 
 	public static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, String correlationId, boolean sopDebug) throws Exception {
@@ -155,11 +200,11 @@ public class CreditRebill extends _API {
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		
 		//TODO: Loop over bucketized object (each customerId) and make API call for each
-		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
+		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
 
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
-		for (Entry<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> entry : submitMap.entrySet()) {
+		for (Entry<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> entry : submitMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
 			_SubmitPriceReqHeader priceCorrectionRowHeader = entry.getKey();
 			if (priceCorrectionRowHeader != null) {
@@ -191,8 +236,8 @@ public class CreditRebill extends _API {
 		}
 		return submitPriceCorrectionReqJSON;
 	}
-	static TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, String correlationId) {
-		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> priceMap = new TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>>();
+	static TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, String correlationId) {
+		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>>();
 		
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//Hydrate key as SubmitPriceReqHeader
@@ -201,18 +246,18 @@ public class CreditRebill extends _API {
 			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
  			
 			//Hydrate priceCorrectionMaterial
-			_PriceCorrectionMaterial priceCorrectionMaterial = hydratePriceCorrectionMaterial(invoiceLines[i]);
+			_CreditRebillMaterial priceCorrectionMaterial = hydratePriceCorrectionMaterial(invoiceLines[i]);
 			String materialKey = priceCorrectionMaterial.getRecordKey();
 			
 			//TODO: Remove SOP debug statement below
 			System.out.println("Invoice.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + priceCorrectionMaterial.getMaterialId());
 			
-			TreeMap<String, _PriceCorrectionMaterial> materialList = priceMap.get(headerKey);
+			TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
 			//TODO: Remove SOP debug
 			System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
 			
 			if (materialList == null) { // Key not in TreeMap - new key found
-				materialList = new TreeMap<String, _PriceCorrectionMaterial>();
+				materialList = new TreeMap<String, _CreditRebillMaterial>();
 				materialList.put(materialKey, priceCorrectionMaterial);	// First material in list
 				priceMap.put(headerKey, materialList);
 			}
@@ -258,19 +303,24 @@ public class CreditRebill extends _API {
 		headerKey.setBillType(invoiceLine.getBillType());
 		return headerKey;
 	}
-	private static _PriceCorrectionMaterial hydratePriceCorrectionMaterial(_CorrectionRowISO invoiceLine) {
-		_PriceCorrectionMaterial priceCorrectionMaterial = new _PriceCorrectionMaterial();
+	private static _CreditRebillMaterial hydratePriceCorrectionMaterial(_CorrectionRowISO invoiceLine) {
+		_CreditRebillMaterial priceCorrectionMaterial = new _CreditRebillMaterial();
 		priceCorrectionMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
 		priceCorrectionMaterial.setMaterialId(invoiceLine.getMaterialId());
-		priceCorrectionMaterial.setDc(invoiceLine.getDc());
 		
+		priceCorrectionMaterial.setRebillQty(invoiceLine.getRebillQty());
+		priceCorrectionMaterial.setUom(invoiceLine.getUom());
+		priceCorrectionMaterial.setDc(invoiceLine.getDc());
+		//Original invoice line pricing related fields
 		priceCorrectionMaterial.setOldActivePrice(invoiceLine.getOldActivePrice());
 		priceCorrectionMaterial.setOldAwp(invoiceLine.getOldAwp());
+		priceCorrectionMaterial.setOldAbd(invoiceLine.getOldAbd());
 		priceCorrectionMaterial.setOldBid(invoiceLine.getOldBid());
 		priceCorrectionMaterial.setOldCbRef(invoiceLine.getOldCbRef());
 		priceCorrectionMaterial.setOldChargeBack(invoiceLine.getOldChargeBack());
 		priceCorrectionMaterial.setOldConRef(invoiceLine.getOldConRef());
 		priceCorrectionMaterial.setOldContCogPer(invoiceLine.getOldContCogPer());
+		priceCorrectionMaterial.setOldWacCogPer(invoiceLine.getOldWacCogPer());
 		priceCorrectionMaterial.setOldItemMkUpPer(invoiceLine.getOldItemMkUpPer());
 		priceCorrectionMaterial.setOldItemVarPer(invoiceLine.getOldItemVarPer());
 		priceCorrectionMaterial.setOldLead(invoiceLine.getOldLead());
@@ -278,19 +328,24 @@ public class CreditRebill extends _API {
 		priceCorrectionMaterial.setOldNoChargeBack(invoiceLine.getOldNoChargeBack());
 		priceCorrectionMaterial.setOldOverridePrice(invoiceLine.getOldOverridePrice());
 		priceCorrectionMaterial.setOldSellCd(invoiceLine.getOldSellCd());
-		priceCorrectionMaterial.setOldSellPrice(invoiceLine.getOldPrice());
+		priceCorrectionMaterial.setOldSellPrice(invoiceLine.getOldPrice()); // oldSellPrice === oldPrice
 		priceCorrectionMaterial.setOldSf(invoiceLine.getOldSf());
 		priceCorrectionMaterial.setOldSsf(invoiceLine.getOldSsf());
 		priceCorrectionMaterial.setOldWac(invoiceLine.getOldWac());
-		priceCorrectionMaterial.setOldWacCogPer(invoiceLine.getOldWacCogPer());
-		
+		priceCorrectionMaterial.setOldNetBill(invoiceLine.getOldNetBill());
+		priceCorrectionMaterial.setOldProgType(invoiceLine.getOldProgType());
+		priceCorrectionMaterial.setOldContrId(invoiceLine.getOldContrId());
+		priceCorrectionMaterial.setOldContType(invoiceLine.getOldContType());
+		//New price related fields
 		priceCorrectionMaterial.setNewActivePrice(invoiceLine.getNewActivePrice());
 		priceCorrectionMaterial.setNewAwp(invoiceLine.getNewAwp());
+		priceCorrectionMaterial.setNewAbd(invoiceLine.getNewAbd());
 		priceCorrectionMaterial.setNewBid(invoiceLine.getNewBid());
 		priceCorrectionMaterial.setNewCbRef(invoiceLine.getNewCbRef());
 		priceCorrectionMaterial.setNewChargeBack(invoiceLine.getNewChargeBack());
 		priceCorrectionMaterial.setNewConRef(invoiceLine.getNewConRef());
 		priceCorrectionMaterial.setNewContCogPer(invoiceLine.getNewContCogPer());
+		priceCorrectionMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
 		priceCorrectionMaterial.setNewItemMkUpPer(invoiceLine.getNewItemMkUpPer());
 		priceCorrectionMaterial.setNewItemVarPer(invoiceLine.getNewItemVarPer());
 		priceCorrectionMaterial.setNewLead(invoiceLine.getNewLead());
@@ -298,15 +353,32 @@ public class CreditRebill extends _API {
 		priceCorrectionMaterial.setNewNoChargeBack(invoiceLine.getNewNoChargeBack());
 		priceCorrectionMaterial.setNewOverridePrice(invoiceLine.getNewOverridePrice());
 		priceCorrectionMaterial.setNewSellCd(invoiceLine.getNewSellCd());
-		priceCorrectionMaterial.setNewSellPrice(invoiceLine.getNewPrice());
+		priceCorrectionMaterial.setNewSellPrice(invoiceLine.getNewPrice()); // newSellPrice === newPrice
 		priceCorrectionMaterial.setNewSf(invoiceLine.getNewSf());
 		priceCorrectionMaterial.setNewSsf(invoiceLine.getNewSsf());
 		priceCorrectionMaterial.setNewWac(invoiceLine.getNewWac());
-		priceCorrectionMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
+		priceCorrectionMaterial.setNewNetBill(invoiceLine.getNewNetBill());
+		priceCorrectionMaterial.setNewProgType(invoiceLine.getNewProgType());
+		priceCorrectionMaterial.setNewContrId(invoiceLine.getNewContrId());
+		priceCorrectionMaterial.setNewContType(invoiceLine.getNewContType());
 		
-		priceCorrectionMaterial.setRebillQty(invoiceLine.getRebillQty());
-		priceCorrectionMaterial.setUom(invoiceLine.getUom());
-		
+		priceCorrectionMaterial.setManufacturer(invoiceLine.getManufacturer());
+		priceCorrectionMaterial.setDistrChan(invoiceLine.getDistrChan());
+		priceCorrectionMaterial.setDivision(invoiceLine.getDivision());
+		// PO Correction
+		priceCorrectionMaterial.setOldPurchaseOrder(invoiceLine.getOldPurchaseOrder());
+		priceCorrectionMaterial.setNewPurchaseOrder(invoiceLine.getNewPurchaseOrder());
+		// Account Switch - customer Ids
+		priceCorrectionMaterial.setOldCustomer(invoiceLine.getCustomerId());
+		// TODO: check mapping accuracy
+		priceCorrectionMaterial.setNewCustomer(invoiceLine.getNewRebillCust());
+		//Invoice line identifiers
+		priceCorrectionMaterial.setInvoiceId(invoiceLine.getInvoiceId()); 
+		priceCorrectionMaterial.setInvoiceLineItemNum(invoiceLine.getInvoiceLineItemNum());  
+		priceCorrectionMaterial.setOrigInvoiceId(invoiceLine.getOrigInvoiceId());
+		priceCorrectionMaterial.setOrigInvoiceLineItemNum(invoiceLine.getOrigInvoiceLineItemNum());  
+		priceCorrectionMaterial.setPrcGroup5(invoiceLine.getPrcGroup5());  
+
 		return priceCorrectionMaterial;
 	}
 	

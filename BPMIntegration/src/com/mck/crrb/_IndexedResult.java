@@ -42,4 +42,8 @@ class _IndexedResult {
 	public void setTwResult(TWObject twResult) {
 		this.twResult = twResult;
 	}
+	@Override
+	public String toString() {
+		return "index:" + index + ", status:" + status + ", message:" + message; 
+	}
 }

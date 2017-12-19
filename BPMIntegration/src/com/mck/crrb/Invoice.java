@@ -46,7 +46,7 @@ public class Invoice extends _API {
 	}
 	
 	@Override
-	String prepRequest(String requestJSON, boolean sopDebug) throws Exception {
+	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {
 		return requestJSON;	//Request is already formatted in this case
 	}
 	
@@ -57,7 +57,7 @@ public class Invoice extends _API {
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		_InvoiceLookupResp invoices = null;
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat(_API.DATE_FORMAT);
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 			jacksonMapper.setDateFormat(sdf);
 			
 			invoices = jacksonMapper.readValue(rawResp, _InvoiceLookupResp.class);

@@ -30,18 +30,17 @@ public class _CorrectionRowISO extends _CorrectionRow {
 		public _CorrectionRowISO(Object twCorrectionRow) {			
 			super((TWObject)twCorrectionRow);
 			TWObject twCorrRow = super.getTwCorrectionRow();
-			String dateFormat = "yyyy-MM-dd";
-			SimpleDateFormat dateFormater = new SimpleDateFormat(dateFormat);
+			SimpleDateFormat dateFormater = new SimpleDateFormat(_API.SHORT_DASHED_DATE_FORMAT);
 
-			//TODO: Remove SOP debug
 			try {
+				//TODO: Remove SOP debug
 				System.out.println("CorrectionRow.pricingDate input string: " + twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 9));
 				this.setPricingDate(dateFormater.parse(twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 9)));
 				//TODO: Remove SOP debug
 				System.out.println("CorrectionRow.createdOn input string: " + twCorrRow.getPropertyValue("createdOn").toString().substring(0, 9));
 				this.setCreatedOn(dateFormater.parse(twCorrRow.getPropertyValue("createdOn").toString().substring(0, 9)));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -49,7 +48,7 @@ public class _CorrectionRowISO extends _CorrectionRow {
 		@Override
 		public String toString() {
 			String s = super.toString();
-			return s + "pricingDate: " + this.getPricingDate() +  ", createdOn: " + this.getCreatedOn();
+			return s + ", pricingDate: " + this.getPricingDate() +  ", createdOn: " + this.getCreatedOn();
 		}
 		
 		@Override

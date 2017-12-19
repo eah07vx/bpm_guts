@@ -28,13 +28,25 @@ import teamworks.TWObject;
  */
 public abstract class _API {
 	public static final int FETCH_SIZE = 10000;
-	public static final String DATE_FORMAT = "yyyyMMdd";
+	public static final String API_DATE_FORMAT = "yyyyMMdd";
+	public static final String SHORT_DASHED_DATE_FORMAT = "yyyy-MM-dd";
+	public static final String LONG_DASHED_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.S";
 	
-	//final template method providing unalterable boiler plate sequence of calls
+	/* 
+	 * Final template method providing unalterable boiler plate sequence of calls
+	 */
 	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
+		return process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
+	}
+	
+	/* 
+	 * Final template method providing unalterable boiler plate sequence of calls
+	 */
+	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, String correlationId, boolean sopDebug) throws Exception {
 		Date d1 = null;
 		Date d2 = null;
 		String className = this.getClass().getName();
+		SimpleDateFormat sdf = new SimpleDateFormat(LONG_DASHED_DATE_FORMAT);
 		if(sopDebug) {
 			System.out.println(className + ".process() input parameters:");
 			System.out.println("> url: " + url);
@@ -44,13 +56,13 @@ public abstract class _API {
 			System.out.println("> sopDebug: " + sopDebug);
 
 			d1 = new Date();
-			System.out.println("\r\n" + className + ".process() Start prep of call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+			System.out.println("\r\n" + className + ".process() Start prep of call: " + sdf.format(d1));
 		}
 		//#1 Prepare request
-		requestJSON = prepRequest(requestJSON, sopDebug);
+		requestJSON = prepRequest(requestJSON, correlationId, sopDebug);
 		if(sopDebug) {
 			d2 = new Date();
-			System.out.println("End prep of SimulatePrice call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
+			System.out.println("End prep request: " + sdf.format(d2));
 			System.out.println("Total prep time (ms): " + (d2.getTime() - d1.getTime()));
 			System.out.println(className + ".process() requestJSON: " + requestJSON);
 		}
@@ -58,12 +70,18 @@ public abstract class _API {
 		String rawResp = call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) {
 			d1 = new Date();
-			System.out.println("\r\n" + className + ".process() End call(): " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+			System.out.println("\r\n" + className + ".process() End call(): " + sdf.format(d1));
 			System.out.println("Total call time (ms): " + (d1.getTime() - d2.getTime()));
 			System.out.println(className + ".process() response: " + rawResp);
 		}
 		//#3 Parse the API response
 		TWObject parsedResp = parseResponse(rawResp, sopDebug);
+		if(sopDebug) {
+			d2 = new Date();
+			System.out.println("End parse request: " + sdf.format(d2));
+			System.out.println("Total parse time (ms): " + (d2.getTime() - d1.getTime()));
+			System.out.println(className + ".process() Is parsedResp null? " + (parsedResp != null));
+		}
 		return parsedResp;
 	}
 	
@@ -97,6 +115,7 @@ public abstract class _API {
 			if(jsonString != null) {
 				rawResp = jsonString.toString();
 			}
+			if (sopDebug) { System.out.println("_API.call() After reading responseJSON.");}
 			jsseHelper.setSSLPropertiesOnThread(null);
 			connection.disconnect();
 		}
@@ -115,10 +134,11 @@ public abstract class _API {
 	 * Transform the input request object into appropriate request JSON
 	 *  
 	 * @param requestJSON A JSON string representation of the request object
+	 * @param correlationId TODO
 	 * 
 	 * @return String Transformed JSON string that is needed for this specific API call 
 	 */
-	abstract String prepRequest(String requestJSON, boolean sopDebug) throws Exception;
+	abstract String prepRequest(String requestJSON,  String correlationId, boolean sopDebug) throws Exception;
 
 	/**
 	 * Parse the JSON output of the API call into TWObject representation
@@ -133,7 +153,6 @@ public abstract class _API {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		String url = "https://esswsqdpz01.mckesson.com/MckWebServices/muleservices/crrb/invoices";
 		String httpMethod = "POST";
 		String sslAlias = "CellDefaultSSLSettings";

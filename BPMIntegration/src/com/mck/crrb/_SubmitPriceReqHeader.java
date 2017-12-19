@@ -13,6 +13,8 @@ public class _SubmitPriceReqHeader implements Comparable<_SubmitPriceReqHeader> 
 	private String correlationId;
 	private String salesOrg;
 	private String billType;
+	private String idtCaseNumber;
+	private String reasonCode;
 //	TODO: Validate if orderType is needed?
 //	private String orderType;
 	
@@ -53,6 +55,18 @@ public class _SubmitPriceReqHeader implements Comparable<_SubmitPriceReqHeader> 
 //		this.orderType = orderType;
 //	}
 	
+	public String getIdtCaseNumber() {
+		return idtCaseNumber;
+	}
+	public void setIdtCaseNumber(String idtCaseNumber) {
+		this.idtCaseNumber = idtCaseNumber;
+	}
+	public String getReasonCode() {
+		return reasonCode;
+	}
+	public void setReasonCode(String reasonCode) {
+		this.reasonCode = reasonCode;
+	}
 	@Override
 	public String toString() {
 		return ", index: " + index + ", customerId: " + customerId + ", correlationId: " + correlationId + ", salesOrg: " + salesOrg + ", billType: " + billType;		

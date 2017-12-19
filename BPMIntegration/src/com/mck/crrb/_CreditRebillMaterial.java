@@ -27,7 +27,7 @@ public class _CreditRebillMaterial extends _Material {
     private float newWacCogPer;
     private float newItemMkUpPer;
     private double newAwp;
-    private double newAbd;
+    private String newAbd;
 	private String newNoChargeBack;
 	private double newChargeBack;
     private double newListPrice;
@@ -37,7 +37,7 @@ public class _CreditRebillMaterial extends _Material {
     private double newSf;
 	private String newSellCd;
     private String newActivePrice;
-	private double newNetBill;
+	private String newNetBill;
 	private String newProgType;
 	private String newContrId;
 	private String newContType;
@@ -52,7 +52,7 @@ public class _CreditRebillMaterial extends _Material {
     private float oldWacCogPer;
     private float oldItemMkUpPer;
     private double oldAwp;
-	private double oldAbd;
+	private String oldAbd;
 	private String oldNoChargeBack;
 	private double oldChargeBack;
     private double oldListPrice;
@@ -62,7 +62,7 @@ public class _CreditRebillMaterial extends _Material {
     private double oldSf;
 	private String oldSellCd;
     private String oldActivePrice;
-	private double oldNetBill;
+	private String oldNetBill;
 	private String oldProgType;
 	private String oldContrId;
 	private String oldContType;
@@ -177,10 +177,10 @@ public class _CreditRebillMaterial extends _Material {
 	public void setNewAwp(double newAwp) {
 		this.newAwp = newAwp;
 	}
-	public double getNewAbd() {
+	public String getNewAbd() {
 		return newAbd;
 	}
-	public void setNewAbd(double newAbd) {
+	public void setNewAbd(String newAbd) {
 		this.newAbd = newAbd;
 	}
 	public String getNewNoChargeBack() {
@@ -243,10 +243,10 @@ public class _CreditRebillMaterial extends _Material {
 	public void setNewActivePrice(String newActivePrice) {
 		this.newActivePrice = newActivePrice;
 	}
-	public double getNewNetBill() {
+	public String getNewNetBill() {
 		return newNetBill;
 	}
-	public void setNewNetBill(double newNetBill) {
+	public void setNewNetBill(String newNetBill) {
 		this.newNetBill = newNetBill;
 	}
 	public String getNewProgType() {
@@ -327,10 +327,10 @@ public class _CreditRebillMaterial extends _Material {
 	public void setOldAwp(double oldAwp) {
 		this.oldAwp = oldAwp;
 	}
-	public double getOldAbd() {
+	public String getOldAbd() {
 		return oldAbd;
 	}
-	public void setOldAbd(double oldAbd) {
+	public void setOldAbd(String oldAbd) {
 		this.oldAbd = oldAbd;
 	}
 	public String getOldNoChargeBack() {
@@ -393,10 +393,10 @@ public class _CreditRebillMaterial extends _Material {
 	public void setOldActivePrice(String oldActivePrice) {
 		this.oldActivePrice = oldActivePrice;
 	}
-	public double getOldNetBill() {
+	public String getOldNetBill() {
 		return oldNetBill;
 	}
-	public void setOldNetBill(double oldNetBill) {
+	public void setOldNetBill(String oldNetBill) {
 		this.oldNetBill = oldNetBill;
 	}
 	public String getOldProgType() {

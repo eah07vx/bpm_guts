@@ -116,27 +116,7 @@ public class Invoice extends _API {
 		}
 		return invoiceLookupResp;
 	}
-	
-	/**
-	 * 
-	 * @param url
-	 * @param httpMethod
-	 * @param sslAlias
-	 * @param requestJSON
-	 * @param sopDebug
-	 * @return
-	 * 
-	 * @deprecated 	this old method returned SalesHistoryResp which was processes in SalesHistory class to get TWList of CorrectionRow objects.
-	 * 				use {@link #lookup(String, String, String, String, boolean)} instead
-	 */
-	@Deprecated
-	public static Z_SalesHistoryResp lookupOldInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
-		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
-		if (sopDebug) System.out.println("Invoice.lookupInvoices response: " + resp);
-		//return parseInvoiceLookupResp(resp);
-		return new Z_SalesHistoryResp();
-	}
-	
+
 	/*
 	 * @deprecated
 	 */

@@ -146,13 +146,13 @@ public class _CorrectionRow {
 	//private double gxcb;
 	//Removed gxcb
 	//Abd trifecta
-	private double oldAbd;
-	private double curAbd;
-	private double newAbd;
+	private String oldAbd;
+	private String curAbd;
+	private String newAbd;
 	//net bill trifecta
-	private double oldNetBill;
-	private double curNetBill;
-	private double newNetBill;
+	private String oldNetBill;
+	private String curNetBill;
+	private String newNetBill;
 	//GX program type trifecta
 	private String oldProgType;
 	private String newProgType;
@@ -300,12 +300,12 @@ public class _CorrectionRow {
 		this.orderType = this.twCorrectionRow.getPropertyValue("orderType").toString();
 		this.sellPriceExt = Double.parseDouble(this.twCorrectionRow.getPropertyValue("sellPriceExt").toString());
 		this.totChbk = Double.parseDouble(this.twCorrectionRow.getPropertyValue("totChbk").toString());
-		this.oldAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldAbd").toString());
-		this.curAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curAbd").toString());
-		this.newAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newAbd").toString());
-		this.oldNetBill = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldNetBill").toString());
-		this.setCurNetBill(Double.parseDouble(this.twCorrectionRow.getPropertyValue("curNetBill").toString()));
-		this.newNetBill = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newNetBill").toString());
+		this.oldAbd = this.twCorrectionRow.getPropertyValue("oldAbd").toString();
+		this.curAbd = this.twCorrectionRow.getPropertyValue("curAbd").toString();
+		this.newAbd = this.twCorrectionRow.getPropertyValue("newAbd").toString();
+		this.oldNetBill = this.twCorrectionRow.getPropertyValue("oldNetBill").toString();
+		this.curNetBill = this.twCorrectionRow.getPropertyValue("curNetBill").toString();
+		this.newNetBill = this.twCorrectionRow.getPropertyValue("newNetBill").toString();
 		this.oldProgType = this.twCorrectionRow.getPropertyValue("oldProgType").toString();
 		this.newProgType = this.twCorrectionRow.getPropertyValue("newProgType").toString();
 		this.curProgType = this.twCorrectionRow.getPropertyValue("curProgType").toString();
@@ -1211,56 +1211,56 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("gxcb", this.gxcb);
 	}
 */
-	public double getOldAbd() {
+	public String getOldAbd() {
 		return oldAbd;
 	}
 
-	public void setOldAbd(double oldAbd) {
+	public void setOldAbd(String oldAbd) {
 		this.oldAbd = oldAbd;
 		this.twCorrectionRow.setPropertyValue("oldAbd", this.oldAbd);
 	}
 
-	public double getCurAbd() {
+	public String getCurAbd() {
 		return curAbd;
 	}
 
-	public void setCurAbd(double curAbd) {
+	public void setCurAbd(String curAbd) {
 		this.curAbd = curAbd;
 		this.twCorrectionRow.setPropertyValue("curAbd", this.curAbd);
 	}
 
-	public double getNewAbd() {
+	public String getNewAbd() {
 		return newAbd;
 	}
 
-	public void setNewAbd(double newAbd) {
+	public void setNewAbd(String newAbd) {
 		this.newAbd = newAbd;
 		this.twCorrectionRow.setPropertyValue("newAbd", this.newAbd);
 	}
 
-	public double getOldNetBill() {
+	public String getOldNetBill() {
 		return oldNetBill;
 	}
 
-	public void setOldNetBill(double oldNetBill) {
+	public void setOldNetBill(String oldNetBill) {
 		this.oldNetBill = oldNetBill;
 		this.twCorrectionRow.setPropertyValue("oldNetBill", this.oldNetBill);
 	}
 
-	public double getCurNetBill() {
+	public String getCurNetBill() {
 		return curNetBill;
 	}
 
-	public void setCurNetBill(double curNetBill) {
+	public void setCurNetBill(String curNetBill) {
 		this.curNetBill = curNetBill;
 		this.twCorrectionRow.setPropertyValue("curNetBill", this.curNetBill);
 	}
 
-	public double getNewNetBill() {
+	public String getNewNetBill() {
 		return newNetBill;
 	}
 
-	public void setNewNetBill(double newNetBill) {
+	public void setNewNetBill(String newNetBill) {
 		this.newNetBill = newNetBill;
 		this.twCorrectionRow.setPropertyValue("newNetBill", this.newNetBill);
 	}

@@ -44,7 +44,7 @@ public class CreditRebill extends _API {
 	 *  
 	 */
 	public TWObject submit(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
-		return super.process(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		return super.process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
 	}
 	
 	/* (non-Javadoc)
@@ -111,14 +111,7 @@ public class CreditRebill extends _API {
 		}
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		System.out.println("CreditRebill.main() invoked.");
-	}
-
-	public static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, String correlationId, boolean sopDebug) throws Exception {
+	static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, String correlationId, boolean sopDebug) throws Exception {
 		Date d1 = null;
 		Date d2 = null;
 
@@ -142,13 +135,13 @@ public class CreditRebill extends _API {
 		try {
 			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, _CorrectionRowISO[].class);
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		//TODO: Remove sopDebug statements
@@ -180,7 +173,7 @@ public class CreditRebill extends _API {
 				twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwCorrectionRow());
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		*/
@@ -199,7 +192,6 @@ public class CreditRebill extends _API {
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		
-		//TODO: Loop over bucketized object (each customerId) and make API call for each
 		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
 
 		List<Object> pricingRequests = new ArrayList<Object>();
@@ -280,16 +272,15 @@ public class CreditRebill extends _API {
 			jacksonMapper.setDateFormat(sdf);
 			
 			submitPriceResp = jacksonMapper.readValue(resp, _PriceCorrectionResp.class);
-			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		return submitPriceResp;
@@ -370,7 +361,6 @@ public class CreditRebill extends _API {
 		priceCorrectionMaterial.setNewPurchaseOrder(invoiceLine.getNewPurchaseOrder());
 		// Account Switch - customer Ids
 		priceCorrectionMaterial.setOldCustomer(invoiceLine.getCustomerId());
-		// TODO: check mapping accuracy
 		priceCorrectionMaterial.setNewCustomer(invoiceLine.getNewRebillCust());
 		//Invoice line identifiers
 		priceCorrectionMaterial.setInvoiceId(invoiceLine.getInvoiceId()); 

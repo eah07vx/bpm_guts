@@ -42,7 +42,7 @@ public class Invoice extends _API {
 	 *  
 	 */
 	public TWObject lookup(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
-		return super.process(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		return super.process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
 	}
 	
 	@Override
@@ -62,13 +62,13 @@ public class Invoice extends _API {
 			
 			invoices = jacksonMapper.readValue(rawResp, _InvoiceLookupResp.class);
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		try {
@@ -95,7 +95,7 @@ public class Invoice extends _API {
 	}
 
 	@Deprecated
-	public static TWObject lookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
+	static TWObject lookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
 		String resp = call(url, httpMethod, sslAlias, requestJSON, sopDebug);
 		if (sopDebug) System.out.println("Invoice.lookupInvoices response: " + resp);
 		_InvoiceLookupResp invoices = parseInvoiceLookupResp(resp);
@@ -157,7 +157,7 @@ public class Invoice extends _API {
 				twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}		
 		return twCorrectionRows;
@@ -193,13 +193,13 @@ public class Invoice extends _API {
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		if (sopDebug) {
@@ -228,13 +228,13 @@ public class Invoice extends _API {
 				twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}		
 		return twCorrectionRows;
 	}	
 	*/
-	public static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, String correlationId, boolean sopDebug) throws Exception {
+	static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, String correlationId, boolean sopDebug) throws Exception {
 		Date d1 = null;
 		Date d2 = null;
 
@@ -258,16 +258,16 @@ public class Invoice extends _API {
 		try {
 			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, _CorrectionRowISO[].class);
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		//TODO: Remove sopDebug statements
+		//TODO: Remove sopDebug statement
 		if (sopDebug) {
 			for (int i = 0; invoiceLines != null && i < invoiceLines.length; i++) {
 				if (invoiceLines[i] != null) {
@@ -296,7 +296,7 @@ public class Invoice extends _API {
 				twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwCorrectionRow());
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		*/
@@ -360,7 +360,6 @@ public class Invoice extends _API {
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		
-		//TODO: Loop over bucketized object (each customerId) and make API call for each
 		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
 
 		List<Object> pricingRequests = new ArrayList<Object>();
@@ -397,45 +396,7 @@ public class Invoice extends _API {
 		}
 		return submitPriceCorrectionReqJSON;
 	}
-	/*
-	static TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines) {
-		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>>();
-		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		for (int i = 0; i < invoiceLines.length; i++) {
-			//NameValuePair<String, String> key = new NameValuePair<String, String>(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()));
-
-			//Hydrate key as SimulatePriceRowHeader
-			_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], i); //new SimulatePriceRowHeader(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()), ...);
-			//TODO: Remove SOP debug statement below
-			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
- 			
-			//Hydrate creditRebillMaterial
-			_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i]);
-			String materialKey = creditRebillMaterial.getRecordKey();
-			
-			//TODO: Remove SOP debug statement below
-			System.out.println("Invoice.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + creditRebillMaterial.getMaterialId());
-			
-			TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
-			//TODO: Remove SOP debug
-			System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
-			
-			if (materialList == null) { // Key not in TreeMap - new key found
-				materialList = new TreeMap<String, _CreditRebillMaterial>();
-				materialList.put(materialKey, creditRebillMaterial);	// First material in list
-				priceMap.put(headerKey, materialList);
-			}
-			else { 	// Key already exists in TreeMap
-				materialList.put(materialKey, creditRebillMaterial);
-			}
-			//TODO: Remove SOP debug
-			System.out.println("  after: " + materialList.get(materialKey) + "\n");
-		}
-		return priceMap;
-	}
-	*/
+	
 	static TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, String correlationId) {
 		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> priceMap = new TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>>();
 		
@@ -480,46 +441,20 @@ public class Invoice extends _API {
 			jacksonMapper.setDateFormat(sdf);
 			
 			invoiceLookupResp = jacksonMapper.readValue(resp, _InvoiceLookupResp.class);
-			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		return invoiceLookupResp;
 	}
-	/*
-	private static _SimulatePriceResp parseSimulatePriceResp(String resp) {
-		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.configure(
-			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		_SimulatePriceResp simulatePriceResp = null;
-		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			jacksonMapper.setDateFormat(sdf);
-			
-			simulatePriceResp = jacksonMapper.readValue(resp, _SimulatePriceResp.class);
-			//System.out.println(respInFile);
 
-		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return simulatePriceResp;
-	}
-	*/
 	private static _PriceCorrectionResp parseSubmitPriceCorrectionResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
@@ -533,29 +468,18 @@ public class Invoice extends _API {
 			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		return submitPriceResp;
 	}	
-	/*
-	private static _SimulatePriceRowHeader hydrateSimulatePriceRowHeader(_CorrectionRowISO invoiceLine, int index){
-		_SimulatePriceRowHeader headerKey = new _SimulatePriceRowHeader();
-		headerKey.setIndex(index);
-		headerKey.setCustomerId(invoiceLine.getCustomerId());
-		headerKey.setPricingDate(invoiceLine.getPricingDate());
-		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
-		headerKey.setBillType(invoiceLine.getBillType());
-		headerKey.setOrderType(invoiceLine.getOrderType());
-		return headerKey;
-	}
-	*/
+	
 	private static _SubmitPriceReqHeader hydrateSubmitPriceReqHeader(_CorrectionRowISO invoiceLine, String correlationId, int index) {
 		_SubmitPriceReqHeader headerKey = new _SubmitPriceReqHeader();
 		headerKey.setIndex(index);
@@ -565,37 +489,8 @@ public class Invoice extends _API {
 		headerKey.setBillType(invoiceLine.getBillType());
 		return headerKey;
 	}
-	/*
-	private static _CreditRebillMaterial hydrateCreditRebillMaterial(_CorrectionRowISO invoiceLine) {
-		_CreditRebillMaterial creditRebillMaterial = new _CreditRebillMaterial();
-		creditRebillMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
-		creditRebillMaterial.setMaterialId(invoiceLine.getMaterialId());
-		creditRebillMaterial.setDc(invoiceLine.getDc());
-		creditRebillMaterial.setNewActivePrice(invoiceLine.getNewActivePrice());
-		creditRebillMaterial.setNewAwp(invoiceLine.getNewAwp());
-		creditRebillMaterial.setNewBid(invoiceLine.getNewBid());
-		creditRebillMaterial.setNewCbRef(invoiceLine.getNewCbRef());
-		creditRebillMaterial.setNewChargeBack(invoiceLine.getNewChargeBack());
-		creditRebillMaterial.setNewConRef(invoiceLine.getNewConRef());
-		creditRebillMaterial.setNewContCogPer(invoiceLine.getNewContCogPer());
-		creditRebillMaterial.setNewItemMkUpPer(invoiceLine.getNewItemMkUpPer());
-		creditRebillMaterial.setNewItemVarPer(invoiceLine.getNewItemVarPer());
-		creditRebillMaterial.setNewLead(invoiceLine.getNewLead());
-		creditRebillMaterial.setNewListPrice(invoiceLine.getNewListPrice());
-		creditRebillMaterial.setNewNoChargeBack(invoiceLine.getNewNoChargeBack());
-		creditRebillMaterial.setNewOverridePrice(invoiceLine.getNewOverridePrice());
-		creditRebillMaterial.setNewSellCd(invoiceLine.getNewSellCd());
-		creditRebillMaterial.setNewSellPrice(invoiceLine.getNewPrice());
-		creditRebillMaterial.setNewSf(invoiceLine.getNewSf());
-		creditRebillMaterial.setNewSsf(invoiceLine.getNewSsf());
-		creditRebillMaterial.setNewWac(invoiceLine.getNewWac());
-		creditRebillMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
-		creditRebillMaterial.setRebillQty(invoiceLine.getRebillQty());
-		creditRebillMaterial.setUom(invoiceLine.getUom());
-		
-		return creditRebillMaterial;
-	}
-	*/
+
+
 	private static _PriceCorrectionMaterial hydratePriceCorrectionMaterial(_CorrectionRowISO invoiceLine) {
 		_PriceCorrectionMaterial priceCorrectionMaterial = new _PriceCorrectionMaterial();
 		priceCorrectionMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
@@ -647,53 +542,12 @@ public class Invoice extends _API {
 		
 		return priceCorrectionMaterial;
 	}
-	/*
-	private static _CorrectionRowISO[] mergeSimulatePriceValues(_CorrectionRowISO[] invoiceLines, _SimulatePriceResp simulatePriceResp) {
-		if (invoiceLines != null && invoiceLines.length > 0 && simulatePriceResp != null 
-				&& simulatePriceResp.getPriceSimulationResp() != null && simulatePriceResp.getPriceSimulationResp().length > 0) {
-			_SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();
-			for(int i = 0; i < invoiceLines.length; i++) {
-				for(int j = 0; j < simulatePriceRows.length; j++){
-					if (invoiceLines[i].getCustomerId() != null && invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
-							&& invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
-						_CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
-						for(int k = 0; k < crMaterials.length; k++) {
-							String invoiceLineRecordKey = invoiceLines[i].getInvoiceId() + "-" + invoiceLines[i].getInvoiceLineItemNum();
-							if (invoiceLineRecordKey.equals(crMaterials[k].getRecordKey())) {
-								invoiceLines[i].setNewPrice(crMaterials[k].getNewSellPrice());
-								invoiceLines[i].setNewActivePrice(crMaterials[k].getNewActivePrice());
-								invoiceLines[i].setNewAwp(crMaterials[k].getNewAwp());
-								invoiceLines[i].setNewBid(crMaterials[k].getNewBid());
-								invoiceLines[i].setNewCbRef(crMaterials[k].getNewCbRef());
-								invoiceLines[i].setNewChargeBack(crMaterials[k].getNewChargeBack());
-								invoiceLines[i].setNewConRef(crMaterials[k].getNewConRef());
-								invoiceLines[i].setNewContCogPer(crMaterials[k].getNewContCogPer());
-								invoiceLines[i].setNewItemMkUpPer(crMaterials[k].getNewItemMkUpPer());
-								invoiceLines[i].setNewItemVarPer(crMaterials[k].getNewItemVarPer());
-								invoiceLines[i].setNewLead(crMaterials[k].getNewLead());
-								invoiceLines[i].setNewListPrice(crMaterials[k].getNewListPrice());
-								invoiceLines[i].setNewNoChargeBack(crMaterials[k].getNewNoChargeBack());
-								invoiceLines[i].setNewOverridePrice(crMaterials[k].getNewOverridePrice());
-								invoiceLines[i].setNewSellCd(crMaterials[k].getNewSellCd());
-								invoiceLines[i].setNewSf(crMaterials[k].getNewSf());
-								invoiceLines[i].setNewSsf(crMaterials[k].getNewSsf());
-								invoiceLines[i].setNewWac(crMaterials[k].getNewWac());
-								invoiceLines[i].setNewWacCogPer(crMaterials[k].getNewWacCogPer());
-//								TODO: Check if newAbd needs to be added to materials and add other fields
-//								invoiceLines[i].setNewAbd(crMaterials[k].getNew??);
-							}
-						}
-					}
-				}
-			}
-		}
-		return invoiceLines;
-	}
-	*/
+
+
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	//public static void main(String[] args) {
 		/*
 		String simulatePriceResp = "{    \"priceSimulationResp\": [        {            \"index\": \"0\",            \"customerId\": \"\",            \"salesOrg\": \"\",            \"billType\": \"\",            \"pricingDate\": \"\",            \"materials\": [                {                    \"materialId\": \"\",					\"recordKey\": \"7840363909-000001\",                    \"rebillQty\": \"0.000\",                    \"uom\": \"\",                    \"dc\": \"\",                    \"newLead\": \"\",                    \"newConRef\": \"\",                    \"newNoChargeBack\": \"\",                    \"newCbRef\": \"\",                    \"newSellCd\": \"\",                    \"newActivePrice\": \"\",                    \"newWac\": \"435.39\",                    \"newBid\": \"64.65\",                    \"newContCogPer\": \"-2.50\",                    \"newItemVarPer\": \"3.00\",                    \"newWacCogPer\": \"0.00\",                    \"newItemMkUpPer\": \"1.00\",                    \"newAwp\": \"608.93\",                    \"newOverridePrice\": \"0.00\"                }            ]        }    ],    \"results\": [        {            \"index\": \"0\",            \"status\": \"success\"        }    ]}";
 		_SimulatePriceResp spr = parseSimulatePriceResp(simulatePriceResp);
@@ -736,6 +590,6 @@ public class Invoice extends _API {
 		System.out.println("resp Complex object from json file with number of records: " + invoiceLookupResp.numberOfInvoiceLines());
 		System.out.println("Total parsing time (ms): " + (d2.getTime() - d1.getTime()));
 		*/
-	}
+	//}
 	
 }

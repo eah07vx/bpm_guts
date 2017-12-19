@@ -46,12 +46,6 @@ public class _CorrectionRowISO extends _CorrectionRow {
 		}
 
 		@Override
-		public String toString() {
-			String s = super.toString();
-			return s + ", pricingDate: " + this.getPricingDate() +  ", createdOn: " + this.getCreatedOn();
-		}
-		
-		@Override
 		public Date getPricingDate() {
 			return pricingDate;
 		}

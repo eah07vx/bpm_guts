@@ -43,7 +43,7 @@ public class Price extends _API {
 	 *  
 	 */
 	public TWObject simulate(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
-		return super.process(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		return super.process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
 	}
 
 	@Override

@@ -35,9 +35,12 @@ public abstract class _API {
 	/* 
 	 * Final template method providing unalterable boiler plate sequence of calls
 	 */
+	/*
 	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
+	
 		return process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
 	}
+	*/
 	
 	/* 
 	 * Final template method providing unalterable boiler plate sequence of calls
@@ -85,7 +88,7 @@ public abstract class _API {
 		return parsedResp;
 	}
 	
-	public static String call(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
+	static String call(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
 	    String rawResp = null;
 	    Properties sslProps = null;
 	    try {
@@ -152,7 +155,9 @@ public abstract class _API {
 	/**
 	 * @param args
 	 */
+	/*
 	public static void main(String[] args) {
+	
 		String url = "https://esswsqdpz01.mckesson.com/MckWebServices/muleservices/crrb/invoices";
 		String httpMethod = "POST";
 		String sslAlias = "CellDefaultSSLSettings";
@@ -161,5 +166,5 @@ public abstract class _API {
 		String rawInvoiceLookupResp = _API.call(url, httpMethod, sslAlias, requestJSON, true);
 		System.out.println(rawInvoiceLookupResp);
 	}
-	
+	*/
 }

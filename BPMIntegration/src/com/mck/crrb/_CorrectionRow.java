@@ -196,7 +196,7 @@ public class _CorrectionRow {
 		try {
 			this.twCorrectionRow = TWObjectFactory.createObject();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 	} 
@@ -1509,7 +1509,6 @@ public class _CorrectionRow {
 	}
 
 	public String toString() {
-		SimpleDateFormat sdf = new SimpleDateFormat(_API.SHORT_DASHED_DATE_FORMAT);
 		return "twCorrectionRow.size: " + this.twCorrectionRow.getPropertyNames().size() + 
 				", invoiceId: " + this.invoiceId +  ", invoiceLineItemNum: " + this.invoiceLineItemNum +
 				", customerId: " + this.customerId +  ", customerName: " + this.customerName +  
@@ -1560,6 +1559,6 @@ public class _CorrectionRow {
 				", prcGroup5: " + this.prcGroup5 + ", oldPurchaseOrder: " + this.oldPurchaseOrder + ", newPurchaseOrder: " + this.newPurchaseOrder +
 				", manufacturer: " + this.manufacturer + ", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
 				", idtCaseNumber: " + idtCaseNumber + 
-				", pricingDate: " + sdf.format(this.pricingDate) +  ", createdOn: " + sdf.format(this.createdOn);
+				", pricingDate: " + this.getPricingDate() + ", createdOn: " + this.getCreatedOn();
 	}
 }

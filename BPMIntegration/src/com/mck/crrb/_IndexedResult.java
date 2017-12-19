@@ -4,6 +4,7 @@
 package com.mck.crrb;
 
 import teamworks.TWObject;
+import teamworks.TWObjectFactory;
 
 /**
  * @author akatre
@@ -15,6 +16,15 @@ class _IndexedResult {
 	private String message;
 	private TWObject twResult;
 	
+	public _IndexedResult() {
+		try {
+			this.twResult = TWObjectFactory.createObject();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	} 
+
 	public int getIndex() {
 		return index;
 	}

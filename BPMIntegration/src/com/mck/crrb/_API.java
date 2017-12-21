@@ -108,7 +108,22 @@ public abstract class _API {
 			writer.write(requestJSON); 
 			writer.close();
 			if (sopDebug) { System.out.println("_API.call() After writing requestJSON.");}
-			
+			/*
+			switch (connection.getResponseCode()) {
+	            case HttpURLConnection.HTTP_OK:
+	                System.out.println(x);
+	                return connection; // **EXIT POINT** fine, go on
+	            case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
+	                log.warning(entries + " **gateway timeout**");
+	                break;// retry
+	            case HttpURLConnection.HTTP_UNAVAILABLE:
+	                log.warning(entries + "**unavailable**");
+	                break;// retry, server is unstable
+	            default:
+	                log.severe(entries + " **unknown response code**.");
+	                break; // abort
+			}
+			*/
 			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			StringBuffer jsonString = new StringBuffer();
 			String line;
@@ -124,11 +139,13 @@ public abstract class _API {
 		}
 	    catch (SSLException e) {
 	        rawResp = e.getMessage();
+		    System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		catch(IOException e) {
 		    rawResp = e.getMessage();
 		    System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 		return rawResp;
 	}

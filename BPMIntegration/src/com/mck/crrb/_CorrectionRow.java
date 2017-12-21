@@ -186,8 +186,10 @@ public class _CorrectionRow {
 	//Original invoice information
 	private String origInvoiceId;
 	private String origInvoiceLineItemNum;
-	//IDT-Salesforce Case Number
+	//IDT-External Case 
+	private String idtCaseType;
 	private String idtCaseNumber;
+	private String submittedBy;
 	//dates
 	private Date pricingDate;
 	private Date createdOn;
@@ -324,11 +326,15 @@ public class _CorrectionRow {
 		this.division = this.twCorrectionRow.getPropertyValue("division").toString();
 		this.docType = this.twCorrectionRow.getPropertyValue("docType").toString();
 		this.prcGroup5 = this.twCorrectionRow.getPropertyValue("prcGroup5").toString();
+		this.submittedBy = this.twCorrectionRow.getPropertyValue("submittedBy").toString();
 		this.oldPurchaseOrder = this.twCorrectionRow.getPropertyValue("oldPurchaseOrder").toString();
 		this.newPurchaseOrder = this.twCorrectionRow.getPropertyValue("newPurchaseOrder").toString();
+		this.origInvoiceId = this.twCorrectionRow.getPropertyValue("origInvoiceId").toString();
+		this.origInvoiceLineItemNum = this.twCorrectionRow.getPropertyValue("origInvoiceLineItemNum").toString();
+		
 		try {
-			this.setPricingDate(dateFormater.parse(this.twCorrectionRow.getPropertyValue("pricingDate").toString().substring(0, 9)));
-			this.setCreatedOn(dateFormater.parse(this.twCorrectionRow.getPropertyValue("createdOn").toString().substring(0, 9)));
+			this.setPricingDate(dateFormater.parse(this.twCorrectionRow.getPropertyValue("pricingDate").toString().substring(0, 10)));
+			this.setCreatedOn(dateFormater.parse(this.twCorrectionRow.getPropertyValue("createdOn").toString().substring(0, 10)));
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -1480,6 +1486,15 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("origInvoiceLineItemNum", this.origInvoiceLineItemNum);
 	}
 
+	public String getIdtCaseType() {
+		return idtCaseType;
+	}
+
+	public void setIdtCaseType(String idtCaseType) {
+		this.idtCaseType = idtCaseType;
+		this.twCorrectionRow.setPropertyValue("idtCaseType", this.idtCaseType);
+	}
+
 	public String getIdtCaseNumber() {
 		return idtCaseNumber;
 	}
@@ -1487,6 +1502,15 @@ public class _CorrectionRow {
 	public void setIdtCaseNumber(String idtCaseNumber) {
 		this.idtCaseNumber = idtCaseNumber;
 		this.twCorrectionRow.setPropertyValue("idtCaseNumber", this.idtCaseNumber);
+	}
+
+	public String getSubmittedBy() {
+		return submittedBy;
+	}
+
+	public void setSubmittedBy(String submittedBy) {
+		this.submittedBy = submittedBy;
+		this.twCorrectionRow.setPropertyValue("submittedBy", this.submittedBy);
 	}
 
 	public Date getPricingDate() {
@@ -1557,7 +1581,7 @@ public class _CorrectionRow {
 				", distrChan: " + this.distrChan +  ", division: " + this.division +  ", docType: " + this.docType + 
 				", prcGroup5: " + this.prcGroup5 + ", oldPurchaseOrder: " + this.oldPurchaseOrder + ", newPurchaseOrder: " + this.newPurchaseOrder +
 				", manufacturer: " + this.manufacturer + ", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
-				", idtCaseNumber: " + idtCaseNumber + 
+				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + 
 				", pricingDate: " + this.getPricingDate() + ", createdOn: " + this.getCreatedOn();
 	}
 

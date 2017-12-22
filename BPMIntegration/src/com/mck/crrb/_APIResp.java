@@ -18,6 +18,16 @@ class _APIResp {
 	private int totalNumberOfRecords;
 	private TWList twResults;
 
+	public _APIResp() {
+		super();
+		try {
+			this.twResults = TWObjectFactory.createList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * @return the results
 	 */
@@ -89,7 +99,9 @@ class _APIResp {
 	}
 
 	public void updateTwResults(_IndexedResult[] results) throws Exception {
-		this.twResults = TWObjectFactory.createList();
+		if (this.twResults == null) {
+			this.twResults = TWObjectFactory.createList();
+		}
 		int size = results.length;
 		for (int i = 0; i < size; i++) {
 			this.twResults.addArrayData(results[i].getTwResult());

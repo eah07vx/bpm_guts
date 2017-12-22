@@ -30,7 +30,7 @@ public class Price extends _API {
 	_CorrectionRowISO[] invoiceLines;
 
 	@Override
-	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {
+	String prepRequest(String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
 		//Read and Hold original correction rows invoice lines to be overlaid with price simulation values from the response
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(

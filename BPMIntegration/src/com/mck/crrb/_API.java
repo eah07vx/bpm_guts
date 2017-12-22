@@ -45,7 +45,7 @@ public abstract class _API {
 	/* 
 	 * Final template method providing unalterable boiler plate sequence of calls
 	 */
-	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, String correlationId, boolean sopDebug) throws Exception {
+	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
 		Date d1 = null;
 		Date d2 = null;
 		String className = this.getClass().getName();
@@ -62,7 +62,7 @@ public abstract class _API {
 			System.out.println("\r\n" + className + ".process() Start prep of call: " + sdf.format(d1));
 		}
 		//#1 Prepare request
-		requestJSON = prepRequest(requestJSON, correlationId, sopDebug);
+		requestJSON = prepRequest(requestJSON, reqHeader, sopDebug);
 		if(sopDebug) {
 			d2 = new Date();
 			System.out.println("End prep request: " + sdf.format(d2));
@@ -158,7 +158,7 @@ public abstract class _API {
 	 * 
 	 * @return String Transformed JSON string that is needed for this specific API call 
 	 */
-	abstract String prepRequest(String requestJSON,  String correlationId, boolean sopDebug) throws Exception;
+	abstract String prepRequest(String requestJSON,  TWObject reqHeader, boolean sopDebug) throws Exception;
 
 	/**
 	 * Parse the JSON output of the API call into TWObject representation

@@ -6,7 +6,6 @@ package com.mck.crrb;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ public class CreditRebill extends _API {
 	 * @see com.mck.crrb._API#prepRequest(java.lang.String, boolean)
 	 */
 	@Override
-	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {
+	String prepRequest(String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -55,12 +54,12 @@ public class CreditRebill extends _API {
 		if (sopDebug) {
 			for (int i = 0; invoiceLines != null && i < invoiceLines.length; i++) {
 				if (invoiceLines[i] != null) {
-					System.out.println("Invoice.submitPriceCorrection() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
+					System.out.println("CreditRebill.prepRequest() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
 				}
 			}
 		}
 
-		return prepSubmitPriceCorrectionCall(invoiceLines, correlationId, "priceCorrectionReq", 1, _API.FETCH_SIZE, sopDebug);
+		return prepSubmitPriceCorrectionCall(invoiceLines, reqHeader, "priceCorrectionReq", 1, _API.FETCH_SIZE, sopDebug);
 		
 	}
 
@@ -94,100 +93,30 @@ public class CreditRebill extends _API {
 		}
 	}
 
-	static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, String correlationId, boolean sopDebug) throws Exception {
-		Date d1 = null;
-		Date d2 = null;
-
-		if(sopDebug) {
-			System.out.println("Invoice.submitPriceCorrection() input parameters:");
-			System.out.println("> url: " + url);
-			System.out.println("> httpMethod: " + httpMethod);
-			System.out.println("> sslAlias: " + sslAlias);
-			System.out.println("> correctionRowsJSON: " + correctionRowsJSON);
-			System.out.println("> correlationId: " + correlationId);
-			System.out.println("> sopDebug: " + sopDebug);
-
-			d1 = new Date();
-			System.out.println("\r\nInvoice.submitPriceCorrection() Start prep of submitPriceCorrection call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
-		}		
-
-		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.configure(
-			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		_CorrectionRowISO[] invoiceLines = null;
-		try {
-			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, _CorrectionRowISO[].class);
-		} catch (JsonParseException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-		//TODO: Remove sopDebug statements
-		if (sopDebug) {
-			for (int i = 0; invoiceLines != null && i < invoiceLines.length; i++) {
-				if (invoiceLines[i] != null) {
-					System.out.println("Invoice.submitPriceCorrection() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
-				}
-			}
-		}
-
-		String requestJSON = prepSubmitPriceCorrectionCall(invoiceLines, correlationId, "priceCorrectionReq", 1, _API.FETCH_SIZE, sopDebug);
-		if(sopDebug) {
-			d2 = new Date();
-			System.out.println("End prep of submitPriceCorrection call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
-			System.out.println("Total prep time (ms): " + (d2.getTime() - d1.getTime()));
-			System.out.println("Invoice.submitPriceCorrection() requestJSON: " + requestJSON);
-		}
-
-		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
-		if (sopDebug) System.out.println("Invoice.submitPriceCorrection() response: " + resp);
-		_PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(resp);
-		
-		/*
-		try {
-			twPriceCorrectionRows = TWObjectFactory.createList();
-			int size = priceCorrectionResp.length;
-			for (int i = 0; i < size; i++) {
-				twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwCorrectionRow());
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-		*/
-		TWList twPriceCorrectionRows = null;
-		if (priceCorrectionResp != null && (twPriceCorrectionRows = priceCorrectionResp.getTwPriceCorrectionRows()) != null) {
-			if(sopDebug) System.out.println("Invoice.submitPriceCorrectionByJSON Returning non empty response!");
-			return twPriceCorrectionRows;
-		}
-		else {
-			if(sopDebug) System.out.println("Invoice.submitPriceCorrectionByJSON Returning empty response!");
-			return TWObjectFactory.createList();	// Return empty list but not a null object
-		}
-	}
-	private static String prepSubmitPriceCorrectionCall(_CorrectionRowISO[] invoiceLines, String correlationId, String containerName, int startIndex, int endIndex, boolean sopDebug) {
+	private static String prepSubmitPriceCorrectionCall(_CorrectionRowISO[] invoiceLines, TWObject reqHeader, String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		
-		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
+		TreeMap<_APIReqHeader, TreeMap<String, _CreditRebillMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, reqHeader);
 
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
-		for (Entry<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> entry : submitMap.entrySet()) {
+		for (Entry<_APIReqHeader, TreeMap<String, _CreditRebillMaterial>> entry : submitMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
-			_SubmitPriceReqHeader priceCorrectionRowHeader = entry.getKey();
+			_APIReqHeader priceCorrectionRowHeader = entry.getKey();
 			if (priceCorrectionRowHeader != null) {
 				pricingReq.put("index", i++);
-				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
 				pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
+				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
 				pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
 				pricingReq.put("billType", priceCorrectionRowHeader.getBillType());
+				pricingReq.put("idtCaseType", priceCorrectionRowHeader.getIdtCaseType());
+				pricingReq.put("idtCaseNumber", priceCorrectionRowHeader.getIdtCaseNumber());
+				pricingReq.put("reasonCode", priceCorrectionRowHeader.getReasonCode());
+				pricingReq.put("submittedBy", priceCorrectionRowHeader.getSubmittedBy());
+				pricingReq.put("ediSuppression", priceCorrectionRowHeader.isEdiSuppression());
+				pricingReq.put("consolidatedPONumber", priceCorrectionRowHeader.getConsolidatedPONumber());
 				
 				if (entry != null && entry.getValue() != null && entry.getValue().values() != null) {
 					pricingReq.put("materials", entry.getValue().values());		// value in the priceMap entry has materials
@@ -211,21 +140,21 @@ public class CreditRebill extends _API {
 		}
 		return submitPriceCorrectionReqJSON;
 	}
-	static TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, String correlationId) {
-		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SubmitPriceReqHeader, TreeMap<String, _CreditRebillMaterial>>();
+	static TreeMap<_APIReqHeader, TreeMap<String, _CreditRebillMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, TWObject reqHeader) {
+		TreeMap<_APIReqHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_APIReqHeader, TreeMap<String, _CreditRebillMaterial>>();
 		
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//Hydrate key as SubmitPriceReqHeader
-			_SubmitPriceReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], correlationId, i); 
+			_APIReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], reqHeader, i); 
 			//TODO: Remove SOP debug statement below
-			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
+			System.out.println("CreditRebill.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
  			
 			//Hydrate priceCorrectionMaterial
 			_CreditRebillMaterial priceCorrectionMaterial = hydratePriceCorrectionMaterial(invoiceLines[i]);
 			String materialKey = priceCorrectionMaterial.getRecordKey();
 			
 			//TODO: Remove SOP debug statement below
-			System.out.println("Invoice.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + priceCorrectionMaterial.getMaterialId());
+			System.out.println("CreditRebill.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + priceCorrectionMaterial.getMaterialId());
 			
 			TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
 			//TODO: Remove SOP debug
@@ -267,16 +196,19 @@ public class CreditRebill extends _API {
 			e.printStackTrace();
 		}
 		return submitPriceResp;
-	}	
-	private static _SubmitPriceReqHeader hydrateSubmitPriceReqHeader(_CorrectionRowISO invoiceLine, String correlationId, int index) {
-		_SubmitPriceReqHeader headerKey = new _SubmitPriceReqHeader();
+	}
+	
+	private static _APIReqHeader hydrateSubmitPriceReqHeader(_CorrectionRowISO invoiceLine, TWObject reqHeader, int index) {
+		_APIReqHeader headerKey = new _APIReqHeader(reqHeader);
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
-		headerKey.setCorrelationId(correlationId);
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());
+		headerKey.setEdiSuppression(invoiceLine.isEdiSuppression());  
+		headerKey.setConsolidatedPONumber(invoiceLine.getPoNumber());
 		return headerKey;
 	}
+	
 	private static _CreditRebillMaterial hydratePriceCorrectionMaterial(_CorrectionRowISO invoiceLine) {
 		_CreditRebillMaterial priceCorrectionMaterial = new _CreditRebillMaterial();
 		priceCorrectionMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
@@ -354,5 +286,81 @@ public class CreditRebill extends _API {
 
 		return priceCorrectionMaterial;
 	}
-	
+	/*
+	static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
+		Date d1 = null;
+		Date d2 = null;
+
+		if(sopDebug) {
+			System.out.println("CreditRebill.submitPriceCorrection() input parameters:");
+			System.out.println("> url: " + url);
+			System.out.println("> httpMethod: " + httpMethod);
+			System.out.println("> sslAlias: " + sslAlias);
+			System.out.println("> correctionRowsJSON: " + correctionRowsJSON);
+			System.out.println("> sopDebug: " + sopDebug);
+
+			d1 = new Date();
+			System.out.println("\r\nCreditRebill.submitPriceCorrection() Start prep of submitPriceCorrection call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+		}		
+
+		ObjectMapper jacksonMapper = new ObjectMapper();
+		jacksonMapper.configure(
+			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		_CorrectionRowISO[] invoiceLines = null;
+		try {
+			invoiceLines = jacksonMapper.readValue(correctionRowsJSON, _CorrectionRowISO[].class);
+		} catch (JsonParseException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		//TODO: Remove sopDebug statements
+		if (sopDebug) {
+			for (int i = 0; invoiceLines != null && i < invoiceLines.length; i++) {
+				if (invoiceLines[i] != null) {
+					System.out.println("CreditRebill.submitPriceCorrection() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
+				}
+			}
+		}
+
+		String requestJSON = prepSubmitPriceCorrectionCall(invoiceLines, reqHeader, "priceCorrectionReq", 1, _API.FETCH_SIZE, sopDebug);
+		if(sopDebug) {
+			d2 = new Date();
+			System.out.println("End prep of submitPriceCorrection call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
+			System.out.println("Total prep time (ms): " + (d2.getTime() - d1.getTime()));
+			System.out.println("CreditRebill.submitPriceCorrection() requestJSON: " + requestJSON);
+		}
+
+		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		if (sopDebug) System.out.println("CreditRebill.submitPriceCorrection() response: " + resp);
+		_PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(resp);
+		
+		
+//		try {
+//			twPriceCorrectionRows = TWObjectFactory.createList();
+//			int size = priceCorrectionResp.length;
+//			for (int i = 0; i < size; i++) {
+//				twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwCorrectionRow());
+//			}
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//			e.printStackTrace();
+//		}
+//		
+		TWList twPriceCorrectionRows = null;
+		if (priceCorrectionResp != null && (twPriceCorrectionRows = priceCorrectionResp.getTwPriceCorrectionRows()) != null) {
+			if(sopDebug) System.out.println("CreditRebill.submitPriceCorrectionByJSON Returning non empty response!");
+			return twPriceCorrectionRows;
+		}
+		else {
+			if(sopDebug) System.out.println("CreditRebill.submitPriceCorrectionByJSON Returning empty response!");
+			return TWObjectFactory.createList();	// Return empty list but not a null object
+		}
+	}
+	*/	
 }

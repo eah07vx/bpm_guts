@@ -15,6 +15,16 @@ public class _PriceCorrectionResp extends _APIResp {
 	private _PriceCorrectionRow[] priceCorrectionResp; // Named to match response from submitPriceCorrection call 
 	private TWList twPriceCorrectionRows;
 
+	public _PriceCorrectionResp() {
+		super();
+		try {
+			this.twPriceCorrectionRows = TWObjectFactory.createList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public _PriceCorrectionRow[] getPriceCorrectionResp() {
 		return priceCorrectionResp;
 	}
@@ -37,7 +47,9 @@ public class _PriceCorrectionResp extends _APIResp {
 	}
 
 	public void updateTwPriceCorrectionRows(_PriceCorrectionRow[] priceCorrectionResp) throws Exception {
-		this.twPriceCorrectionRows = TWObjectFactory.createList();
+		if (this.twPriceCorrectionRows == null) {
+			this.twPriceCorrectionRows = TWObjectFactory.createList();
+		}
 		int size = priceCorrectionResp.length;
 		for (int i = 0; i < size; i++) {
 			this.twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwPriceCorrectionRow());

@@ -190,6 +190,7 @@ public class _CorrectionRow {
 	private String idtCaseType;
 	private String idtCaseNumber;
 	private String submittedBy;
+	private boolean ediSuppression;
 	//dates
 	private Date pricingDate;
 	private Date createdOn;
@@ -1513,6 +1514,15 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("submittedBy", this.submittedBy);
 	}
 
+	public boolean isEdiSuppression() {
+		return ediSuppression;
+	}
+
+	public void setEdiSuppression(boolean ediSuppression) {
+		this.ediSuppression = ediSuppression;
+		this.twCorrectionRow.setPropertyValue("ediSuppression", this.ediSuppression);
+	}
+
 	public Date getPricingDate() {
 		return pricingDate;
 	}
@@ -1581,7 +1591,7 @@ public class _CorrectionRow {
 				", distrChan: " + this.distrChan +  ", division: " + this.division +  ", docType: " + this.docType + 
 				", prcGroup5: " + this.prcGroup5 + ", oldPurchaseOrder: " + this.oldPurchaseOrder + ", newPurchaseOrder: " + this.newPurchaseOrder +
 				", manufacturer: " + this.manufacturer + ", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
-				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + 
+				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + ", ediSuppression: " + ediSuppression +
 				", pricingDate: " + this.getPricingDate() + ", createdOn: " + this.getCreatedOn();
 	}
 

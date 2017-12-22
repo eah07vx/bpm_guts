@@ -5,17 +5,17 @@ package com.mck.crrb;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
+//import java.util.ArrayList;
+//import java.util.Date;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//import java.util.Map.Entry;
+//import java.util.TreeMap;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+//import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+//import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ import teamworks.TWObjectFactory;
 public class Invoice extends _API {
 	
 	@Override
-	String prepRequest(String requestJSON, String correlationId, boolean sopDebug) throws Exception {
+	String prepRequest(String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
 		return requestJSON;	//Request is already formatted in this case
 	}
 	
@@ -79,7 +79,7 @@ public class Invoice extends _API {
 			throw e;
 		}
 	}
-
+	/*
 	@Deprecated
 	static TWObject lookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
 		String resp = call(url, httpMethod, sslAlias, requestJSON, sopDebug);
@@ -102,7 +102,7 @@ public class Invoice extends _API {
 		}
 		return invoiceLookupResp;
 	}
-
+	*/
 	/*
 	 * @deprecated
 	 */
@@ -220,6 +220,7 @@ public class Invoice extends _API {
 		return twCorrectionRows;
 	}	
 	*/
+	/*
 	static TWList submitPriceCorrectionByJSON(String url, String httpMethod, String sslAlias, String correctionRowsJSON, String correlationId, boolean sopDebug) throws Exception {
 		Date d1 = null;
 		Date d2 = null;
@@ -274,18 +275,18 @@ public class Invoice extends _API {
 		if (sopDebug) System.out.println("Invoice.submitPriceCorrection() response: " + resp);
 		_PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(resp);
 		
-		/*
-		try {
-			twPriceCorrectionRows = TWObjectFactory.createList();
-			int size = priceCorrectionResp.length;
-			for (int i = 0; i < size; i++) {
-				twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwCorrectionRow());
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-		*/
+//		
+//		try {
+//			twPriceCorrectionRows = TWObjectFactory.createList();
+//			int size = priceCorrectionResp.length;
+//			for (int i = 0; i < size; i++) {
+//				twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwCorrectionRow());
+//			}
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//			e.printStackTrace();
+//		}
+//		
 		TWList twPriceCorrectionRows = null;
 		if (priceCorrectionResp != null && (twPriceCorrectionRows = priceCorrectionResp.getTwPriceCorrectionRows()) != null) {
 			if(sopDebug) System.out.println("Invoice.submitPriceCorrectionByJSON Returning non empty response!");
@@ -296,6 +297,7 @@ public class Invoice extends _API {
 			return TWObjectFactory.createList();	// Return empty list but not a null object
 		}
 	}
+	*/
 	/*
 	private static String prepSimulatePriceCall(_CorrectionRowISO[] invoiceLines, String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
@@ -341,18 +343,19 @@ public class Invoice extends _API {
 		return simulatePriceReqJSON;
 	}
 	*/
+	/*
 	private static String prepSubmitPriceCorrectionCall(_CorrectionRowISO[] invoiceLines, String correlationId, String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		
-		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
+		TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, correlationId);
 
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
-		for (Entry<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> entry : submitMap.entrySet()) {
+		for (Entry<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> entry : submitMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
-			_SubmitPriceReqHeader priceCorrectionRowHeader = entry.getKey();
+			_APIReqHeader priceCorrectionRowHeader = entry.getKey();
 			if (priceCorrectionRowHeader != null) {
 				pricingReq.put("index", i++);
 				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
@@ -382,13 +385,14 @@ public class Invoice extends _API {
 		}
 		return submitPriceCorrectionReqJSON;
 	}
-	
-	static TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, String correlationId) {
-		TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>> priceMap = new TreeMap<_SubmitPriceReqHeader, TreeMap<String, _PriceCorrectionMaterial>>();
+	*/
+	/*
+	static TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, String correlationId) {
+		TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> priceMap = new TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>>();
 		
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//Hydrate key as SubmitPriceReqHeader
-			_SubmitPriceReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], correlationId, i); 
+			_APIReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], correlationId, i); 
 			//TODO: Remove SOP debug statement below
 			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
  			
@@ -416,7 +420,8 @@ public class Invoice extends _API {
 		}
 		return priceMap;
 	}
-	
+	*/
+	/*
 	private static _InvoiceLookupResp parseInvoiceLookupResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
@@ -440,7 +445,8 @@ public class Invoice extends _API {
 		}
 		return invoiceLookupResp;
 	}
-
+	*/
+	/*
 	private static _PriceCorrectionResp parseSubmitPriceCorrectionResp(String resp) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
@@ -465,9 +471,10 @@ public class Invoice extends _API {
 		}
 		return submitPriceResp;
 	}	
-	
-	private static _SubmitPriceReqHeader hydrateSubmitPriceReqHeader(_CorrectionRowISO invoiceLine, String correlationId, int index) {
-		_SubmitPriceReqHeader headerKey = new _SubmitPriceReqHeader();
+	*/
+	/*
+	private static _APIReqHeader hydrateSubmitPriceReqHeader(_CorrectionRowISO invoiceLine, String correlationId, int index) {
+		_APIReqHeader headerKey = new _APIReqHeader();
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
 		headerKey.setCorrelationId(correlationId);
@@ -475,8 +482,8 @@ public class Invoice extends _API {
 		headerKey.setBillType(invoiceLine.getBillType());
 		return headerKey;
 	}
-
-
+	*/
+	/*
 	private static _PriceCorrectionMaterial hydratePriceCorrectionMaterial(_CorrectionRowISO invoiceLine) {
 		_PriceCorrectionMaterial priceCorrectionMaterial = new _PriceCorrectionMaterial();
 		priceCorrectionMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
@@ -528,7 +535,7 @@ public class Invoice extends _API {
 		
 		return priceCorrectionMaterial;
 	}
-
+	*/
 
 	/**
 	 * @param args

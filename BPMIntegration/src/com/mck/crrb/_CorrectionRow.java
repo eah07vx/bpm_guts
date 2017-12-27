@@ -20,7 +20,7 @@ public class _CorrectionRow {
 	private String invoiceLineItemNum;
 	//customer
 	private String customerId;
-	private String customerName;
+	private String customerName; // Same as the newly introduced oldCustomerName field
 	//material
 	private String materialId;
 	private String materialName;
@@ -170,7 +170,7 @@ public class _CorrectionRow {
 	private String newRebillCust;
 	private String curRebillCust;
 	//customer name trifecta (used for rebill)
-	private String oldCustomerName;
+	private String oldCustomerName; // Same as customerName
 	private String newCustomerName;
 	private String curCustomerName;
 	//distribution channel
@@ -208,134 +208,141 @@ public class _CorrectionRow {
 		this.twCorrectionRow = (TWObject)twCorrectionRow;
 		SimpleDateFormat dateFormater = new SimpleDateFormat(_API.SHORT_DASHED_DATE_FORMAT);
 
-		this.invoiceId = this.twCorrectionRow.getPropertyValue("invoiceId").toString();
-		this.invoiceLineItemNum = this.twCorrectionRow.getPropertyValue("invoiceLineItemNum").toString();
-		this.customerId = this.twCorrectionRow.getPropertyValue("customerId").toString();
-		this.customerName = this.twCorrectionRow.getPropertyValue("customerName").toString();
-		this.materialId = this.twCorrectionRow.getPropertyValue("materialId").toString();
-		this.materialName = this.twCorrectionRow.getPropertyValue("materialName").toString();
-		this.supplierId = this.twCorrectionRow.getPropertyValue("supplierId").toString();
-		this.supplierName = this.twCorrectionRow.getPropertyValue("supplierName").toString();
-		this.billQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("billQty").toString());
-		this.retQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("retQty").toString());
-		this.crQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("crQty").toString());
-		this.rebillQty = Float.parseFloat(this.twCorrectionRow.getPropertyValue("rebillQty").toString());
-		this.uom = this.twCorrectionRow.getPropertyValue("uom").toString();
-		this.dc = this.twCorrectionRow.getPropertyValue("dc").toString();
-		this.ndcUpc = this.twCorrectionRow.getPropertyValue("ndcUpc").toString();
-		this.billType = this.twCorrectionRow.getPropertyValue("billType").toString();
-		this.chainId = this.twCorrectionRow.getPropertyValue("chainId").toString();
-		this.chainName = this.twCorrectionRow.getPropertyValue("chainName").toString();
-		this.groupId = this.twCorrectionRow.getPropertyValue("groupId").toString();
-		this.groupName = this.twCorrectionRow.getPropertyValue("groupName").toString();
-		this.subgroupId = this.twCorrectionRow.getPropertyValue("subgroupId").toString();
-		this.subgroupName = this.twCorrectionRow.getPropertyValue("subgroupName").toString();
-		this.reasonCode = this.twCorrectionRow.getPropertyValue("reasonCode").toString();
-		this.poNumber = this.twCorrectionRow.getPropertyValue("poNumber").toString();
-		this.oldPrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldPrice").toString());
-		this.curPrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curPrice").toString());
-		this.newPrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newPrice").toString());
-		this.oldWac = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldWac").toString());
-		this.curWac = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curWac").toString());
-		this.newWac = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newWac").toString());
-		this.oldBid = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldBid").toString());
-		this.curBid = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curBid").toString());
-		this.newBid = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newBid").toString());
-		this.oldLead = this.twCorrectionRow.getPropertyValue("oldLead").toString();
-		this.curLead = this.twCorrectionRow.getPropertyValue("curLead").toString();
-		this.newLead = this.twCorrectionRow.getPropertyValue("newLead").toString();
-		this.oldConRef = this.twCorrectionRow.getPropertyValue("oldConRef").toString();
-		this.curConRef = this.twCorrectionRow.getPropertyValue("curConRef").toString();
-		this.newConRef = this.twCorrectionRow.getPropertyValue("newConRef").toString();
-		this.oldCbRef = this.twCorrectionRow.getPropertyValue("oldCbRef").toString();
-		this.curCbRef = this.twCorrectionRow.getPropertyValue("curCbRef").toString();
-		this.newCbRef = this.twCorrectionRow.getPropertyValue("newCbRef").toString();
-		this.oldContCogPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("oldContCogPer").toString());
-		this.curContCogPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("curContCogPer").toString());
-		this.newContCogPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("newContCogPer").toString());
-		this.oldItemVarPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("oldItemVarPer").toString());
-		this.curItemVarPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("curItemVarPer").toString());
-		this.newItemVarPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("newItemVarPer").toString());
-		this.oldWacCogPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("oldWacCogPer").toString());
-		this.curWacCogPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("curWacCogPer").toString());
-		this.newWacCogPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("newWacCogPer").toString());
-		this.oldItemMkUpPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("oldItemMkUpPer").toString());
-		this.curItemMkUpPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("curItemMkUpPer").toString());
-		this.newItemMkUpPer = Float.parseFloat(this.twCorrectionRow.getPropertyValue("newItemMkUpPer").toString());
-		this.oldChargeBack = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldChargeBack").toString());
-		this.curChargeBack = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curChargeBack").toString());
-		this.newChargeBack = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newChargeBack").toString());
-		this.oldSellCd = this.twCorrectionRow.getPropertyValue("oldSellCd").toString();
-		this.curSellCd = this.twCorrectionRow.getPropertyValue("curSellCd").toString();
-		this.newSellCd = this.twCorrectionRow.getPropertyValue("newSellCd").toString();
-		this.oldNoChargeBack = this.twCorrectionRow.getPropertyValue("oldNoChargeBack").toString();
-		this.curNoChargeBack = this.twCorrectionRow.getPropertyValue("curNoChargeBack").toString();
-		this.newNoChargeBack = this.twCorrectionRow.getPropertyValue("newNoChargeBack").toString();
-		this.oldActivePrice = this.twCorrectionRow.getPropertyValue("oldActivePrice").toString();
-		this.curActivePrice = this.twCorrectionRow.getPropertyValue("curActivePrice").toString();
-		this.newActivePrice = this.twCorrectionRow.getPropertyValue("newActivePrice").toString();
-		this.oldSsf = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldSsf").toString());
-		this.curSsf = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curSsf").toString());
-		this.newSsf = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newSsf").toString());
-		this.oldSf = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldSf").toString());
-		this.curSf = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curSf").toString());
-		this.newSf = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newSf").toString());
-		this.oldListPrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldListPrice").toString());
-		this.curListPrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curListPrice").toString());
-		this.newListPrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newListPrice").toString());
-		this.oldAwp = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldAwp").toString());
-		this.curAwp = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curAwp").toString());
-		this.newAwp = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newAwp").toString());
-		this.oldOverridePrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldOverridePrice").toString());
-		this.curOverridePrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curOverridePrice").toString());
-		this.newOverridePrice = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newOverridePrice").toString());
-		this.orgDbtMemoId = this.twCorrectionRow.getPropertyValue("orgDbtMemoId").toString();
-		this.orgVendorAccAmt = Double.parseDouble(this.twCorrectionRow.getPropertyValue("orgVendorAccAmt").toString());
-		this.deaNum = this.twCorrectionRow.getPropertyValue("deaNum").toString();
-		this.hin = this.twCorrectionRow.getPropertyValue("hin").toString();
-		this.street = this.twCorrectionRow.getPropertyValue("street").toString();
-		this.city = this.twCorrectionRow.getPropertyValue("city").toString();
-		this.region = this.twCorrectionRow.getPropertyValue("region").toString();
-		this.postalCode = this.twCorrectionRow.getPropertyValue("postalCode").toString();
-		this.country = this.twCorrectionRow.getPropertyValue("country").toString();
-		this.salesOrg = this.twCorrectionRow.getPropertyValue("salesOrg").toString();
-		this.orderType = this.twCorrectionRow.getPropertyValue("orderType").toString();
-		this.sellPriceExt = Double.parseDouble(this.twCorrectionRow.getPropertyValue("sellPriceExt").toString());
-		this.totChbk = Double.parseDouble(this.twCorrectionRow.getPropertyValue("totChbk").toString());
-		this.oldAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("oldAbd").toString());
-		this.curAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("curAbd").toString());
-		this.newAbd = Double.parseDouble(this.twCorrectionRow.getPropertyValue("newAbd").toString());
-		this.oldNetBill = this.twCorrectionRow.getPropertyValue("oldNetBill").toString();
-		this.curNetBill = this.twCorrectionRow.getPropertyValue("curNetBill").toString();
-		this.newNetBill = this.twCorrectionRow.getPropertyValue("newNetBill").toString();
-		this.oldProgType = this.twCorrectionRow.getPropertyValue("oldProgType").toString();
-		this.newProgType = this.twCorrectionRow.getPropertyValue("newProgType").toString();
-		this.curProgType = this.twCorrectionRow.getPropertyValue("curProgType").toString();
-		this.oldContrId = this.twCorrectionRow.getPropertyValue("oldContrId").toString();
-		this.newContrId = this.twCorrectionRow.getPropertyValue("newContrId").toString();
-		this.curContrId = this.twCorrectionRow.getPropertyValue("curContrId").toString();
-		this.oldContType = this.twCorrectionRow.getPropertyValue("oldContType").toString();
-		this.newContType = this.twCorrectionRow.getPropertyValue("newContType").toString();
-		this.curContType = this.twCorrectionRow.getPropertyValue("curContType").toString();
-		this.oldRebillCust = this.twCorrectionRow.getPropertyValue("oldRebillCust").toString();
-		this.newRebillCust = this.twCorrectionRow.getPropertyValue("newRebillCust").toString();
-		this.curRebillCust = this.twCorrectionRow.getPropertyValue("curRebillCust").toString();
-		this.oldCustomerName = this.twCorrectionRow.getPropertyValue("oldCustomerName").toString();
-		this.newCustomerName = this.twCorrectionRow.getPropertyValue("newCustomerName").toString();
-		this.curCustomerName = this.twCorrectionRow.getPropertyValue("curCustomerName").toString();
-		this.distrChan = this.twCorrectionRow.getPropertyValue("distrChan").toString();
-		this.division = this.twCorrectionRow.getPropertyValue("division").toString();
-		this.docType = this.twCorrectionRow.getPropertyValue("docType").toString();
-		this.prcGroup5 = this.twCorrectionRow.getPropertyValue("prcGroup5").toString();
-		this.submittedBy = this.twCorrectionRow.getPropertyValue("submittedBy").toString();
-		this.oldPurchaseOrder = this.twCorrectionRow.getPropertyValue("oldPurchaseOrder").toString();
-		this.newPurchaseOrder = this.twCorrectionRow.getPropertyValue("newPurchaseOrder").toString();
-		this.origInvoiceId = this.twCorrectionRow.getPropertyValue("origInvoiceId").toString();
-		this.origInvoiceLineItemNum = this.twCorrectionRow.getPropertyValue("origInvoiceLineItemNum").toString();
+		this.invoiceId = (String)this.twCorrectionRow.getPropertyValue("invoiceId");
+		this.invoiceLineItemNum = (String)this.twCorrectionRow.getPropertyValue("invoiceLineItemNum");
+		this.customerId = (String)this.twCorrectionRow.getPropertyValue("customerId");
+		this.customerName = (String)this.twCorrectionRow.getPropertyValue("customerName");
+		this.materialId = (String)this.twCorrectionRow.getPropertyValue("materialId");
+		this.materialName = (String)this.twCorrectionRow.getPropertyValue("materialName");
+		this.supplierId = (String)this.twCorrectionRow.getPropertyValue("supplierId");
+		this.supplierName = (String)this.twCorrectionRow.getPropertyValue("supplierName");
+		//TODO: Better parsing logic - account for null
+		this.billQty = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("billQty"));
+		this.retQty = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("retQty"));
+		this.crQty = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("crQty"));
+		this.rebillQty = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("rebillQty"));
+		this.uom = (String)this.twCorrectionRow.getPropertyValue("uom");
+		this.dc = (String)this.twCorrectionRow.getPropertyValue("dc");
+		this.ndcUpc = (String)this.twCorrectionRow.getPropertyValue("ndcUpc");
+		this.billType = (String)this.twCorrectionRow.getPropertyValue("billType");
+		this.chainId = (String)this.twCorrectionRow.getPropertyValue("chainId");
+		this.chainName = (String)this.twCorrectionRow.getPropertyValue("chainName");
+		this.groupId = (String)this.twCorrectionRow.getPropertyValue("groupId");
+		this.groupName = (String)this.twCorrectionRow.getPropertyValue("groupName");
+		this.subgroupId = (String)this.twCorrectionRow.getPropertyValue("subgroupId");
+		this.subgroupName = (String)this.twCorrectionRow.getPropertyValue("subgroupName");
+		this.reasonCode = (String)this.twCorrectionRow.getPropertyValue("reasonCode");
+		this.poNumber = (String)this.twCorrectionRow.getPropertyValue("poNumber");
+		this.oldPrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldPrice"));
+		this.curPrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curPrice"));
+		this.newPrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newPrice"));
+		this.oldWac = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldWac"));
+		this.curWac = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curWac"));
+		this.newWac = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newWac"));
+		this.oldBid = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldBid"));
+		this.curBid = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curBid"));
+		this.newBid = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newBid"));
+		this.oldLead = (String)this.twCorrectionRow.getPropertyValue("oldLead");
+		this.curLead = (String)this.twCorrectionRow.getPropertyValue("curLead");
+		this.newLead = (String)this.twCorrectionRow.getPropertyValue("newLead");
+		this.oldConRef = (String)this.twCorrectionRow.getPropertyValue("oldConRef");
+		this.curConRef = (String)this.twCorrectionRow.getPropertyValue("curConRef");
+		this.newConRef = (String)this.twCorrectionRow.getPropertyValue("newConRef");
+		this.oldCbRef = (String)this.twCorrectionRow.getPropertyValue("oldCbRef");
+		this.curCbRef = (String)this.twCorrectionRow.getPropertyValue("curCbRef");
+		this.newCbRef = (String)this.twCorrectionRow.getPropertyValue("newCbRef");
+		this.oldContCogPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("oldContCogPer"));
+		this.curContCogPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("curContCogPer"));
+		this.newContCogPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("newContCogPer"));
+		this.oldItemVarPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("oldItemVarPer"));
+		this.curItemVarPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("curItemVarPer"));
+		this.newItemVarPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("newItemVarPer"));
+		this.oldWacCogPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("oldWacCogPer"));
+		this.curWacCogPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("curWacCogPer"));
+		this.newWacCogPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("newWacCogPer"));
+		this.oldItemMkUpPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("oldItemMkUpPer"));
+		this.curItemMkUpPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("curItemMkUpPer"));
+		this.newItemMkUpPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("newItemMkUpPer"));
+		this.oldChargeBack = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldChargeBack"));
+		this.curChargeBack = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curChargeBack"));
+		this.newChargeBack = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newChargeBack"));
+		this.oldSellCd = (String)this.twCorrectionRow.getPropertyValue("oldSellCd");
+		this.curSellCd = (String)this.twCorrectionRow.getPropertyValue("curSellCd");
+		this.newSellCd = (String)this.twCorrectionRow.getPropertyValue("newSellCd");
+		this.oldNoChargeBack = (String)this.twCorrectionRow.getPropertyValue("oldNoChargeBack");
+		this.curNoChargeBack = (String)this.twCorrectionRow.getPropertyValue("curNoChargeBack");
+		this.newNoChargeBack = (String)this.twCorrectionRow.getPropertyValue("newNoChargeBack");
+		this.oldActivePrice = (String)this.twCorrectionRow.getPropertyValue("oldActivePrice");
+		this.curActivePrice = (String)this.twCorrectionRow.getPropertyValue("curActivePrice");
+		this.newActivePrice = (String)this.twCorrectionRow.getPropertyValue("newActivePrice");
+		this.oldSsf = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldSsf"));
+		this.curSsf = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curSsf"));
+		this.newSsf = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newSsf"));
+		this.oldSf = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldSf"));
+		this.curSf = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curSf"));
+		this.newSf = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newSf"));
+		this.oldListPrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldListPrice"));
+		this.curListPrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curListPrice"));
+		this.newListPrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newListPrice"));
+		this.oldAwp = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldAwp"));
+		this.curAwp = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curAwp"));
+		this.newAwp = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newAwp"));
+		this.oldOverridePrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldOverridePrice"));
+		this.curOverridePrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curOverridePrice"));
+		this.newOverridePrice = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newOverridePrice"));
+		this.orgDbtMemoId = (String)this.twCorrectionRow.getPropertyValue("orgDbtMemoId");
+		this.orgVendorAccAmt = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("orgVendorAccAmt"));
+		this.deaNum = (String)this.twCorrectionRow.getPropertyValue("deaNum");
+		this.hin = (String)this.twCorrectionRow.getPropertyValue("hin");
+		this.street = (String)this.twCorrectionRow.getPropertyValue("street");
+		this.city = (String)this.twCorrectionRow.getPropertyValue("city");
+		this.region = (String)this.twCorrectionRow.getPropertyValue("region");
+		this.postalCode = (String)this.twCorrectionRow.getPropertyValue("postalCode");
+		this.country = (String)this.twCorrectionRow.getPropertyValue("country");
+		this.salesOrg = (String)this.twCorrectionRow.getPropertyValue("salesOrg");
+		this.orderType = (String)this.twCorrectionRow.getPropertyValue("orderType");
+		this.sellPriceExt = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("sellPriceExt"));
+		this.totChbk = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("totChbk"));
+		this.oldAbd = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("oldAbd"));
+		this.curAbd = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("curAbd"));
+		this.newAbd = Double.parseDouble((String)this.twCorrectionRow.getPropertyValue("newAbd"));
+		this.oldNetBill = (String)this.twCorrectionRow.getPropertyValue("oldNetBill");
+		this.curNetBill = (String)this.twCorrectionRow.getPropertyValue("curNetBill");
+		this.newNetBill = (String)this.twCorrectionRow.getPropertyValue("newNetBill");
+		this.oldProgType = (String)this.twCorrectionRow.getPropertyValue("oldProgType");
+		this.newProgType = (String)this.twCorrectionRow.getPropertyValue("newProgType");
+		this.curProgType = (String)this.twCorrectionRow.getPropertyValue("curProgType");
+		this.oldContrId = (String)this.twCorrectionRow.getPropertyValue("oldContrId");
+		this.newContrId = (String)this.twCorrectionRow.getPropertyValue("newContrId");
+		this.curContrId = (String)this.twCorrectionRow.getPropertyValue("curContrId");
+		this.oldContType = (String)this.twCorrectionRow.getPropertyValue("oldContType");
+		this.newContType = (String)this.twCorrectionRow.getPropertyValue("newContType");
+		this.curContType = (String)this.twCorrectionRow.getPropertyValue("curContType");
+		this.oldRebillCust = (String)this.twCorrectionRow.getPropertyValue("oldRebillCust");
+		this.newRebillCust = (String)this.twCorrectionRow.getPropertyValue("newRebillCust");
+		this.curRebillCust = (String)this.twCorrectionRow.getPropertyValue("curRebillCust");
+		this.oldCustomerName = (String)this.twCorrectionRow.getPropertyValue("oldCustomerName");
+		this.newCustomerName = (String)this.twCorrectionRow.getPropertyValue("newCustomerName");
+		this.curCustomerName = (String)this.twCorrectionRow.getPropertyValue("curCustomerName");
+		this.distrChan = (String)this.twCorrectionRow.getPropertyValue("distrChan");
+		this.division = (String)this.twCorrectionRow.getPropertyValue("division");
+		this.docType = (String)this.twCorrectionRow.getPropertyValue("docType");
+		this.prcGroup5 = (String)this.twCorrectionRow.getPropertyValue("prcGroup5");
+		this.submittedBy = (String)this.twCorrectionRow.getPropertyValue("submittedBy");
+		this.oldPurchaseOrder = (String)this.twCorrectionRow.getPropertyValue("oldPurchaseOrder");
+		this.newPurchaseOrder = (String)this.twCorrectionRow.getPropertyValue("newPurchaseOrder");
+		this.origInvoiceId = (String)this.twCorrectionRow.getPropertyValue("origInvoiceId");
+		this.origInvoiceLineItemNum = (String)this.twCorrectionRow.getPropertyValue("origInvoiceLineItemNum");
 		
 		try {
-			this.setPricingDate(dateFormater.parse(this.twCorrectionRow.getPropertyValue("pricingDate").toString().substring(0, 10)));
-			this.setCreatedOn(dateFormater.parse(this.twCorrectionRow.getPropertyValue("createdOn").toString().substring(0, 10)));
+			String tmp = (String)this.twCorrectionRow.getPropertyValue("pricingDate");
+			if (tmp != null) {
+				this.setPricingDate(dateFormater.parse(tmp.substring(0, 10)));
+			}
+			tmp = (String)this.twCorrectionRow.getPropertyValue("createdOn");
+			if (tmp != null) {
+				this.setCreatedOn(dateFormater.parse(tmp.substring(0, 10)));
+			}
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -381,9 +388,11 @@ public class _CorrectionRow {
 		return customerName;
 	}
 
-	public void setCustomerName(String customerName) {
+	public void setCustomerName(String customerName) { // Set oldCustomerName and customerName to same value
 		this.customerName = customerName;
+		this.oldCustomerName = customerName;
 		this.twCorrectionRow.setPropertyValue("customerName", this.customerName);
+		this.twCorrectionRow.setPropertyValue("oldCustomerName", this.customerName);
 	}
 
 	public String getMaterialId() {
@@ -1383,8 +1392,10 @@ public class _CorrectionRow {
 		return oldCustomerName;
 	}
 
-	public void setOldCustomerName(String oldCustomerName) {
+	public void setOldCustomerName(String oldCustomerName) { // Set oldCustomerName and customerName to same value
+		this.customerName = oldCustomerName;
 		this.oldCustomerName = oldCustomerName;
+		this.twCorrectionRow.setPropertyValue("customerName", this.oldCustomerName);
 		this.twCorrectionRow.setPropertyValue("oldCustomerName", this.oldCustomerName);
 	}
 

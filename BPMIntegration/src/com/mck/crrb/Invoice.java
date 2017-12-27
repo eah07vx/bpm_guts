@@ -62,7 +62,7 @@ public class Invoice extends _API {
 			TWList corRows = null;
 			TWList lookupResults = null;
 			if ((invoices != null) && ((corRows = invoices.getTwCorrectionRows()) != null) && ((lookupResults = invoices.getTwResults()) != null)) {
-				if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning non empty response!");
+				if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning with [" + corRows.getArraySize() + "] number of rows.");				
 				twInvoiceLookupResp.setPropertyValue("correctionRows", corRows);
 				twInvoiceLookupResp.setPropertyValue("results", lookupResults);
 			}

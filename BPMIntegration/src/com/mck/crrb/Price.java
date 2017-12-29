@@ -38,7 +38,7 @@ public class Price extends _API {
 		try {
 			//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");			
 			//jacksonMapper.setDateFormat(sdf);
-			//OffsetDateTime
+			//TODO: Evaluate DateTime offset if json string contains ISO string format with Z meaning UTC timezone 
 			
 			this.invoiceLines = jacksonMapper.readValue(requestJSON, _CorrectionRowISO[].class);
 
@@ -132,7 +132,7 @@ public class Price extends _API {
 		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 		for (Map.Entry<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> entry : priceMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
 			_SimulatePriceRowHeader simulatePriceRowHeader = entry.getKey();
@@ -155,8 +155,8 @@ public class Price extends _API {
 		priceReqMap.put("endIndex", endIndex);
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
-		jacksonMapper.setSerializationInclusion(Include.NON_EMPTY);
+		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));
+		jacksonMapper.setSerializationInclusion(Include.NON_NULL);
 		
 		try {
 			simulatePriceReqJSON = jacksonMapper.writeValueAsString(priceReqMap);
@@ -171,7 +171,7 @@ public class Price extends _API {
 		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>>();
 		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//NameValuePair<String, String> key = new NameValuePair<String, String>(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()));
 

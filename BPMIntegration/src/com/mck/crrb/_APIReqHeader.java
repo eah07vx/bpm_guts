@@ -3,6 +3,8 @@
  */
 package com.mck.crrb;
 
+import java.util.Date;
+
 import teamworks.TWObject;
 
 /**
@@ -13,6 +15,8 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	private int index; 
 	private String correlationId;
 	private String customerId;
+	private Date pricingDate;
+	private String orderType;
 	private String salesOrg;
 	private String billType;
 	private String idtCaseType;
@@ -29,6 +33,15 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 			this.setIdtCaseNumber((String)reqHeader.getPropertyValue("idtCaseNumber"));
 			this.setReasonCode((String)reqHeader.getPropertyValue("reasonCode"));
 			this.setSubmittedBy((String)reqHeader.getPropertyValue("submittedBy"));
+			/*
+			//Currently EDI Suppression flag and Consolidated PO Number do NOT come through reqHeader - the are in correction row a.k.a. invoice line
+			if ((Boolean)reqHeader.getPropertyValue("ediSuppression") != null) {
+				this.setEdiSuppression(((Boolean)reqHeader.getPropertyValue("ediSuppression")).booleanValue());
+			}
+			if ((String)reqHeader.getPropertyValue("consolidatedPONumber") != null) {
+				this.setConsolidatedPONumber((String)reqHeader.getPropertyValue("consolidatedPONumber"));
+			}
+			*/
 		}
 	}
 	
@@ -49,6 +62,18 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	}
 	public void setCustomerId(String customerId) {
 		this.customerId = customerId;
+	}
+	public Date getPricingDate() {
+		return pricingDate;
+	}
+	public void setPricingDate(Date pricingDate) {
+		this.pricingDate = pricingDate;
+	}
+	public String getOrderType() {
+		return orderType;
+	}
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
 	}
 	public String getSalesOrg() {
 		return salesOrg;
@@ -100,7 +125,9 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	}
 	@Override
 	public String toString() {
-		return ", index: " + index + ", correlationId: " + correlationId + ", customerId: " + customerId + ", salesOrg: " + salesOrg + ", billType: " + billType 
+		return ", index: " + index + ", correlationId: " + correlationId + ", customerId: " + customerId
+				+ ", pricindDate: " + pricingDate.toString() + ", orderType: " + orderType
+				+ ", salesOrg: " + salesOrg + ", billType: " + billType 
 				+ ", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", reasonCode: " + reasonCode + ", submittedBy: " + submittedBy
 				+ ", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber;		
 	}
@@ -111,11 +138,21 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 		if (arg0 == null) { // As the method is called on this object - argument being null means its unequal
 			return comparison;
 		}
+		System.out.println(this.getClass().getName() + ".compareTo: " + 
+				"\nthis.customerId: " + this.customerId + " equals " + (arg0.getCustomerId()) +
+				" ?\nthis.salesOrg: " + this.salesOrg + " equals " + (arg0.getSalesOrg()) +
+				" ?\nthis.consolidatedPONumber: " + this.consolidatedPONumber + " equals " + (arg0.getConsolidatedPONumber()) +
+				" ?\nthis.ediSuppression: " + this.ediSuppression + " == " + arg0.isEdiSuppression() + 
+				" ?\n>>  Comparison: " + 
+				((this.customerId.equals(arg0.getCustomerId())) 
+				&& (this.salesOrg.equals(arg0.getSalesOrg()))
+				&& (this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
+				&& (this.ediSuppression == arg0.isEdiSuppression())));
 		
-		if ((this.getCustomerId()).equals(arg0.getCustomerId()) 
-				&& (this.getSalesOrg()).equals(arg0.getSalesOrg())
-				&& (this.getConsolidatedPONumber()).equals(arg0.getConsolidatedPONumber())
-				&& (this.isEdiSuppression() == arg0.isEdiSuppression())) {
+		if ((this.customerId.equals(arg0.getCustomerId())) 
+				&& (this.salesOrg.equals(arg0.getSalesOrg()))
+				&& (this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
+				&& (this.ediSuppression == arg0.isEdiSuppression())) {
 			comparison = 0;
 		}
 		return comparison;

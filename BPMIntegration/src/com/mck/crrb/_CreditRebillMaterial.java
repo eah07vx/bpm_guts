@@ -3,6 +3,8 @@
  */
 package com.mck.crrb;
 
+import java.util.Date;
+
 /**
  * CreditRebillMaterial represents the material on an invoice line item with pricing components, WAC, COG, contract reference, chargeback reference, etc.
  * 
@@ -12,8 +14,9 @@ package com.mck.crrb;
 public class _CreditRebillMaterial extends _Material {
 
 	private String recordKey; // Consists of invoiceId-invoiceLineItemNum
-//	TODO: Check why privingDate is needed at the material level if it is already at the header level?
+//	TODO: Check why pricingDate is needed at the material level if it is already at the header level?
 //	private Date pricingDate;
+	private Date createdOn;
 	private float rebillQty;
 	private String uom;
 	private String dc;
@@ -66,8 +69,8 @@ public class _CreditRebillMaterial extends _Material {
 	private String oldProgType;
 	private String oldContrId;
 	private String oldContType;
-    
-    private String manufacturer;
+
+	private String manufacturer;
     //distribution channel
   	private String distrChan;   
 	private String division;
@@ -90,6 +93,12 @@ public class _CreditRebillMaterial extends _Material {
 	}
 	public void setRecordKey(String recordKey) {
 		this.recordKey = recordKey;
+	}
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
 	}
 	/*
 	public Date getPricingDate() {

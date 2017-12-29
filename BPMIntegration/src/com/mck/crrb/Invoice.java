@@ -308,7 +308,7 @@ public class Invoice extends _API {
 		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(invoiceLines);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 		for (Map.Entry<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> entry : priceMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
 			_SimulatePriceRowHeader simulatePriceRowHeader = entry.getKey();
@@ -331,7 +331,7 @@ public class Invoice extends _API {
 		priceReqMap.put("endIndex", endIndex);
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
+		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));
 		jacksonMapper.setSerializationInclusion(Include.NON_EMPTY);
 		
 		try {
@@ -374,7 +374,7 @@ public class Invoice extends _API {
 		priceReqMap.put("endIndex", endIndex);
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
+		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));
 		jacksonMapper.setSerializationInclusion(Include.NON_EMPTY);
 		
 		try {
@@ -428,7 +428,7 @@ public class Invoice extends _API {
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		_InvoiceLookupResp invoiceLookupResp = null;
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 			jacksonMapper.setDateFormat(sdf);
 			
 			invoiceLookupResp = jacksonMapper.readValue(resp, _InvoiceLookupResp.class);
@@ -453,7 +453,7 @@ public class Invoice extends _API {
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		_PriceCorrectionResp submitPriceResp = null;
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 			jacksonMapper.setDateFormat(sdf);
 			
 			submitPriceResp = jacksonMapper.readValue(resp, _PriceCorrectionResp.class);

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+//import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -97,6 +97,7 @@ public class CreditRebill extends _API {
 		
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
+		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 		
 		TreeMap<_APIReqHeader, TreeMap<String, _CreditRebillMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, reqHeader);
 
@@ -109,6 +110,7 @@ public class CreditRebill extends _API {
 				pricingReq.put("index", i++);
 				pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
 				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
+				pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
 				pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
 				pricingReq.put("billType", priceCorrectionRowHeader.getBillType());
 				pricingReq.put("idtCaseType", priceCorrectionRowHeader.getIdtCaseType());
@@ -129,8 +131,8 @@ public class CreditRebill extends _API {
 		priceReqMap.put("endIndex", endIndex);
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
-		jacksonMapper.setSerializationInclusion(Include.NON_EMPTY);
+		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));
+		//jacksonMapper.setSerializationInclusion(Include.NON_NULL);
 		
 		try {
 			submitPriceCorrectionReqJSON = jacksonMapper.writeValueAsString(priceReqMap);
@@ -180,7 +182,7 @@ public class CreditRebill extends _API {
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		_PriceCorrectionResp submitPriceResp = null;
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 			jacksonMapper.setDateFormat(sdf);
 			
 			submitPriceResp = jacksonMapper.readValue(resp, _PriceCorrectionResp.class);
@@ -202,10 +204,22 @@ public class CreditRebill extends _API {
 		_APIReqHeader headerKey = new _APIReqHeader(reqHeader);
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
+		headerKey.setPricingDate(invoiceLine.getPricingDate());
+		headerKey.setOrderType(invoiceLine.getOrderType());
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());
-		headerKey.setEdiSuppression(invoiceLine.isEdiSuppression());  
-		headerKey.setConsolidatedPONumber(invoiceLine.getPoNumber());
+		headerKey.setEdiSuppression(invoiceLine.isEdiSuppression());		
+		// Use consolidated PO number if not null otherwise default to PO Number from invoice 
+		headerKey.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber() != null ? invoiceLine.getConsolidatedPONumber() : invoiceLine.getPoNumber());
+		/*
+		//Currently EDI Suppression flag and Consolidated PO Number do NOT come through reqHeader - the are in correction row a.k.a. invoice line
+		if ((Boolean)reqHeader.getPropertyValue("ediSuppression") == null) {
+			headerKey.setEdiSuppression(invoiceLine.isEdiSuppression());  
+		}
+		if ((String)reqHeader.getPropertyValue("consolidatedPONumber") == null) {
+			headerKey.setConsolidatedPONumber(invoiceLine.getPoNumber());
+		}
+		*/
 		return headerKey;
 	}
 	
@@ -213,61 +227,62 @@ public class CreditRebill extends _API {
 		_CreditRebillMaterial priceCorrectionMaterial = new _CreditRebillMaterial();
 		priceCorrectionMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
 		priceCorrectionMaterial.setMaterialId(invoiceLine.getMaterialId());
+		priceCorrectionMaterial.setCreatedOn(invoiceLine.getCreatedOn());
 		
 		priceCorrectionMaterial.setRebillQty(invoiceLine.getRebillQty());
 		priceCorrectionMaterial.setUom(invoiceLine.getUom());
 		priceCorrectionMaterial.setDc(invoiceLine.getDc());
 		//Original invoice line pricing related fields
-		priceCorrectionMaterial.setOldActivePrice(invoiceLine.getOldActivePrice());
-		priceCorrectionMaterial.setOldAwp(invoiceLine.getOldAwp());
-		priceCorrectionMaterial.setOldAbd(invoiceLine.getOldAbd());
+		priceCorrectionMaterial.setOldWac(invoiceLine.getOldWac());
 		priceCorrectionMaterial.setOldBid(invoiceLine.getOldBid());
-		priceCorrectionMaterial.setOldCbRef(invoiceLine.getOldCbRef());
-		priceCorrectionMaterial.setOldChargeBack(invoiceLine.getOldChargeBack());
+		priceCorrectionMaterial.setOldLead(invoiceLine.getOldLead());
 		priceCorrectionMaterial.setOldConRef(invoiceLine.getOldConRef());
 		priceCorrectionMaterial.setOldContCogPer(invoiceLine.getOldContCogPer());
+		priceCorrectionMaterial.setOldItemVarPer(invoiceLine.getOldItemVarPer());
 		priceCorrectionMaterial.setOldWacCogPer(invoiceLine.getOldWacCogPer());
 		priceCorrectionMaterial.setOldItemMkUpPer(invoiceLine.getOldItemMkUpPer());
-		priceCorrectionMaterial.setOldItemVarPer(invoiceLine.getOldItemVarPer());
-		priceCorrectionMaterial.setOldLead(invoiceLine.getOldLead());
-		priceCorrectionMaterial.setOldListPrice(invoiceLine.getOldListPrice());
+		priceCorrectionMaterial.setOldAwp(invoiceLine.getOldAwp());
 		priceCorrectionMaterial.setOldNoChargeBack(invoiceLine.getOldNoChargeBack());
 		priceCorrectionMaterial.setOldOverridePrice(invoiceLine.getOldOverridePrice());
-		priceCorrectionMaterial.setOldSellCd(invoiceLine.getOldSellCd());
 		priceCorrectionMaterial.setOldSellPrice(invoiceLine.getOldPrice()); // oldSellPrice === oldPrice
-		priceCorrectionMaterial.setOldSf(invoiceLine.getOldSf());
+		priceCorrectionMaterial.setOldCbRef(invoiceLine.getOldCbRef());
+		priceCorrectionMaterial.setOldSellCd(invoiceLine.getOldSellCd());
+		priceCorrectionMaterial.setOldActivePrice(invoiceLine.getOldActivePrice());
+		priceCorrectionMaterial.setOldChargeBack(invoiceLine.getOldChargeBack());
 		priceCorrectionMaterial.setOldSsf(invoiceLine.getOldSsf());
-		priceCorrectionMaterial.setOldWac(invoiceLine.getOldWac());
+		priceCorrectionMaterial.setOldSf(invoiceLine.getOldSf());
+		priceCorrectionMaterial.setOldListPrice(invoiceLine.getOldListPrice());
+		priceCorrectionMaterial.setOldAbd(invoiceLine.getOldAbd());
 		priceCorrectionMaterial.setOldNetBill(invoiceLine.getOldNetBill());
 		priceCorrectionMaterial.setOldProgType(invoiceLine.getOldProgType());
 		priceCorrectionMaterial.setOldContrId(invoiceLine.getOldContrId());
 		priceCorrectionMaterial.setOldContType(invoiceLine.getOldContType());
 		//New price related fields
-		priceCorrectionMaterial.setNewActivePrice(invoiceLine.getNewActivePrice());
-		priceCorrectionMaterial.setNewAwp(invoiceLine.getNewAwp());
-		priceCorrectionMaterial.setNewAbd(invoiceLine.getNewAbd());
+		priceCorrectionMaterial.setNewWac(invoiceLine.getNewWac());
 		priceCorrectionMaterial.setNewBid(invoiceLine.getNewBid());
-		priceCorrectionMaterial.setNewCbRef(invoiceLine.getNewCbRef());
-		priceCorrectionMaterial.setNewChargeBack(invoiceLine.getNewChargeBack());
+		priceCorrectionMaterial.setNewLead(invoiceLine.getNewLead());
 		priceCorrectionMaterial.setNewConRef(invoiceLine.getNewConRef());
 		priceCorrectionMaterial.setNewContCogPer(invoiceLine.getNewContCogPer());
+		priceCorrectionMaterial.setNewItemVarPer(invoiceLine.getNewItemVarPer());
 		priceCorrectionMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
 		priceCorrectionMaterial.setNewItemMkUpPer(invoiceLine.getNewItemMkUpPer());
-		priceCorrectionMaterial.setNewItemVarPer(invoiceLine.getNewItemVarPer());
-		priceCorrectionMaterial.setNewLead(invoiceLine.getNewLead());
-		priceCorrectionMaterial.setNewListPrice(invoiceLine.getNewListPrice());
+		priceCorrectionMaterial.setNewAwp(invoiceLine.getNewAwp());
 		priceCorrectionMaterial.setNewNoChargeBack(invoiceLine.getNewNoChargeBack());
 		priceCorrectionMaterial.setNewOverridePrice(invoiceLine.getNewOverridePrice());
-		priceCorrectionMaterial.setNewSellCd(invoiceLine.getNewSellCd());
 		priceCorrectionMaterial.setNewSellPrice(invoiceLine.getNewPrice()); // newSellPrice === newPrice
-		priceCorrectionMaterial.setNewSf(invoiceLine.getNewSf());
+		priceCorrectionMaterial.setNewCbRef(invoiceLine.getNewCbRef());
+		priceCorrectionMaterial.setNewSellCd(invoiceLine.getNewSellCd());
+		priceCorrectionMaterial.setNewActivePrice(invoiceLine.getNewActivePrice());
+		priceCorrectionMaterial.setNewChargeBack(invoiceLine.getNewChargeBack());
 		priceCorrectionMaterial.setNewSsf(invoiceLine.getNewSsf());
-		priceCorrectionMaterial.setNewWac(invoiceLine.getNewWac());
+		priceCorrectionMaterial.setNewSf(invoiceLine.getNewSf());
+		priceCorrectionMaterial.setNewListPrice(invoiceLine.getNewListPrice());
+		priceCorrectionMaterial.setNewAbd(invoiceLine.getNewAbd());
 		priceCorrectionMaterial.setNewNetBill(invoiceLine.getNewNetBill());
 		priceCorrectionMaterial.setNewProgType(invoiceLine.getNewProgType());
 		priceCorrectionMaterial.setNewContrId(invoiceLine.getNewContrId());
 		priceCorrectionMaterial.setNewContType(invoiceLine.getNewContType());
-		
+		// Additional pass-through fields
 		priceCorrectionMaterial.setManufacturer(invoiceLine.getManufacturer());
 		priceCorrectionMaterial.setDistrChan(invoiceLine.getDistrChan());
 		priceCorrectionMaterial.setDivision(invoiceLine.getDivision());
@@ -278,11 +293,11 @@ public class CreditRebill extends _API {
 		priceCorrectionMaterial.setOldCustomer(invoiceLine.getCustomerId());
 		priceCorrectionMaterial.setNewCustomer(invoiceLine.getNewRebillCust());
 		//Invoice line identifiers
-		priceCorrectionMaterial.setInvoiceId(invoiceLine.getInvoiceId()); 
-		priceCorrectionMaterial.setInvoiceLineItemNum(invoiceLine.getInvoiceLineItemNum());  
+		priceCorrectionMaterial.setInvoiceId(invoiceLine.getInvoiceId());
+		priceCorrectionMaterial.setInvoiceLineItemNum(invoiceLine.getInvoiceLineItemNum());
 		priceCorrectionMaterial.setOrigInvoiceId(invoiceLine.getOrigInvoiceId());
-		priceCorrectionMaterial.setOrigInvoiceLineItemNum(invoiceLine.getOrigInvoiceLineItemNum());  
-		priceCorrectionMaterial.setPrcGroup5(invoiceLine.getPrcGroup5());  
+		priceCorrectionMaterial.setOrigInvoiceLineItemNum(invoiceLine.getOrigInvoiceLineItemNum());
+		priceCorrectionMaterial.setPrcGroup5(invoiceLine.getPrcGroup5());
 
 		return priceCorrectionMaterial;
 	}
@@ -300,7 +315,7 @@ public class CreditRebill extends _API {
 			System.out.println("> sopDebug: " + sopDebug);
 
 			d1 = new Date();
-			System.out.println("\r\nCreditRebill.submitPriceCorrection() Start prep of submitPriceCorrection call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
+			System.out.println("\r\nCreditRebill.submitPriceCorrection() Start prep of submitPriceCorrection call: " + new SimpleDateFormat(_API.LONG_DASHED_DATE_FORMAT).format(d1));
 		}		
 
 		ObjectMapper jacksonMapper = new ObjectMapper();
@@ -331,7 +346,7 @@ public class CreditRebill extends _API {
 		String requestJSON = prepSubmitPriceCorrectionCall(invoiceLines, reqHeader, "priceCorrectionReq", 1, _API.FETCH_SIZE, sopDebug);
 		if(sopDebug) {
 			d2 = new Date();
-			System.out.println("End prep of submitPriceCorrection call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d2));
+			System.out.println("End prep of submitPriceCorrection call: " + new SimpleDateFormat(_API.LONG_DASHED_DATE_FORMAT).format(d2));
 			System.out.println("Total prep time (ms): " + (d2.getTime() - d1.getTime()));
 			System.out.println("CreditRebill.submitPriceCorrection() requestJSON: " + requestJSON);
 		}

@@ -191,6 +191,7 @@ public class _CorrectionRow {
 	private String idtCaseNumber;
 	private String submittedBy;
 	private boolean ediSuppression;
+	private String consolidatedPONumber;
 	//dates
 	private Date pricingDate;
 	private Date createdOn;
@@ -1534,6 +1535,14 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("ediSuppression", this.ediSuppression);
 	}
 
+	public String getConsolidatedPONumber() {
+		return consolidatedPONumber;
+	}
+
+	public void setConsolidatedPONumber(String consolidatedPONumber) {
+		this.consolidatedPONumber = consolidatedPONumber;
+	}
+
 	public Date getPricingDate() {
 		return pricingDate;
 	}
@@ -1602,8 +1611,8 @@ public class _CorrectionRow {
 				", distrChan: " + this.distrChan +  ", division: " + this.division +  ", docType: " + this.docType + 
 				", prcGroup5: " + this.prcGroup5 + ", oldPurchaseOrder: " + this.oldPurchaseOrder + ", newPurchaseOrder: " + this.newPurchaseOrder +
 				", manufacturer: " + this.manufacturer + ", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
-				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + ", ediSuppression: " + ediSuppression +
+				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + 
+				", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber +
 				", pricingDate: " + this.getPricingDate() + ", createdOn: " + this.getCreatedOn();
 	}
-
 }

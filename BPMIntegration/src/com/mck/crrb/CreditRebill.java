@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-//import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -132,7 +132,7 @@ public class CreditRebill extends _API {
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));
-		//jacksonMapper.setSerializationInclusion(Include.NON_NULL);
+		jacksonMapper.setSerializationInclusion(Include.NON_NULL);
 		
 		try {
 			submitPriceCorrectionReqJSON = jacksonMapper.writeValueAsString(priceReqMap);

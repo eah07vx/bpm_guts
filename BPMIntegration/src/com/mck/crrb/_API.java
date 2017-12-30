@@ -31,6 +31,7 @@ public abstract class _API {
 	public static final String API_DATE_FORMAT = "yyyyMMdd";
 	public static final String SHORT_DASHED_DATE_FORMAT = "yyyy-MM-dd";
 	public static final String LONG_DASHED_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.S";
+	public static final String HTTP_NOT_OK = "HTTP_RESPONSE_NOT_OK";
 	
 	/* 
 	 * Final template method providing unalterable boiler plate sequence of calls
@@ -70,15 +71,25 @@ public abstract class _API {
 			System.out.println(className + ".process() requestJSON: " + requestJSON);
 		}
 		//#2 Call the API
-		String rawResp = call(url, httpMethod, sslAlias, requestJSON, sopDebug);
+		_HttpResponse httpResp = new _HttpResponse();
+		String rawResp = call(url, httpMethod, sslAlias, requestJSON, httpResp, sopDebug);
 		if (sopDebug) {
 			d1 = new Date();
 			System.out.println("\r\n" + className + ".process() End call(): " + sdf.format(d1));
 			System.out.println("Total call time (ms): " + (d1.getTime() - d2.getTime()));
 			System.out.println(className + ".process() response: " + rawResp);
 		}
+		/*
+		if (rawResp.equals(HTTP_NOT_OK)) {
+			TWObject errorResp = TWObjectFactory.createObject();
+			errorResp.setPropertyValue("responseCode", httpResp.getResponseCode());
+			errorResp.setPropertyValue("responseMessage", httpResp.getResponseMessage());
+			if (sopDebug) System.out.println("_API.process(): " + HTTP_NOT_OK + " sending HTTP response code: " + (String)errorResp.getPropertyValue("responseCode"));
+			return errorResp;
+		} // else HTTP_OK so continue with parsing...
+		*/ 
 		//#3 Parse the API response
-		TWObject parsedResp = parseResponse(rawResp, sopDebug);
+		TWObject parsedResp = parseResponse(rawResp, httpResp, sopDebug);
 		if(sopDebug) {
 			d2 = new Date();
 			System.out.println("End parse request: " + sdf.format(d2));
@@ -88,16 +99,18 @@ public abstract class _API {
 		return parsedResp;
 	}
 	
-	static String call(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug)  {
+	static String call(String url, String httpMethod, String sslAlias, String requestJSON, _HttpResponse httpResp, boolean sopDebug)  {
 	    String rawResp = null;
+        com.ibm.websphere.ssl.JSSEHelper jsseHelper = null;
 	    Properties sslProps = null;
+	    HttpsURLConnection connection = null;
 	    try {
-	        com.ibm.websphere.ssl.JSSEHelper jsseHelper = com.ibm.websphere.ssl.JSSEHelper.getInstance();
+	    	jsseHelper = com.ibm.websphere.ssl.JSSEHelper.getInstance();
 			sslProps = jsseHelper.getProperties(sslAlias);
 	        jsseHelper.setSSLPropertiesOnThread(sslProps); 
 			
 			URL restUrl = new URL(url);                           
-			HttpsURLConnection connection = (HttpsURLConnection) restUrl.openConnection();
+			connection = (HttpsURLConnection) restUrl.openConnection();
 			if (sopDebug) { System.out.println("_API.call() After restUrl.openConnection."); }
 			connection.setDoOutput(true);
 			connection.setRequestMethod(httpMethod);
@@ -108,20 +121,18 @@ public abstract class _API {
 			writer.write(requestJSON); 
 			writer.close();
 			if (sopDebug) { System.out.println("_API.call() After writing requestJSON.");}
-			/*
-			switch (connection.getResponseCode()) {
-	            case HttpURLConnection.HTTP_OK:
-	                System.out.println(x);
-	                return connection; // **EXIT POINT** fine, go on
-	            case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
-	                log.warning(entries + " **gateway timeout**");
-	                break;// retry
-	            case HttpURLConnection.HTTP_UNAVAILABLE:
-	                log.warning(entries + "**unavailable**");
-	                break;// retry, server is unstable
+			
+			int respCode = connection.getResponseCode();
+        	httpResp.setResponseCode(respCode); 
+        	httpResp.setResponseMessage(connection.getResponseMessage());
+        	/*
+			switch (respCode) {
+	            case HttpsURLConnection.HTTP_OK:	                
+	                if (sopDebug) System.out.println("_API.call(): " + HttpsURLConnection.HTTP_OK + " httpResp: " + httpResp.toString());
+	                break; // OK response - clear to proceed with processing
 	            default:
-	                log.severe(entries + " **unknown response code**.");
-	                break; // abort
+	                if (sopDebug) System.out.println("_API.call(): " + HTTP_NOT_OK + " httpResp: " + httpResp.toString());
+	                return HTTP_NOT_OK; // Not OK - abort mission
 			}
 			*/
 			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -134,19 +145,26 @@ public abstract class _API {
 				rawResp = jsonString.toString();
 			}
 			if (sopDebug) { System.out.println("_API.call() After reading responseJSON.");}
-			jsseHelper.setSSLPropertiesOnThread(null);
-			connection.disconnect();
 		}
 	    catch (SSLException e) {
 	        rawResp = e.getMessage();
 		    System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		catch(IOException e) {
-		    rawResp = e.getMessage();
-		    System.out.println(e.getMessage());
-			e.printStackTrace();
+		catch(IOException ioe) {
+		    rawResp = ioe.getMessage();
+		    System.out.println(ioe.getMessage());
+			ioe.printStackTrace();
 		}
+	    finally { //Future Enhancement - Once BPM supports Java 7+ and making sure that HttpsURLConnection implements AutoCloseable use try-with-resource construct instead 
+			if (jsseHelper != null) { 
+				jsseHelper.setSSLPropertiesOnThread(null);
+			}
+			if (connection != null) { 
+				connection.disconnect();
+			}
+			if (sopDebug) { System.out.println("_API.call() resource cleanup complete.");}
+	    }
 		return rawResp;
 	}
 	
@@ -167,7 +185,7 @@ public abstract class _API {
 	 * 
 	 * @return TWObject An object of type TWObject ready to be mapped to a BPM Object with same attributes
 	 */
-	abstract TWObject parseResponse(String rawResp, boolean sopDebug) throws Exception;
+	abstract TWObject parseResponse(String rawResp, _HttpResponse httpResp, boolean sopDebug) throws Exception;
 	
 	/**
 	 * @param args

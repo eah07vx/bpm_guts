@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.net.ssl.HttpsURLConnection;
+
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -67,13 +70,19 @@ public class CreditRebill extends _API {
 	 * @see com.mck.crrb._API#parseResponse(java.lang.String, boolean)
 	 */
 	@Override
-	TWObject parseResponse(String rawResp, boolean sopDebug) throws Exception {
-		_PriceCorrectionResp priceCorrectionResp = parseSubmitPriceCorrectionResp(rawResp);
-		
+	TWObject parseResponse(String rawResp, _HttpResponse httpResp, boolean sopDebug) throws Exception {
+		_PriceCorrectionResp priceCorrectionResp = null;
+		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+			priceCorrectionResp = parseSubmitPriceCorrectionResp(rawResp);
+		}
 		try {
 			TWObject twPriceCorrectionResp = TWObjectFactory.createObject();
 			TWList twPriceCorrectionRows = null;
 			//TWList lookupResults = null;
+			TWObject httpResponse = TWObjectFactory.createObject();
+			httpResponse.setPropertyValue("responseCode", httpResp.getResponseCode());
+			httpResponse.setPropertyValue("responseMessage", httpResp.getResponseMessage());
+			twPriceCorrectionResp.setPropertyValue("httpResponse", httpResponse);
 			if (priceCorrectionResp != null && (twPriceCorrectionRows = priceCorrectionResp.getTwPriceCorrectionRows()) != null) {
 				if(sopDebug) System.out.println("CreditRebill.parseResponse() Returning non empty response!");
 				twPriceCorrectionResp.setPropertyValue("priceCorrectionRows", twPriceCorrectionRows);

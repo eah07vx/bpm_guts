@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -64,22 +66,31 @@ public class Price extends _API {
 	 * @see com.mck.crrb._API#parseResponse(java.lang.String, boolean)
 	 */
 	@Override
-	TWObject parseResponse(String rawResp, boolean sopDebug) throws Exception {
+	TWObject parseResponse(String rawResp, _HttpResponse httpResp, boolean sopDebug) throws Exception {
 		//Parse and Merge the response into original correction row invoice lines
-		_SimulatePriceResp simulatePriceResp = parseSimulatePriceResp(rawResp);
-		mergeSimulatePriceValues(this.invoiceLines, simulatePriceResp);
+		_SimulatePriceResp simulatePriceResp = null;
+		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+			simulatePriceResp = parseSimulatePriceResp(rawResp);
+			if (simulatePriceResp != null) {
+				mergeSimulatePriceValues(this.invoiceLines, simulatePriceResp);
+			}
+		}
 		//Populate and return TWObject response
 		try {
 			TWObject twSimulatePriceResp = TWObjectFactory.createObject();
 			TWList twCorrectionRows = null;
 			TWList lookupResults = null;
+			TWObject httpResponse = TWObjectFactory.createObject();
+			httpResponse.setPropertyValue("responseCode", httpResp.getResponseCode());
+			httpResponse.setPropertyValue("responseMessage", httpResp.getResponseMessage());
+			twSimulatePriceResp.setPropertyValue("httpResponse", httpResponse);
 			
 			twCorrectionRows = TWObjectFactory.createList();
 			int size = invoiceLines.length;
 			for (int i = 0; i < size; i++) {
 				twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
 			}
-			if (twCorrectionRows != null && (lookupResults = simulatePriceResp.getTwResults()) != null) {
+			if ((twCorrectionRows != null) && (simulatePriceResp != null) && (lookupResults = simulatePriceResp.getTwResults()) != null) {
 				if(sopDebug) System.out.println("Price.parseResponse() Returning non empty response!");
 				twSimulatePriceResp.setPropertyValue("correctionRows", twCorrectionRows);
 				twSimulatePriceResp.setPropertyValue("results", lookupResults);
@@ -108,16 +119,15 @@ public class Price extends _API {
 			jacksonMapper.setDateFormat(sdf);
 			
 			simulatePriceResp = jacksonMapper.readValue(rawResp, _SimulatePriceResp.class);
-			//System.out.println(respInFile);
 
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 		return simulatePriceResp;

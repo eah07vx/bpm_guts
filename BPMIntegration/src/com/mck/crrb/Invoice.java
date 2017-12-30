@@ -13,6 +13,8 @@ import java.text.SimpleDateFormat;
 //import java.util.Map.Entry;
 //import java.util.TreeMap;
 
+import javax.net.ssl.HttpsURLConnection;
+
 //import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 //import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,30 +39,20 @@ public class Invoice extends _API {
 	}
 	
 	@Override
-	TWObject parseResponse(String rawResp, boolean sopDebug) throws Exception {
-		ObjectMapper jacksonMapper = new ObjectMapper();
-		jacksonMapper.configure(
-			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	TWObject parseResponse(String rawResp, _HttpResponse httpResp, boolean sopDebug) throws Exception {
 		_InvoiceLookupResp invoices = null;
-		try {
-			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
-			jacksonMapper.setDateFormat(sdf);
-			
-			invoices = jacksonMapper.readValue(rawResp, _InvoiceLookupResp.class);
-		} catch (JsonParseException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
+		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+			invoices = parseInvoiceLookupResp(rawResp);
+		}		
 		try {
 			TWObject twInvoiceLookupResp = TWObjectFactory.createObject();
 			TWList corRows = null;
 			TWList lookupResults = null;
+			TWObject httpResponse = TWObjectFactory.createObject();
+			httpResponse.setPropertyValue("responseCode", httpResp.getResponseCode());
+			httpResponse.setPropertyValue("responseMessage", httpResp.getResponseMessage());
+			twInvoiceLookupResp.setPropertyValue("httpResponse", httpResponse);
+			
 			if ((invoices != null) && ((corRows = invoices.getTwCorrectionRows()) != null) && ((lookupResults = invoices.getTwResults()) != null)) {
 				if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning with [" + corRows.getArraySize() + "] number of rows.");				
 				twInvoiceLookupResp.setPropertyValue("correctionRows", corRows);
@@ -79,6 +71,31 @@ public class Invoice extends _API {
 			throw e;
 		}
 	}
+	
+
+	private _InvoiceLookupResp parseInvoiceLookupResp(String rawResp) {
+		_InvoiceLookupResp invoicesResp = null;
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
+			ObjectMapper jacksonMapper = new ObjectMapper();
+			jacksonMapper.configure(
+				    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			jacksonMapper.setDateFormat(sdf);
+			
+			invoicesResp = jacksonMapper.readValue(rawResp, _InvoiceLookupResp.class);
+		} catch (JsonParseException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return invoicesResp;
+	}
+
 	/*
 	@Deprecated
 	static TWObject lookupInvoices(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {

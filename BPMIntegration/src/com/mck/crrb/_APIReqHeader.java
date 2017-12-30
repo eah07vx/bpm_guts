@@ -139,11 +139,11 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 			return comparison;
 		}
 		System.out.println(this.getClass().getName() + ".compareTo: " + 
-				"\nthis.customerId: " + this.customerId + " equals " + (arg0.getCustomerId()) +
-				" ?\nthis.salesOrg: " + this.salesOrg + " equals " + (arg0.getSalesOrg()) +
-				" ?\nthis.consolidatedPONumber: " + this.consolidatedPONumber + " equals " + (arg0.getConsolidatedPONumber()) +
-				" ?\nthis.ediSuppression: " + this.ediSuppression + " == " + arg0.isEdiSuppression() + 
-				" ?\n>>  Comparison: " + 
+				"\nthis.customerId: |" + this.customerId + "| equals |" + (arg0.getCustomerId()) +
+				"|?\nthis.salesOrg: |" + this.salesOrg + "| equals |" + (arg0.getSalesOrg()) +
+				"|?\nthis.consolidatedPONumber: |" + this.consolidatedPONumber + "| equals |" + (arg0.getConsolidatedPONumber()) +
+				"|?\nthis.ediSuppression: |" + this.ediSuppression + "| == |" + arg0.isEdiSuppression() + 
+				"|?\n>>  Comparison: " + 
 				((this.customerId.equals(arg0.getCustomerId())) 
 				&& (this.salesOrg.equals(arg0.getSalesOrg()))
 				&& (this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))

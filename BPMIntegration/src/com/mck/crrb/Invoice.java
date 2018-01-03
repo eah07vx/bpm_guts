@@ -49,8 +49,17 @@ public class Invoice extends _API {
 			TWList corRows = null;
 			TWList lookupResults = null;
 			TWObject httpResponse = TWObjectFactory.createObject();
-			httpResponse.setPropertyValue("responseCode", httpResp.getResponseCode());
-			httpResponse.setPropertyValue("responseMessage", httpResp.getResponseMessage());
+			
+			int respCode = httpResp.getResponseCode();
+			String respMsg = httpResp.getResponseMessage();
+			httpResponse.setPropertyValue("responseCode", respCode);
+			if (respMsg == null || respMsg.equals("")) {
+            	respMsg = rawResp;
+            }
+			if (respCode != HttpsURLConnection.HTTP_OK) {	                
+				respMsg = _API.HTTP_NOT_OK + ": " + respMsg; // Not OK - abort mission
+			}
+			httpResponse.setPropertyValue("responseMessage", respMsg);
 			twInvoiceLookupResp.setPropertyValue("httpResponse", httpResponse);
 			
 			if ((invoices != null) && ((corRows = invoices.getTwCorrectionRows()) != null) && ((lookupResults = invoices.getTwResults()) != null)) {

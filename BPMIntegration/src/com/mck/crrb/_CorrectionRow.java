@@ -192,6 +192,10 @@ public class _CorrectionRow {
 	private String submittedBy;
 	private boolean ediSuppression;
 	private String consolidatedPONumber;
+	//Item DC Markup trifecta
+	private float oldItemDcMarkUpPer;
+	private float curItemDcMarkUpPer;
+	private float newItemDcMarkUpPer;
 	//dates
 	private Date pricingDate;
 	private Date createdOn;
@@ -1543,6 +1547,30 @@ public class _CorrectionRow {
 		this.consolidatedPONumber = consolidatedPONumber;
 	}
 
+	public float getOldItemDcMarkUpPer() {
+		return oldItemDcMarkUpPer;
+	}
+
+	public void setOldItemDcMarkUpPer(float oldItemDcMarkUpPer) {
+		this.oldItemDcMarkUpPer = oldItemDcMarkUpPer;
+	}
+
+	public float getCurItemDcMarkUpPer() {
+		return curItemDcMarkUpPer;
+	}
+
+	public void setCurItemDcMarkUpPer(float curItemDcMarkUpPer) {
+		this.curItemDcMarkUpPer = curItemDcMarkUpPer;
+	}
+
+	public float getNewItemDcMarkUpPer() {
+		return newItemDcMarkUpPer;
+	}
+
+	public void setNewItemDcMarkUpPer(float newItemDcMarkUpPer) {
+		this.newItemDcMarkUpPer = newItemDcMarkUpPer;
+	}
+
 	public Date getPricingDate() {
 		return pricingDate;
 	}
@@ -1613,6 +1641,8 @@ public class _CorrectionRow {
 				", manufacturer: " + this.manufacturer + ", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
 				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + 
 				", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber +
+				", oldItemDcMarkUpPer : " + oldItemDcMarkUpPer + ", curItemDcMarkUpPer: " + curItemDcMarkUpPer +  
+				", newItemDcMarkUpPer: " + newItemDcMarkUpPer +
 				", pricingDate: " + this.getPricingDate() + ", createdOn: " + this.getCreatedOn();
 	}
 }

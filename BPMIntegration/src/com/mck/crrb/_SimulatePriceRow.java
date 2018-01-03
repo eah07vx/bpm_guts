@@ -10,22 +10,24 @@ package com.mck.crrb;
  *
  */
 public class _SimulatePriceRow extends _SimulatePriceRowHeader {
-	private _CreditRebillMaterial[] materials;
+	private _PriceCorrectionMaterial[] materials;
 	
-	public _CreditRebillMaterial[] getMaterials() {
+	public _PriceCorrectionMaterial[] getMaterials() {
 		return materials;
 	}
-	public void setMaterials(_CreditRebillMaterial[] materials) {
+	public void setMaterials(_PriceCorrectionMaterial[] materials) {
 		this.materials = materials;
 	}
 	
 	public String toString() {
+		String delim = "";
 		String str = "";
 		str = super.toString();
 		str += ", materials[]: ";
 		if (materials != null) {
 			for (int i = 0; i < materials.length; i++) {
-				str += "\n" + materials[i].toString();
+				str += delim + " {" + materials[i].toString() + "}";
+				delim = ",";
 			}
 		}
 		else 

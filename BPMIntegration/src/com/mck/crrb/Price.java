@@ -29,6 +29,7 @@ import teamworks.TWObjectFactory;
  *
  */
 public class Price extends _API {
+	// Need to send the complete invoiceLine correction row back - so keep local copy to be used in merging the response
 	_CorrectionRowISO[] invoiceLines;
 
 	@Override
@@ -45,18 +46,25 @@ public class Price extends _API {
 			this.invoiceLines = jacksonMapper.readValue(requestJSON, _CorrectionRowISO[].class);
 
 		} catch (JsonParseException e) {
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
+		//TODO: Remove sopDebug statement
 		if (sopDebug) {
 			for (int i = 0; invoiceLines != null && i < invoiceLines.length; i++) {
 				if (invoiceLines[i] != null) {
 					System.out.println("Invoice.simulatePriceJSON() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
 				}
 			}
+		}
+		if(this.invoiceLines == null) {
+			return "failed";
 		}
 		//Transform the JSON to match price simulation API request
 		return prepSimulatePriceCall("priceSimulationReq", 1, _API.FETCH_SIZE, sopDebug);
@@ -136,13 +144,13 @@ public class Price extends _API {
 	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
 		//String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"billType\": \"ZPF2\",        \"materials\":[			{                \"recordKey\": \"7840363909-000001\",            	\"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
-		String simulatePriceReqJSON = null; 
+		String simulatePriceReqJSON = null;
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-		
-		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines);
+				TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
 		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
+		
 		for (Map.Entry<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> entry : priceMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
 			_SimulatePriceRowHeader simulatePriceRowHeader = entry.getKey();

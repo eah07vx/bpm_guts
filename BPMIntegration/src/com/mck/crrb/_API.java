@@ -125,6 +125,8 @@ public abstract class _API {
 			int respCode = connection.getResponseCode();
         	httpResp.setResponseCode(respCode); 
         	httpResp.setResponseMessage(connection.getResponseMessage());
+        	if (sopDebug) { System.out.println("_API.call httpResponse: "  + httpResp.toString()); }
+        	
         	/*
 			switch (respCode) {
 	            case HttpsURLConnection.HTTP_OK:	                
@@ -144,7 +146,7 @@ public abstract class _API {
 			if(jsonString != null) {
 				rawResp = jsonString.toString();
 			}
-			if (sopDebug) { System.out.println("_API.call() After reading responseJSON.");}
+			if (sopDebug) { System.out.println("_API.call() After reading responseJSON: " + rawResp);}
 		}
 	    catch (SSLException e) {
 	        rawResp = e.getMessage();

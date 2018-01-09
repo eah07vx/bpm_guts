@@ -10,9 +10,8 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
-
-public class _InvoiceLookupResp extends _APIResp {
-	private _CorrectionRow[] invoiceLookupResp;  // Named to match response from invoiceLookup call 
+public class Z_InvoiceLookupResp extends _APIResp {
+	private _CorrectionRow[] invoiceLookupResp;
 	private TWList twCorrectionRows;
 
 	/**
@@ -48,7 +47,7 @@ public class _InvoiceLookupResp extends _APIResp {
 	}
 
 	public int numberOfInvoiceLines() {
-		return (invoiceLookupResp != null) ? invoiceLookupResp.length : 0;
+		return invoiceLookupResp.length | 0;
 	}
 	
 	public String toString() {
@@ -60,41 +59,4 @@ public class _InvoiceLookupResp extends _APIResp {
 		resp += super.toString();
 		return resp;
 	}
-/*
-	@Override
-	public Set<String> getPropertyNames() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object getPropertyValue(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void removeProperty(String arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setPropertyValue(Map<String, Object> arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setPropertyValue(String arg0, Object arg1) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getTWClassName() throws TeamWorksException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	*/
 }

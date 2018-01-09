@@ -64,8 +64,7 @@ public class CreditRebill extends _API {
 		if(invoiceLines == null) {
 			return "failed";
 		}
-		return prepSubmitPriceCorrectionCall(invoiceLines, reqHeader, "priceCorrectionReq", 1, _API.FETCH_SIZE, sopDebug);
-		
+		return prepSubmitPriceCorrectionCall(invoiceLines, reqHeader, "priceCorrectionReq", 0, _API.FETCH_SIZE, sopDebug);	
 	}
 
 	/* (non-Javadoc)
@@ -147,7 +146,7 @@ public class CreditRebill extends _API {
 		}
 		priceReqMap.put(containerName, pricingRequests.toArray());
 		priceReqMap.put("startIndex", startIndex);
-		priceReqMap.put("endIndex", endIndex);
+		priceReqMap.put("endIndex", endIndex-1);
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));

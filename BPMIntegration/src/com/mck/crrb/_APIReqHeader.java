@@ -136,8 +136,9 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	public int compareTo(_APIReqHeader arg0) {
 		int comparison = -1;
 		if (arg0 == null) { // As the method is called on this object - argument being null means its unequal
-			return comparison;
+			throw new NullPointerException(this.getClass().getName() + ".compareTo() null argument");
 		}
+		//TODO: Remove sop
 		System.out.println(this.getClass().getName() + ".compareTo: " + 
 				"\nthis.customerId: |" + this.customerId + "| equals |" + (arg0.getCustomerId()) +
 				"|?\nthis.salesOrg: |" + this.salesOrg + "| equals |" + (arg0.getSalesOrg()) +

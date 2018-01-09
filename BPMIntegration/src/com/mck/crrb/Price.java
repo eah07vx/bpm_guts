@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -31,7 +32,8 @@ import teamworks.TWObjectFactory;
 public class Price extends _API {
 	// Need to send the complete invoiceLine correction row back - so keep local copy to be used in merging the response
 	_CorrectionRowISO[] invoiceLines;
-
+	Map<Integer, Set<String>> correlatedResults;
+	
 	@Override
 	String prepRequest(String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
 		//Read and Hold original correction rows invoice lines to be overlaid with price simulation values from the response
@@ -67,7 +69,7 @@ public class Price extends _API {
 			return "failed";
 		}
 		//Transform the JSON to match price simulation API request
-		return prepSimulatePriceCall("priceSimulationReq", 1, _API.FETCH_SIZE, sopDebug);
+		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, sopDebug);
 	}
 	
 	/* (non-Javadoc)
@@ -80,7 +82,7 @@ public class Price extends _API {
 		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
 			simulatePriceResp = parseSimulatePriceResp(rawResp);
 			if (simulatePriceResp != null) {
-				mergeSimulatePriceValues(this.invoiceLines, simulatePriceResp);
+				mergeSimulatePriceValues(this.invoiceLines, simulatePriceResp);				
 			}
 		}
 		//Populate and return TWObject response
@@ -98,7 +100,8 @@ public class Price extends _API {
 			for (int i = 0; i < size; i++) {
 				twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
 			}
-			if ((twCorrectionRows != null) && (simulatePriceResp != null) && (lookupResults = simulatePriceResp.getTwResults()) != null) {
+			if ((twCorrectionRows != null) && (simulatePriceResp != null) 
+					&& (lookupResults = mergeCorrelatedResults(this.correlatedResults, simulatePriceResp.getResults())) != null) {
 				if(sopDebug) System.out.println("Price.parseResponse() Returning non empty response!");
 				twSimulatePriceResp.setPropertyValue("correctionRows", twCorrectionRows);
 				twSimulatePriceResp.setPropertyValue("results", lookupResults);
@@ -146,31 +149,34 @@ public class Price extends _API {
 		//String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"billType\": \"ZPF2\",        \"materials\":[			{                \"recordKey\": \"7840363909-000001\",            	\"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
 		String simulatePriceReqJSON = null;
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-				TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines);
+		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines);
 		List<Object> pricingRequests = new ArrayList<Object>();
+		this.correlatedResults = new TreeMap<Integer, Set<String>>();
+		
 		int i = 0;
 		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 		
 		for (Map.Entry<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> entry : priceMap.entrySet()) {
 			Map<String, Object> pricingReq = new HashMap<String, Object>();
 			_SimulatePriceRowHeader simulatePriceRowHeader = entry.getKey();
-			if (simulatePriceRowHeader != null) {
-				pricingReq.put("index", i++);
+			TreeMap<String, _CreditRebillMaterial> simulatePriceRowDetail = entry.getValue();
+			if (simulatePriceRowHeader != null && simulatePriceRowDetail != null && simulatePriceRowDetail.values() != null) {
+				pricingReq.put("index", i);
 				pricingReq.put("customerId", simulatePriceRowHeader.getCustomerId());
 				pricingReq.put("pricingDate", sdf.format(simulatePriceRowHeader.getPricingDate()));
 				pricingReq.put("salesOrg", simulatePriceRowHeader.getSalesOrg());
 				pricingReq.put("billType", simulatePriceRowHeader.getBillType());
 				pricingReq.put("orderType", simulatePriceRowHeader.getOrderType());
-				
-				if (entry != null && entry.getValue() != null && entry.getValue().values() != null) {
-					pricingReq.put("materials", entry.getValue().values());		// value in the priceMap entry has materials
-				}
+				System.out.println(this.getClass().getName() + ".prepSimulatePriceCall() - simulatePriceRowDetail.keySet[" + i + "]: " + simulatePriceRowDetail.keySet().toString());
+				this.correlatedResults.put(i, simulatePriceRowDetail.keySet()); // has recordKeys
+				pricingReq.put("materials", simulatePriceRowDetail.values());	// has material records
 				pricingRequests.add(pricingReq);
+				i++;
 			}
 		}
 		priceReqMap.put(containerName, pricingRequests.toArray());
 		priceReqMap.put("startIndex", startIndex);
-		priceReqMap.put("endIndex", endIndex);
+		priceReqMap.put("endIndex", endIndex - 1);
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));
@@ -260,7 +266,12 @@ public class Price extends _API {
 		creditRebillMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
 		creditRebillMaterial.setRebillQty(invoiceLine.getRebillQty());
 		creditRebillMaterial.setUom(invoiceLine.getUom());
-		
+		//TODO: Check if these new fields need to be echoed in simulate price call?? 
+		creditRebillMaterial.setNewContType(invoiceLine.getNewContType());
+		creditRebillMaterial.setNewContrId(invoiceLine.getNewContrId());
+		creditRebillMaterial.setNewNetBill(invoiceLine.getNewNetBill());
+		creditRebillMaterial.setNewProgType(invoiceLine.getNewProgType());
+
 		return creditRebillMaterial;
 	}
 
@@ -291,12 +302,17 @@ public class Price extends _API {
 								invoiceLines[i].setNewNoChargeBack(crMaterials[k].getNewNoChargeBack());
 								invoiceLines[i].setNewOverridePrice(crMaterials[k].getNewOverridePrice());
 								invoiceLines[i].setNewSellCd(crMaterials[k].getNewSellCd());
-								invoiceLines[i].setNewSf(crMaterials[k].getNewSf());
 								invoiceLines[i].setNewSsf(crMaterials[k].getNewSsf());
+								invoiceLines[i].setNewSf(crMaterials[k].getNewSf());
 								invoiceLines[i].setNewWac(crMaterials[k].getNewWac());
 								invoiceLines[i].setNewWacCogPer(crMaterials[k].getNewWacCogPer());
 //								TODO: Check if newAbd needs to be added to materials and add other fields
-//								invoiceLines[i].setNewAbd(crMaterials[k].getNew??);
+//								invoiceLines[i].setNewAbd(crMaterials[k].getNewAbd());
+								invoiceLines[i].setNewContType(crMaterials[k].getNewContType());
+								invoiceLines[i].setNewContrId(crMaterials[k].getNewContrId());
+								invoiceLines[i].setNewNetBill(crMaterials[k].getNewNetBill());
+								invoiceLines[i].setNewProgType(crMaterials[k].getNewProgType());
+								invoiceLines[i].setDc(crMaterials[k].getDc());
 							}
 						}
 					}
@@ -306,6 +322,30 @@ public class Price extends _API {
 		return invoiceLines;
 	}
 	
+	private TWList mergeCorrelatedResults(Map<Integer, Set<String>> correlatedResults, _IndexedResult[] indexedResults) throws Exception {
+		TWList twResults = TWObjectFactory.createList();
+		if (indexedResults != null) {
+			for(int i = 0; i < indexedResults.length; i++) {
+				//this.twResult.setPropertyValue("index", this.index);
+				TWObject twResult = TWObjectFactory.createObject();
+				int listIndex = indexedResults[i].getIndex();
+				twResult.setPropertyValue("index", listIndex);
+				twResult.setPropertyValue("status", indexedResults[i].getStatus());
+				twResult.setPropertyValue("message", indexedResults[i].getMessage());
+				TWList twRecordKeys = TWObjectFactory.createList();
+				Set<String> recordKeys = correlatedResults.get(listIndex);
+				if (recordKeys != null) {
+					for (String recordKey : recordKeys) {
+						twRecordKeys.addArrayData(recordKey);
+					}
+				}
+				twResult.setPropertyValue("recordKeys", twRecordKeys);
+				twResults.addArrayData(twResult);
+			}
+		}
+		return twResults;
+	}
+
 	/**
 	 * Convenience method that does the same job as process method inherited from API. 
 	 * @see _API#process(String, String, String, String, boolean) 

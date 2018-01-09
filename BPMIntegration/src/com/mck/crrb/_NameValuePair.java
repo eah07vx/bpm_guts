@@ -43,6 +43,9 @@ public class _NameValuePair<K, V> implements Map.Entry<K, V>, Comparable<_NameVa
 	@Override
 	public int compareTo(_NameValuePair<K, V> arg0) {
 		int comparison = -1;
+		if (arg0 == null) {
+			throw new NullPointerException(this.getClass().getName() + ".compareTo() null argument");
+		}
 		if (((String)this.key).equals((String)arg0.getKey()) && ((String)this.value).equals((String)arg0.getValue())) {
 			comparison = 0;
 		}

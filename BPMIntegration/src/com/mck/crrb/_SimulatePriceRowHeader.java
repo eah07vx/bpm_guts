@@ -59,10 +59,9 @@ public class _SimulatePriceRowHeader extends _PriceRow implements Comparable<_Si
 	}
 	@Override
 	public int compareTo(_SimulatePriceRowHeader arg0) {
-		int comparison = -1;
-		if ((this.getCustomerId()).equals((String)arg0.getCustomerId()) && (this.getPricingDate()).compareTo(arg0.getPricingDate()) == 0) {
-			comparison = 0;
+		if (arg0 == null) {
+			throw new NullPointerException(this.getClass().getName() + ".compareTo() null argument");
 		}
-		return comparison;		
+		return ((this.getCustomerId()).compareTo((String)arg0.getCustomerId()) | (this.getPricingDate()).compareTo(arg0.getPricingDate())); // bitwise or
 	}
 }

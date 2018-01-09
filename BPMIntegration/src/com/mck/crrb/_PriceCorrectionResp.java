@@ -50,8 +50,7 @@ public class _PriceCorrectionResp extends _APIResp {
 		if (this.twPriceCorrectionRows == null) {
 			this.twPriceCorrectionRows = TWObjectFactory.createList();
 		}
-		int size = priceCorrectionResp.length;
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < priceCorrectionResp.length; i++) {
 			this.twPriceCorrectionRows.addArrayData(priceCorrectionResp[i].getTwPriceCorrectionRow());
 		}
 	}

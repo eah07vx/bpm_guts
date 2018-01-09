@@ -29,7 +29,6 @@ class _IndexedResult {
 		try {
 			this.twResult = TWObjectFactory.createObject();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.setIndex(index);

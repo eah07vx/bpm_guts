@@ -23,7 +23,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	private String idtCaseNumber;
 	private String reasonCode;
 	private String submittedBy;
-	private boolean ediSuppression;
+	private String ediSuppression;
 	private String consolidatedPONumber;
 
 	public _APIReqHeader (TWObject reqHeader) {
@@ -111,10 +111,10 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	public void setSubmittedBy(String submittedBy) {
 		this.submittedBy = submittedBy;
 	}
-	public boolean isEdiSuppression() {
+	public String getEdiSuppression() {
 		return ediSuppression;
 	}
-	public void setEdiSuppression(boolean ediSuppression) {
+	public void setEdiSuppression(String ediSuppression) {
 		this.ediSuppression = ediSuppression;
 	}
 	public String getConsolidatedPONumber() {
@@ -143,17 +143,17 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 				"\nthis.customerId: |" + this.customerId + "| equals |" + (arg0.getCustomerId()) +
 				"|?\nthis.salesOrg: |" + this.salesOrg + "| equals |" + (arg0.getSalesOrg()) +
 				"|?\nthis.consolidatedPONumber: |" + this.consolidatedPONumber + "| equals |" + (arg0.getConsolidatedPONumber()) +
-				"|?\nthis.ediSuppression: |" + this.ediSuppression + "| == |" + arg0.isEdiSuppression() + 
+				"|?\nthis.ediSuppression: |" + this.ediSuppression + "| == |" + arg0.getEdiSuppression() + 
 				"|?\n>>  Comparison: " + 
 				((this.customerId.equals(arg0.getCustomerId())) 
 				&& (this.salesOrg.equals(arg0.getSalesOrg()))
 				&& (this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
-				&& (this.ediSuppression == arg0.isEdiSuppression())));
+				&& (this.ediSuppression == arg0.getEdiSuppression())));
 		
 		if ((this.customerId.equals(arg0.getCustomerId())) 
 				&& (this.salesOrg.equals(arg0.getSalesOrg()))
 				&& (this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
-				&& (this.ediSuppression == arg0.isEdiSuppression())) {
+				&& (this.ediSuppression == arg0.getEdiSuppression())) {
 			comparison = 0;
 		}
 		return comparison;

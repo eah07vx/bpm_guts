@@ -135,7 +135,7 @@ public class CreditRebill extends _API {
 				pricingReq.put("idtCaseNumber", priceCorrectionRowHeader.getIdtCaseNumber());
 				pricingReq.put("reasonCode", priceCorrectionRowHeader.getReasonCode());
 				pricingReq.put("submittedBy", priceCorrectionRowHeader.getSubmittedBy());
-				pricingReq.put("ediSuppression", priceCorrectionRowHeader.isEdiSuppression());
+				pricingReq.put("ediSuppression", priceCorrectionRowHeader.getEdiSuppression());
 				pricingReq.put("consolidatedPONumber", priceCorrectionRowHeader.getConsolidatedPONumber());
 				
 				if (entry != null && entry.getValue() != null && entry.getValue().values() != null) {
@@ -226,13 +226,15 @@ public class CreditRebill extends _API {
 		headerKey.setOrderType(invoiceLine.getOrderType());
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());
-		headerKey.setEdiSuppression(invoiceLine.isEdiSuppression());		
+		headerKey.setEdiSuppression(invoiceLine.getEdiSuppression());		
+		//TODO: Remove logic to default consolidatedPONumber to poNumber
 		// Use consolidated PO number if not null otherwise default to PO Number from invoice 
-		headerKey.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber() != null ? invoiceLine.getConsolidatedPONumber() : invoiceLine.getPoNumber());
+		//headerKey.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber() != null ? invoiceLine.getConsolidatedPONumber() : invoiceLine.getPoNumber());
+		headerKey.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber());
 		/*
 		//Currently EDI Suppression flag and Consolidated PO Number do NOT come through reqHeader - the are in correction row a.k.a. invoice line
-		if ((Boolean)reqHeader.getPropertyValue("ediSuppression") == null) {
-			headerKey.setEdiSuppression(invoiceLine.isEdiSuppression());  
+		if ((String)reqHeader.getPropertyValue("ediSuppression") == null) {
+			headerKey.setEdiSuppression(invoiceLine.getEdiSuppression());  
 		}
 		if ((String)reqHeader.getPropertyValue("consolidatedPONumber") == null) {
 			headerKey.setConsolidatedPONumber(invoiceLine.getPoNumber());

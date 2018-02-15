@@ -81,6 +81,10 @@ public class Price extends _API {
 		_SimulatePriceResp simulatePriceResp = null;
 		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
 			simulatePriceResp = parseSimulatePriceResp(rawResp);
+			if (sopDebug) {
+				System.out.println("invoiceLines.length: " + invoiceLines.length);
+				System.out.println("simulatePriceResp: " + simulatePriceResp);
+			}
 			if (simulatePriceResp != null) {
 				mergeSimulatePriceValues(this.invoiceLines, simulatePriceResp);				
 			}
@@ -98,7 +102,9 @@ public class Price extends _API {
 			twCorrectionRows = TWObjectFactory.createList();
 			int size = invoiceLines.length;
 			for (int i = 0; i < size; i++) {
-				twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
+				if (invoiceLines[i] != null && invoiceLines[i].getTwCorrectionRow() != null) {
+					twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
+				}
 			}
 			if ((twCorrectionRows != null) && (simulatePriceResp != null) 
 					&& (lookupResults = mergeCorrelatedResults(this.correlatedResults, simulatePriceResp.getResults())) != null) {
@@ -130,7 +136,9 @@ public class Price extends _API {
 			jacksonMapper.setDateFormat(sdf);
 			
 			simulatePriceResp = jacksonMapper.readValue(rawResp, _SimulatePriceResp.class);
-
+			
+			System.out.println("simulatePriceResp: " + simulatePriceResp);
+			
 		} catch (JsonParseException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -196,35 +204,39 @@ public class Price extends _API {
 		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
-		for (int i = 0; i < invoiceLines.length; i++) {
-			//NameValuePair<String, String> key = new NameValuePair<String, String>(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()));
 
-			//Hydrate key as SimulatePriceRowHeader
-			_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], i); //new SimulatePriceRowHeader(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()), ...);
-			//TODO: Remove SOP debug statement below
-			System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
- 			
-			//Hydrate creditRebillMaterial
-			_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i]);
-			String materialKey = creditRebillMaterial.getRecordKey();
-			
-			//TODO: Remove SOP debug statement below
-			System.out.println("Invoice.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + creditRebillMaterial.getMaterialId());
-			
-			TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
-			//TODO: Remove SOP debug
-			System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
-			
-			if (materialList == null) { // Key not in TreeMap - new key found
-				materialList = new TreeMap<String, _CreditRebillMaterial>();
-				materialList.put(materialKey, creditRebillMaterial);	// First material in list
-				priceMap.put(headerKey, materialList);
+		for (int i = 0, idx = 0; i < invoiceLines.length; i++) {
+			//NameValuePair<String, String> key = new NameValuePair<String, String>(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()));
+			System.out.println("Price.bucketizePriceMap() invoiceLines[i] null?: " + (invoiceLines[i] != null));
+			System.out.println("Price.bucketizePriceMap() invoiceLines[i]: " + invoiceLines[i]);
+			if (invoiceLines[i] != null && invoiceLines[i].getCustomerId() != null) {
+				//Hydrate key as SimulatePriceRowHeader
+				_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], idx++); 
+				//TODO: Remove SOP debug statement below
+				System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
+	 			
+				//Hydrate creditRebillMaterial
+				_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i]);
+				String materialKey = creditRebillMaterial.getRecordKey();
+				
+				//TODO: Remove SOP debug statement below
+				System.out.println("Price.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + creditRebillMaterial.getMaterialId());
+				
+				TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
+				//TODO: Remove SOP debug
+				System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
+				
+				if (materialList == null) { // Key not in TreeMap - new key found
+					materialList = new TreeMap<String, _CreditRebillMaterial>();
+					materialList.put(materialKey, creditRebillMaterial);	// First material in list
+					priceMap.put(headerKey, materialList);
+				}
+				else { 	// Key already exists in TreeMap
+					materialList.put(materialKey, creditRebillMaterial);
+				}
+				//TODO: Remove SOP debug
+				System.out.println("  after: " + materialList.get(materialKey) + "\n");
 			}
-			else { 	// Key already exists in TreeMap
-				materialList.put(materialKey, creditRebillMaterial);
-			}
-			//TODO: Remove SOP debug
-			System.out.println("  after: " + materialList.get(materialKey) + "\n");
 		}
 		return priceMap;
 	}
@@ -281,7 +293,7 @@ public class Price extends _API {
 			_SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();
 			for(int i = 0; i < invoiceLines.length; i++) {
 				for(int j = 0; j < simulatePriceRows.length; j++){
-					if (invoiceLines[i].getCustomerId() != null && invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
+					if (invoiceLines != null && invoiceLines[i] != null && invoiceLines[i].getCustomerId() != null && invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
 							&& invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
 						_CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
 						for(int k = 0; k < crMaterials.length; k++) {

@@ -190,7 +190,7 @@ public class _CorrectionRow {
 	private String idtCaseType;
 	private String idtCaseNumber;
 	private String submittedBy;
-	private boolean ediSuppression;
+	private String ediSuppression;
 	private String consolidatedPONumber;
 	//Item DC Markup trifecta
 	private float oldItemDcMarkUpPer;
@@ -1348,15 +1348,6 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("oldContType", this.oldContType);
 	}
 
-	public String getNewContType() {
-		return newContType;
-	}
-
-	public void setNewContType(String newContType) {
-		this.newContType = newContType;
-		this.twCorrectionRow.setPropertyValue("newContType", this.newContType);
-	}
-
 	public String getCurContType() {
 		return curContType;
 	}
@@ -1364,6 +1355,15 @@ public class _CorrectionRow {
 	public void setCurContType(String curContType) {
 		this.curContType = curContType;
 		this.twCorrectionRow.setPropertyValue("curContType", this.curContType);
+	}
+
+	public String getNewContType() {
+		return newContType;
+	}
+
+	public void setNewContType(String newContType) {
+		this.newContType = newContType;
+		this.twCorrectionRow.setPropertyValue("newContType", this.newContType);
 	}
 
 	public String getOldRebillCust() {
@@ -1375,15 +1375,6 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("oldRebillCust", this.oldRebillCust);
 	}
 
-	public String getNewRebillCust() {
-		return newRebillCust;
-	}
-
-	public void setNewRebillCust(String newRebillCust) {
-		this.newRebillCust = newRebillCust;
-		this.twCorrectionRow.setPropertyValue("newRebillCust", this.newRebillCust);
-	}
-
 	public String getCurRebillCust() {
 		return curRebillCust;
 	}
@@ -1391,6 +1382,15 @@ public class _CorrectionRow {
 	public void setCurRebillCust(String curRebillCust) {
 		this.curRebillCust = curRebillCust;
 		this.twCorrectionRow.setPropertyValue("curRebillCust", this.curRebillCust);
+	}
+
+	public String getNewRebillCust() {
+		return newRebillCust;
+	}
+
+	public void setNewRebillCust(String newRebillCust) {
+		this.newRebillCust = newRebillCust;
+		this.twCorrectionRow.setPropertyValue("newRebillCust", this.newRebillCust);
 	}
 
 	public String getOldCustomerName() {
@@ -1404,15 +1404,6 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("oldCustomerName", this.oldCustomerName);
 	}
 
-	public String getNewCustomerName() {
-		return newCustomerName;
-	}
-
-	public void setNewCustomerName(String newCustomerName) {
-		this.newCustomerName = newCustomerName;
-		this.twCorrectionRow.setPropertyValue("newCustomerName", this.newCustomerName);
-	}
-
 	public String getCurCustomerName() {
 		return curCustomerName;
 	}
@@ -1420,6 +1411,15 @@ public class _CorrectionRow {
 	public void setCurCustomerName(String curCustomerName) {
 		this.curCustomerName = curCustomerName;
 		this.twCorrectionRow.setPropertyValue("curCustomerName", this.curCustomerName);
+	}
+
+	public String getNewCustomerName() {
+		return newCustomerName;
+	}
+
+	public void setNewCustomerName(String newCustomerName) {
+		this.newCustomerName = newCustomerName;
+		this.twCorrectionRow.setPropertyValue("newCustomerName", this.newCustomerName);
 	}
 
 	public String getDistrChan() {
@@ -1530,11 +1530,11 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("submittedBy", this.submittedBy);
 	}
 
-	public boolean isEdiSuppression() {
+	public String getEdiSuppression() {
 		return ediSuppression;
 	}
 
-	public void setEdiSuppression(boolean ediSuppression) {
+	public void setEdiSuppression(String ediSuppression) {
 		this.ediSuppression = ediSuppression;
 		this.twCorrectionRow.setPropertyValue("ediSuppression", this.ediSuppression);
 	}
@@ -1545,6 +1545,7 @@ public class _CorrectionRow {
 
 	public void setConsolidatedPONumber(String consolidatedPONumber) {
 		this.consolidatedPONumber = consolidatedPONumber;
+		this.twCorrectionRow.setPropertyValue("consolidatedPONumber", this.consolidatedPONumber);
 	}
 
 	public float getOldItemDcMarkUpPer() {
@@ -1553,6 +1554,7 @@ public class _CorrectionRow {
 
 	public void setOldItemDcMarkUpPer(float oldItemDcMarkUpPer) {
 		this.oldItemDcMarkUpPer = oldItemDcMarkUpPer;
+		this.twCorrectionRow.setPropertyValue("oldItemDcMarkUpPer", this.oldItemDcMarkUpPer);
 	}
 
 	public float getCurItemDcMarkUpPer() {
@@ -1561,6 +1563,7 @@ public class _CorrectionRow {
 
 	public void setCurItemDcMarkUpPer(float curItemDcMarkUpPer) {
 		this.curItemDcMarkUpPer = curItemDcMarkUpPer;
+		this.twCorrectionRow.setPropertyValue("curItemDcMarkUpPer", this.curItemDcMarkUpPer);
 	}
 
 	public float getNewItemDcMarkUpPer() {
@@ -1569,6 +1572,7 @@ public class _CorrectionRow {
 
 	public void setNewItemDcMarkUpPer(float newItemDcMarkUpPer) {
 		this.newItemDcMarkUpPer = newItemDcMarkUpPer;
+		this.twCorrectionRow.setPropertyValue("newItemDcMarkUpPer", this.newItemDcMarkUpPer);
 	}
 
 	public Date getPricingDate() {

@@ -19,7 +19,7 @@ public class _PriceCorrectionRow extends _IndexedResult {
 	private String correlationId;
 	private String customerId;
 	private String salesOrg;
-	private boolean ediSuppression;
+	private String ediSuppression;
 	private String consolidatedPONumber;
 	
 	public _PriceCorrectionRow() {
@@ -32,7 +32,7 @@ public class _PriceCorrectionRow extends _IndexedResult {
 		}
 	}
 	
-	public _PriceCorrectionRow(int index, String status, String message, String correlationId, String customerId, String salesOrg, boolean ediSuppression, String consolidatedPONumber) {
+	public _PriceCorrectionRow(int index, String status, String message, String correlationId, String customerId, String salesOrg, String ediSuppression, String consolidatedPONumber) {
 		super(index, status, message);
 		try {
 			this.twPriceCorrectionRow = TWObjectFactory.createObject();
@@ -71,10 +71,10 @@ public class _PriceCorrectionRow extends _IndexedResult {
 		this.twPriceCorrectionRow.setPropertyValue("salesOrg", this.salesOrg);
 	}
 	
-	public boolean isEdiSuppression() {
+	public String getEdiSuppression() {
 		return ediSuppression;
 	}
-	public void setEdiSuppression(boolean ediSuppression) {
+	public void setEdiSuppression(String ediSuppression) {
 		this.ediSuppression = ediSuppression;
 		this.twPriceCorrectionRow.setPropertyValue("ediSuppression", this.ediSuppression);
 	}

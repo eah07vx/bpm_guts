@@ -166,7 +166,6 @@ public class CreditRebill extends _API {
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//Hydrate key as SubmitPriceReqHeader
 			_APIReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], reqHeader, i); 
-			//TODO: Remove SOP debug statement below
 			if (sopDebug) {
 				System.out.println((i+1) + ". \n" + "CreditRebill.bucketizeSubmitMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
 			}
@@ -179,9 +178,9 @@ public class CreditRebill extends _API {
 			//	System.out.println(this.getClass().getName() + ".bucketizeSubmitMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + priceCorrectionMaterial.getMaterialId());
 			//}
 			TreeMap<String, _PriceCorrectionMaterial> materialList = priceMap.get(headerKey);
-			//TODO: Remove SOP debug
-			System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
-			
+			if (sopDebug) {
+				System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
+			}
 			if (materialList == null) { // Key not in TreeMap - new key found
 				materialList = new TreeMap<String, _PriceCorrectionMaterial>();
 				materialList.put(materialKey, priceCorrectionMaterial);	// First material in list
@@ -193,7 +192,6 @@ public class CreditRebill extends _API {
 			else { 	// Key already exists in TreeMap
 				materialList.put(materialKey, priceCorrectionMaterial);
 			}
-			//TODO: Remove SOP debug
 			if (sopDebug) {
 				System.out.println("	materialList[" + i + "] after putting in treemap: " + materialList.get(materialKey) + "\n");
 			}

@@ -68,7 +68,7 @@ public class Invoice extends _API {
 				twInvoiceLookupResp.setPropertyValue("results", lookupResults);
 			}
 			else {
-				// Return empty object but not a null object
+				// Return empty object but not a null object 
 				if(sopDebug) System.out.println("Invoice.lookupInvoices() Returning empty response!");
 				twInvoiceLookupResp.setPropertyValue("correctionRows", TWObjectFactory.createList());
 				twInvoiceLookupResp.setPropertyValue("results", TWObjectFactory.createList());

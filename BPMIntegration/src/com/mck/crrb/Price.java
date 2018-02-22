@@ -155,7 +155,6 @@ public class Price extends _API {
 	
 	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
-		//String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"billType\": \"ZPF2\",        \"materials\":[			{                \"recordKey\": \"7840363909-000001\",            	\"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
 		String simulatePriceReqJSON = null;
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
 		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, sopDebug);
@@ -217,7 +216,6 @@ public class Price extends _API {
 			if (invoiceLines[i] != null && invoiceLines[i].getCustomerId() != null) {
 				//Hydrate key as SimulatePriceRowHeader
 				_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], idx++); 
-				//TODO: Remove SOP debug statement below
 				if (sopDebug) {
 					System.out.println((i+1) + ". \n" + this.getClass().getName() + ".bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
 				}
@@ -243,7 +241,6 @@ public class Price extends _API {
 				else { 	// Key already exists in TreeMap
 					materialList.put(materialKey, creditRebillMaterial);
 				}
-				//TODO: Remove SOP debug
 				if (sopDebug) {
 					System.out.println("	materialList[" + i + "] after putting in treemap: " + materialList.get(materialKey) + "\n");
 				}

@@ -41,7 +41,7 @@ public abstract class _API {
 		Date d2 = null;
 		String className = this.getClass().getName();
 		SimpleDateFormat sdf = new SimpleDateFormat(LONG_DASHED_DATE_FORMAT);
-		//if(sopDebug) {
+		//if(sopDebug) { //Logging main call information 
 			System.out.println(className + ".process() input parameters:");
 			System.out.println("> url: " + url);
 			System.out.println("> httpMethod: " + httpMethod);

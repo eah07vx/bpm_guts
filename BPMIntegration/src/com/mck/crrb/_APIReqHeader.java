@@ -33,15 +33,6 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 			this.setIdtCaseNumber((String)reqHeader.getPropertyValue("idtCaseNumber"));
 			this.setReasonCode((String)reqHeader.getPropertyValue("reasonCode"));
 			this.setSubmittedBy((String)reqHeader.getPropertyValue("submittedBy"));
-			/*
-			//Currently EDI Suppression flag and Consolidated PO Number do NOT come through reqHeader - the are in correction row a.k.a. invoice line
-			if ((Boolean)reqHeader.getPropertyValue("ediSuppression") != null) {
-				this.setEdiSuppression(((Boolean)reqHeader.getPropertyValue("ediSuppression")).booleanValue());
-			}
-			if ((String)reqHeader.getPropertyValue("consolidatedPONumber") != null) {
-				this.setConsolidatedPONumber((String)reqHeader.getPropertyValue("consolidatedPONumber"));
-			}
-			*/
 		}
 	}
 	
@@ -123,6 +114,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	public void setConsolidatedPONumber(String consolidatedPONumber) {
 		this.consolidatedPONumber = consolidatedPONumber;
 	}
+	
 	@Override
 	public String toString() {
 		return ", index: " + index + ", correlationId: " + correlationId + ", customerId: " + customerId

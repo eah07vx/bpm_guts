@@ -36,22 +36,12 @@ public abstract class _API {
 	/* 
 	 * Final template method providing unalterable boiler plate sequence of calls
 	 */
-	/*
-	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception {
-	
-		return process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
-	}
-	*/
-	
-	/* 
-	 * Final template method providing unalterable boiler plate sequence of calls
-	 */
 	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
 		Date d1 = null;
 		Date d2 = null;
 		String className = this.getClass().getName();
 		SimpleDateFormat sdf = new SimpleDateFormat(LONG_DASHED_DATE_FORMAT);
-		if(sopDebug) {
+		//if(sopDebug) { //Logging main call information 
 			System.out.println(className + ".process() input parameters:");
 			System.out.println("> url: " + url);
 			System.out.println("> httpMethod: " + httpMethod);
@@ -61,24 +51,24 @@ public abstract class _API {
 
 			d1 = new Date();
 			System.out.println("\r\n" + className + ".process() Start prep of call: " + sdf.format(d1));
-		}
+		//}
 		//#1 Prepare request
 		requestJSON = prepRequest(requestJSON, reqHeader, sopDebug);
-		if(sopDebug) {
+		//if(sopDebug) {
 			d2 = new Date();
 			System.out.println("End prep request: " + sdf.format(d2));
 			System.out.println("Total prep time (ms): " + (d2.getTime() - d1.getTime()));
 			System.out.println(className + ".process() requestJSON: " + requestJSON);
-		}
+		//}
 		//#2 Call the API
 		_HttpResponse httpResp = new _HttpResponse();
 		String rawResp = call(url, httpMethod, sslAlias, requestJSON, httpResp, sopDebug);
-		if (sopDebug) {
+		//if (sopDebug) {
 			d1 = new Date();
 			System.out.println("\r\n" + className + ".process() End call(): " + sdf.format(d1));
 			System.out.println("Total call time (ms): " + (d1.getTime() - d2.getTime()));
 			System.out.println(className + ".process() response: " + rawResp);
-		}
+		//}
 		/*
 		if (rawResp.equals(HTTP_NOT_OK)) {
 			TWObject errorResp = TWObjectFactory.createObject();
@@ -90,12 +80,12 @@ public abstract class _API {
 		*/ 
 		//#3 Parse the API response
 		TWObject parsedResp = parseResponse(rawResp, httpResp, sopDebug);
-		if(sopDebug) {
+		//if(sopDebug) {
 			d2 = new Date();
 			System.out.println("End parse request: " + sdf.format(d2));
 			System.out.println("Total parse time (ms): " + (d2.getTime() - d1.getTime()));
 			System.out.println(className + ".process() Is parsedResp null? " + (parsedResp == null));
-		}
+		//}
 		return parsedResp;
 	}
 	
@@ -111,7 +101,9 @@ public abstract class _API {
 			
 			URL restUrl = new URL(url);                           
 			connection = (HttpsURLConnection) restUrl.openConnection();
-			if (sopDebug) { System.out.println("_API.call() After restUrl.openConnection."); }
+			//if (sopDebug) { 
+				System.out.println("_API.call() After restUrl.openConnection."); 
+			//}
 			connection.setDoOutput(true);
 			connection.setRequestMethod(httpMethod);
 			connection.setRequestProperty("Accept", "application/json");
@@ -120,12 +112,16 @@ public abstract class _API {
 			OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
 			writer.write(requestJSON); 
 			writer.close();
-			if (sopDebug) { System.out.println("_API.call() After writing requestJSON.");}
+			//if (sopDebug) { 
+				System.out.println("_API.call() After writing requestJSON.");
+			//}
 			
 			int respCode = connection.getResponseCode();
         	httpResp.setResponseCode(respCode); 
         	httpResp.setResponseMessage(connection.getResponseMessage());
-        	if (sopDebug) { System.out.println("_API.call httpResponse: "  + httpResp.toString()); }
+        	//if (sopDebug) { 
+        		System.out.println("_API.call httpResponse: "  + httpResp.toString()); 
+        	//}
         	
         	/*
 			switch (respCode) {
@@ -146,7 +142,9 @@ public abstract class _API {
 			if(jsonString != null) {
 				rawResp = jsonString.toString();
 			}
-			if (sopDebug) { System.out.println("_API.call() After reading responseJSON: " + rawResp);}
+			//if (sopDebug) { 
+				System.out.println("_API.call() After reading responseJSON: " + rawResp);
+			//}
 		}
 	    catch (SSLException e) {
 	        rawResp = e.getMessage();
@@ -165,7 +163,9 @@ public abstract class _API {
 			if (connection != null) { 
 				connection.disconnect();
 			}
-			if (sopDebug) { System.out.println("_API.call() resource cleanup complete.");}
+			//if (sopDebug) { 
+				System.out.println("_API.call() resource cleanup complete.");
+			//}
 	    }
 		return rawResp;
 	}

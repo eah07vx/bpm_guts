@@ -80,7 +80,7 @@ public class Price extends _API {
 		//Parse and Merge the response into original correction row invoice lines
 		_SimulatePriceResp simulatePriceResp = null;
 		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-			simulatePriceResp = parseSimulatePriceResp(rawResp);
+			simulatePriceResp = parseSimulatePriceResp(rawResp, sopDebug);
 			if (sopDebug) {
 				System.out.println("invoiceLines.length: " + invoiceLines.length);
 				System.out.println("simulatePriceResp: " + simulatePriceResp);
@@ -126,7 +126,7 @@ public class Price extends _API {
 		}
 	}
 
-	private _SimulatePriceResp parseSimulatePriceResp(String rawResp) {
+	private _SimulatePriceResp parseSimulatePriceResp(String rawResp, boolean sopDebug) {
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.configure(
 			    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -136,8 +136,9 @@ public class Price extends _API {
 			jacksonMapper.setDateFormat(sdf);
 			
 			simulatePriceResp = jacksonMapper.readValue(rawResp, _SimulatePriceResp.class);
-			
-			System.out.println("simulatePriceResp: " + simulatePriceResp);
+			if (sopDebug) {
+				System.out.println("simulatePriceResp: " + simulatePriceResp);
+			}
 			
 		} catch (JsonParseException e) {
 			System.out.println(e.getMessage());
@@ -154,10 +155,9 @@ public class Price extends _API {
 	
 	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean sopDebug) {
 		
-		//String tst = "{	\"priceSimulationReq\":[    {    	\"index\": 0,        \"customerId\":\"79387\",        \"pricingDate\":\"20170914\",        \"salesOrg\": \"8000\",        \"billType\": \"ZPF2\",        \"materials\":[			{                \"recordKey\": \"7840363909-000001\",            	\"materialId\": \"1763549\",            	\"rebillQty\": \"2.000\",                \"uom\": \"KAR\",                \"dc\": \"8110\",                \"newSellCd\": \"1\",                \"newNoChargeBack\": \"N\",                \"newActivePrice\": \"YCON\",                \"newLead\": \"0000181126\",                \"newConRef\": \"SG-WEGMANS\",                \"newCbRef\": \"SG-WEGMANS\",                \"newContCogPer\": \"-2.50\",                \"newItemVarPer\": \"3.00\",                \"newListPrice\": \"435.39\",                \"newWac\": \"435.39\",                \"newBid\": \"64.65\",                \"newItemMkUpPer\": \"1.00\",                \"newAwp\": \"608.93\",                \"newPrice\": \"120.70\"            }        ]    }]}";
 		String simulatePriceReqJSON = null;
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines);
+		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, sopDebug);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		this.correlatedResults = new TreeMap<Integer, Set<String>>();
 		
@@ -175,7 +175,9 @@ public class Price extends _API {
 				pricingReq.put("salesOrg", simulatePriceRowHeader.getSalesOrg());
 				pricingReq.put("billType", simulatePriceRowHeader.getBillType());
 				pricingReq.put("orderType", simulatePriceRowHeader.getOrderType());
-				System.out.println(this.getClass().getName() + ".prepSimulatePriceCall() - simulatePriceRowDetail.keySet[" + i + "]: " + simulatePriceRowDetail.keySet().toString());
+				if (sopDebug) {
+					System.out.println(this.getClass().getName() + ".prepSimulatePriceCall() - simulatePriceRowDetail.keySet[" + i + "]: " + simulatePriceRowDetail.keySet().toString());
+				}
 				this.correlatedResults.put(i, simulatePriceRowDetail.keySet()); // has recordKeys
 				pricingReq.put("materials", simulatePriceRowDetail.values());	// has material records
 				pricingRequests.add(pricingReq);
@@ -199,7 +201,7 @@ public class Price extends _API {
 		return simulatePriceReqJSON;
 	}
 	
-	private TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines) {
+	private TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines, boolean sopDebug) {
 		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>>();
 		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
 		
@@ -207,35 +209,41 @@ public class Price extends _API {
 
 		for (int i = 0, idx = 0; i < invoiceLines.length; i++) {
 			//NameValuePair<String, String> key = new NameValuePair<String, String>(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()));
-			System.out.println("Price.bucketizePriceMap() invoiceLines[i] null?: " + (invoiceLines[i] != null));
-			System.out.println("Price.bucketizePriceMap() invoiceLines[i]: " + invoiceLines[i]);
+			/*if (sopDebug) {
+				System.out.println("Price.bucketizePriceMap() invoiceLines[i] null?: " + (invoiceLines[i] != null));
+				System.out.println("Price.bucketizePriceMap() invoiceLines[i]: " + invoiceLines[i]);
+			}*/
 			if (invoiceLines[i] != null && invoiceLines[i].getCustomerId() != null) {
 				//Hydrate key as SimulatePriceRowHeader
 				_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], idx++); 
-				//TODO: Remove SOP debug statement below
-				System.out.println("Invoice.bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
-	 			
+				if (sopDebug) {
+					System.out.println((i+1) + ". \n" + this.getClass().getName() + ".bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
+				}
 				//Hydrate creditRebillMaterial
 				_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i]);
 				String materialKey = creditRebillMaterial.getRecordKey();
 				
 				//TODO: Remove SOP debug statement below
-				System.out.println("Price.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + creditRebillMaterial.getMaterialId());
+				//System.out.println("Price.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + creditRebillMaterial.getMaterialId());
 				
 				TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
 				//TODO: Remove SOP debug
-				System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
+				//System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
 				
 				if (materialList == null) { // Key not in TreeMap - new key found
 					materialList = new TreeMap<String, _CreditRebillMaterial>();
 					materialList.put(materialKey, creditRebillMaterial);	// First material in list
+					if (sopDebug) {
+						System.out.println(this.getClass().getName() + ".bucketizePriceMap() headerKey before put in treemap [" + i + "] \n" + headerKey.toString()); 
+					}
 					priceMap.put(headerKey, materialList);
 				}
 				else { 	// Key already exists in TreeMap
 					materialList.put(materialKey, creditRebillMaterial);
 				}
-				//TODO: Remove SOP debug
-				System.out.println("  after: " + materialList.get(materialKey) + "\n");
+				if (sopDebug) {
+					System.out.println("	materialList[" + i + "] after putting in treemap: " + materialList.get(materialKey) + "\n");
+				}
 			}
 		}
 		return priceMap;
@@ -357,64 +365,4 @@ public class Price extends _API {
 		}
 		return twResults;
 	}
-
-	/**
-	 * Convenience method that does the same job as process method inherited from API. 
-	 * @see _API#process(String, String, String, String, boolean) 
-	 * 
-	 * @param url
-	 * @param httpMethod
-	 * @param sslAlias
-	 * @param requestJSON
-	 * @param sopDebug
-	 * @return teamworks.TWObject to be mapped to BPM BO with same properties/parameters 
-	 * @throws Exception 
-	 *  
-	 */
-	/*
-	@Deprecated
-	public TWObject simulateByTWList(String url, String httpMethod, String sslAlias, TWList correctionRows, boolean sopDebug) throws Exception {
-		
-		Date d1 = null;
-
-		if(sopDebug) {
-			System.out.println("Invoice.simulatePrice() input parameters:");
-			System.out.println("> url: " + url);
-			System.out.println("> httpMethod: " + httpMethod);
-			System.out.println("> sslAlias: " + sslAlias);
-			System.out.println("> correctionRows: " + correctionRows);
-			System.out.println("> sopDebug: " + sopDebug);
-
-			d1 = new Date();
-			System.out.println("\r\nInvoice.simulatePrice() Start prep of SimulatePrice call: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(d1));
-		}		
-
-		_CorrectionRowISO[] invoiceLines = new _CorrectionRowISO[correctionRows.getArraySize()];
-		for (int i = 0; i < correctionRows.getArraySize(); i++) {
-			if(sopDebug) System.out.println("Invoice.simulatePrice() correctionRows.getArrayData(i).getClass().getName(): " + correctionRows.getArrayData(i).getClass().getName());
-			invoiceLines[i] = new _CorrectionRowISO(correctionRows.getArrayData(i));
-			if (invoiceLines[i] != null) {
-				System.out.println("Invoice.simulatePrice() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
-			}
-		}
-		String requestJSON = prepSimulatePriceCall(invoiceLines, "priceSimulationReq", 1, _API.FETCH_SIZE, sopDebug);
-		if (sopDebug) System.out.println("Invoice.simulatePrice requestJSON" + requestJSON);
-		String resp = _API.call(url, httpMethod, sslAlias, requestJSON, sopDebug);
-		if (sopDebug) System.out.println("Invoice.simulatePrice response: " + resp);
-		mergeSimulatePriceValues(invoiceLines, parseSimulatePriceResp(resp));
-		TWList twCorrectionRows = null;
-		try {
-			twCorrectionRows = TWObjectFactory.createList();
-			int size = invoiceLines.length;
-			for (int i = 0; i < size; i++) {
-				twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-//		return twCorrectionRows;
-		String requestJSON = ""; // Create responseJSON from correctionRows TWList
-		return super.process(url, httpMethod, sslAlias, requestJSON, sopDebug);
-	}*/
 }

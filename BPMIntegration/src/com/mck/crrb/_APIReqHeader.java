@@ -118,7 +118,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	@Override
 	public String toString() {
 		return ", index: " + index + ", correlationId: " + correlationId + ", customerId: " + customerId
-				+ ", pricindDate: " + pricingDate.toString() + ", orderType: " + orderType
+				+ ", pricingDate: " + (pricingDate != null ? pricingDate.toString() : null) + ", orderType: " + orderType
 				+ ", salesOrg: " + salesOrg + ", billType: " + billType 
 				+ ", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", reasonCode: " + reasonCode + ", submittedBy: " + submittedBy
 				+ ", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber;		
@@ -131,23 +131,20 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 			throw new NullPointerException(this.getClass().getName() + ".compareTo() null argument");
 		}
 		//TODO: Remove sop
-		System.out.println(this.getClass().getName() + ".compareTo: " + 
-				"\nthis.customerId: |" + this.customerId + "| equals |" + (arg0.getCustomerId()) +
+		/*
+		 System.out.println(this.getClass().getName() + ".compareTo: " + 
+		 		"\nthis.customerId: |" + this.customerId + "| equals |" + (arg0.getCustomerId()) +
 				"|?\nthis.salesOrg: |" + this.salesOrg + "| equals |" + (arg0.getSalesOrg()) +
 				"|?\nthis.consolidatedPONumber: |" + this.consolidatedPONumber + "| equals |" + (arg0.getConsolidatedPONumber()) +
-				"|?\nthis.ediSuppression: |" + this.ediSuppression + "| == |" + arg0.getEdiSuppression() + 
-				"|?\n>>  Comparison: " + 
-				((this.customerId.equals(arg0.getCustomerId())) 
-				&& (this.salesOrg.equals(arg0.getSalesOrg()))
-				&& (this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
-				&& (this.ediSuppression == arg0.getEdiSuppression())));
-		
-		if ((this.customerId.equals(arg0.getCustomerId())) 
-				&& (this.salesOrg.equals(arg0.getSalesOrg()))
-				&& (this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
-				&& (this.ediSuppression == arg0.getEdiSuppression())) {
+				"|?\nthis.ediSuppression: |" + this.ediSuppression + "| equals |" + arg0.getEdiSuppression());
+		*/
+		if (this.customerId.equals(arg0.getCustomerId()) 
+				&& this.salesOrg.equals(arg0.getSalesOrg())	
+				&& ((this.consolidatedPONumber == null && arg0.getConsolidatedPONumber() == null) || this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
+				&& ((this.ediSuppression == null && arg0.getEdiSuppression() == null) || this.ediSuppression.equals(arg0.getEdiSuppression()))) {
 			comparison = 0;
 		}
+		System.out.println("\n    comparison: " + comparison);
 		return comparison;
 	}
 }

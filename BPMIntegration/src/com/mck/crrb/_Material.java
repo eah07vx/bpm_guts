@@ -9,7 +9,7 @@ package com.mck.crrb;
  */
 class _Material {
 	
-	private String materialId;
+	protected String materialId;
 
 	public String getMaterialId() {
 		return materialId;
@@ -18,5 +18,10 @@ class _Material {
 	public void setMaterialId(String materialId) {
 		this.materialId = _Utility.trimLeadingChars(materialId, "0");
 	}
-
+	
+	@Override
+	public String toString() {
+		String str = "\n materialId: " + materialId;
+		return str;
+	}
 }

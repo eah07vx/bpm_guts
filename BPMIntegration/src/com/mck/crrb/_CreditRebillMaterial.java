@@ -14,8 +14,7 @@ import java.util.Date;
 public class _CreditRebillMaterial extends _Material {
 
 	private String recordKey; // Consists of invoiceId-invoiceLineItemNum
-//	TODO: Check why pricingDate is needed at the material level if it is already at the header level?
-//	private Date pricingDate;
+	private Date pricingDate;
 	private Date createdOn;
 	private float rebillQty;
 	private String uom;
@@ -100,14 +99,14 @@ public class _CreditRebillMaterial extends _Material {
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
 	}
-	/*
+	
 	public Date getPricingDate() {
 		return pricingDate;
 	}
 	public void setPricingDate(Date pricingDate) {
 		this.pricingDate = pricingDate;
 	}
-	*/
+	
 	public float getRebillQty() {
 		return rebillQty;
 	}

@@ -24,8 +24,6 @@ public class _CorrectionRow {
 	//material
 	private String materialId;
 	private String materialName;
-	//@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	//private Date pricingDate;
 	//supplier
 	private String supplierId;
 	private String supplierName;
@@ -35,8 +33,6 @@ public class _CorrectionRow {
 	private float crQty;
 	private float rebillQty;
 	private String uom;
-	//@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	//private Date createdOn;
 	private String dc;
 	private String ndcUpc;
 	private String billType;
@@ -182,7 +178,7 @@ public class _CorrectionRow {
 	private String oldPurchaseOrder;
 	private String newPurchaseOrder;
 	//manufacturer
-	private String manufacturer;
+//	private String manufacturer;
 	//Original invoice information
 	private String origInvoiceId;
 	private String origInvoiceLineItemNum;
@@ -1476,14 +1472,14 @@ public class _CorrectionRow {
 		this.twCorrectionRow.setPropertyValue("newPurchaseOrder", this.newPurchaseOrder);
 	}
 
-	public String getManufacturer() {
-		return manufacturer;
-	}
-
-	public void setManufacturer(String manufacturer) {
-		this.manufacturer = manufacturer;
-		this.twCorrectionRow.setPropertyValue("manufacturer", this.manufacturer);
-	}
+//	public String getManufacturer() {
+//		return manufacturer;
+//	}
+//
+//	public void setManufacturer(String manufacturer) {
+//		this.manufacturer = manufacturer;
+//		this.twCorrectionRow.setPropertyValue("manufacturer", this.manufacturer);
+//	}
 
 	public String getOrigInvoiceId() {
 		return origInvoiceId;
@@ -1594,7 +1590,7 @@ public class _CorrectionRow {
 	}
 
 	public String toString() {
-		return "twCorrectionRow.size: " + this.twCorrectionRow.getPropertyNames().size() + 
+		return "twCorrectionRow.number_of_properties: " + this.twCorrectionRow.getPropertyNames().size() + 
 				", invoiceId: " + this.invoiceId +  ", invoiceLineItemNum: " + this.invoiceLineItemNum +
 				", customerId: " + this.customerId +  ", customerName: " + this.customerName +  
 				", materialId: " + this.materialId +  ", materialName: " + this.materialName +
@@ -1642,7 +1638,8 @@ public class _CorrectionRow {
 				", oldCustomerName: " + this.oldCustomerName +  ", newCustomerName: " + this.newCustomerName +  ", curCustomerName: " + this.curCustomerName + 
 				", distrChan: " + this.distrChan +  ", division: " + this.division +  ", docType: " + this.docType + 
 				", prcGroup5: " + this.prcGroup5 + ", oldPurchaseOrder: " + this.oldPurchaseOrder + ", newPurchaseOrder: " + this.newPurchaseOrder +
-				", manufacturer: " + this.manufacturer + ", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
+//				", manufacturer: " + this.manufacturer + 
+				", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
 				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + 
 				", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber +
 				", oldItemDcMarkUpPer : " + oldItemDcMarkUpPer + ", curItemDcMarkUpPer: " + curItemDcMarkUpPer +  

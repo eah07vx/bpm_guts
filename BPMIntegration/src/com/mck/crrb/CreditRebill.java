@@ -32,6 +32,10 @@ import teamworks.TWObjectFactory;
  */
 public class CreditRebill extends _API {
 	
+	public CreditRebill() {
+		super();
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.mck.crrb._API#prepRequest(java.lang.String, boolean)
 	 */
@@ -115,7 +119,7 @@ public class CreditRebill extends _API {
 		
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
+//		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 		
 		TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, reqHeader, sopDebug);
 
@@ -128,7 +132,7 @@ public class CreditRebill extends _API {
 				pricingReq.put("index", i++);
 				pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
 				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
-				pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
+				//pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
 				pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
 				pricingReq.put("billType", priceCorrectionRowHeader.getBillType());
 				pricingReq.put("idtCaseType", priceCorrectionRowHeader.getIdtCaseType());
@@ -227,7 +231,8 @@ public class CreditRebill extends _API {
 		_APIReqHeader headerKey = new _APIReqHeader(reqHeader);
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
-		headerKey.setPricingDate(invoiceLine.getPricingDate());
+		// Moving pricingDate into materials array
+		//headerKey.setPricingDate(invoiceLine.getPricingDate());
 		headerKey.setOrderType(invoiceLine.getOrderType());
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());
@@ -253,6 +258,7 @@ public class CreditRebill extends _API {
 		priceCorrectionMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
 		priceCorrectionMaterial.setMaterialId(invoiceLine.getMaterialId());
 		priceCorrectionMaterial.setCreatedOn(invoiceLine.getCreatedOn());
+		priceCorrectionMaterial.setPricingDate(invoiceLine.getPricingDate());
 		// Quantity fields
 		priceCorrectionMaterial.setRebillQty(invoiceLine.getRebillQty());
 		priceCorrectionMaterial.setUom(invoiceLine.getUom());
@@ -308,7 +314,7 @@ public class CreditRebill extends _API {
 		priceCorrectionMaterial.setNewContrId(invoiceLine.getNewContrId());
 		priceCorrectionMaterial.setNewContType(invoiceLine.getNewContType());
 		// Additional pass-through fields
-		priceCorrectionMaterial.setManufacturer(invoiceLine.getManufacturer());
+		//priceCorrectionMaterial.setManufacturer(invoiceLine.getManufacturer());
 		priceCorrectionMaterial.setDistrChan(invoiceLine.getDistrChan());
 		priceCorrectionMaterial.setDivision(invoiceLine.getDivision());
 		// Original poNumber

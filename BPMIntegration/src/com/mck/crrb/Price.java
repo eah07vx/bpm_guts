@@ -30,9 +30,14 @@ import teamworks.TWObjectFactory;
  *
  */
 public class Price extends _API {
+	
+	public Price() {
+		super();
+	}
+	
 	// Need to send the complete invoiceLine correction row back - so keep local copy to be used in merging the response
-	_CorrectionRowISO[] invoiceLines;
-	Map<Integer, Set<String>> correlatedResults;
+	private _CorrectionRowISO[] invoiceLines;
+	private Map<Integer, Set<String>> correlatedResults;
 	
 	@Override
 	String prepRequest(String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
@@ -43,8 +48,9 @@ public class Price extends _API {
 		try {
 			//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");			
 			//jacksonMapper.setDateFormat(sdf);
-			//TODO: Evaluate DateTime offset if json string contains ISO string format with Z meaning UTC timezone 
-			
+			//TODO: Expect API to send ISO 8601 formatted date with Pacific time zone as the base 
+			//	Evaluate DateTime offset if json string contains ISO string format with Z meaning UTC timezone 
+			this.invoiceLines = null;
 			this.invoiceLines = jacksonMapper.readValue(requestJSON, _CorrectionRowISO[].class);
 
 		} catch (JsonParseException e) {
@@ -59,17 +65,18 @@ public class Price extends _API {
 		}
 		//TODO: Remove sopDebug statement
 		if (sopDebug) {
-			for (int i = 0; invoiceLines != null && i < invoiceLines.length; i++) {
-				if (invoiceLines[i] != null) {
-					System.out.println("Invoice.simulatePriceJSON() invoiceLines[" + i + "]: " + invoiceLines[i].toString());
+			for (int i = 0; this.invoiceLines != null && i < this.invoiceLines.length; i++) {
+				if (this.invoiceLines[i] != null) {
+					System.out.println("Invoice.simulatePriceJSON() invoiceLines[" + i + "]: " + this.invoiceLines[i].toString());
 				}
 			}
 		}
 		if(this.invoiceLines == null) {
 			return "failed";
 		}
+		boolean useOldValues = ((Boolean)reqHeader.getPropertyValue("useOldValues")).booleanValue();
 		//Transform the JSON to match price simulation API request
-		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, sopDebug);
+		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, useOldValues, sopDebug);
 	}
 	
 	/* (non-Javadoc)
@@ -77,20 +84,20 @@ public class Price extends _API {
 	 */
 	@Override
 	TWObject parseResponse(String rawResp, _HttpResponse httpResp, boolean sopDebug) throws Exception {
-		//Parse and Merge the response into original correction row invoice lines
-		_SimulatePriceResp simulatePriceResp = null;
-		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-			simulatePriceResp = parseSimulatePriceResp(rawResp, sopDebug);
-			if (sopDebug) {
-				System.out.println("invoiceLines.length: " + invoiceLines.length);
-				System.out.println("simulatePriceResp: " + simulatePriceResp);
-			}
-			if (simulatePriceResp != null) {
-				mergeSimulatePriceValues(this.invoiceLines, simulatePriceResp);				
-			}
-		}
 		//Populate and return TWObject response
 		try {
+			//Parse and Merge the response into original correction row invoice lines
+			_SimulatePriceResp simulatePriceResp = null;
+			if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+				simulatePriceResp = parseSimulatePriceResp(rawResp, sopDebug);
+				if (sopDebug) {
+					System.out.println("invoiceLines.length: " + this.invoiceLines.length);
+				}
+				if (simulatePriceResp != null) {
+					mergeSimulatePriceValues(simulatePriceResp, sopDebug);				
+				}
+			}
+			
 			TWObject twSimulatePriceResp = TWObjectFactory.createObject();
 			TWList twCorrectionRows = null;
 			TWList lookupResults = null;
@@ -99,11 +106,15 @@ public class Price extends _API {
 			httpResponse.setPropertyValue("responseMessage", httpResp.getResponseMessage());
 			twSimulatePriceResp.setPropertyValue("httpResponse", httpResponse);
 			
-			twCorrectionRows = TWObjectFactory.createList();
-			int size = invoiceLines.length;
-			for (int i = 0; i < size; i++) {
-				if (invoiceLines[i] != null && invoiceLines[i].getTwCorrectionRow() != null) {
-					twCorrectionRows.addArrayData(invoiceLines[i].getTwCorrectionRow());
+			if (this.invoiceLines.length > 0) {
+				twCorrectionRows = TWObjectFactory.createList();
+			}
+			for (int i = 0; i < this.invoiceLines.length; i++) {
+				if (this.invoiceLines[i] != null && this.invoiceLines[i].getTwCorrectionRow() != null) {
+					if (sopDebug) {
+						System.out.println("invoiceLines[" + i + "]: " + this.invoiceLines[i].toString());
+					}
+					twCorrectionRows.addArrayData(this.invoiceLines[i].getTwCorrectionRow());
 				}
 			}
 			if ((twCorrectionRows != null) && (simulatePriceResp != null) 
@@ -120,7 +131,7 @@ public class Price extends _API {
 			}
 			return twSimulatePriceResp;
 		} catch (Exception e) {
-			e.getMessage();
+			System.out.println("Exception caught in " + this.getClass().getName() + ".parseResponse(): " + e.getMessage());
 			e.printStackTrace();
 			throw e;
 		}
@@ -153,11 +164,11 @@ public class Price extends _API {
 		return simulatePriceResp;
 	}
 	
-	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean sopDebug) {
+	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean useOldValues, boolean sopDebug) {
 		
 		String simulatePriceReqJSON = null;
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, sopDebug);
+		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, useOldValues, sopDebug);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		this.correlatedResults = new TreeMap<Integer, Set<String>>();
 		
@@ -186,7 +197,7 @@ public class Price extends _API {
 		}
 		priceReqMap.put(containerName, pricingRequests.toArray());
 		priceReqMap.put("startIndex", startIndex);
-		priceReqMap.put("endIndex", endIndex - 1);
+		priceReqMap.put("endIndex", i);
 		
 		ObjectMapper jacksonMapper = new ObjectMapper();
 		jacksonMapper.setDateFormat(new SimpleDateFormat(_API.API_DATE_FORMAT));
@@ -201,18 +212,14 @@ public class Price extends _API {
 		return simulatePriceReqJSON;
 	}
 	
-	private TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines, boolean sopDebug) {
+	private TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines, boolean useOldValues, boolean sopDebug) {
 		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>>();
 		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 
 		for (int i = 0, idx = 0; i < invoiceLines.length; i++) {
-			//NameValuePair<String, String> key = new NameValuePair<String, String>(invoiceLines[i].getCustomerId(), sdf.format(invoiceLines[i].getPricingDate()));
-			/*if (sopDebug) {
-				System.out.println("Price.bucketizePriceMap() invoiceLines[i] null?: " + (invoiceLines[i] != null));
-				System.out.println("Price.bucketizePriceMap() invoiceLines[i]: " + invoiceLines[i]);
-			}*/
+			
 			if (invoiceLines[i] != null && invoiceLines[i].getCustomerId() != null) {
 				//Hydrate key as SimulatePriceRowHeader
 				_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], idx++); 
@@ -220,15 +227,10 @@ public class Price extends _API {
 					System.out.println((i+1) + ". \n" + this.getClass().getName() + ".bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
 				}
 				//Hydrate creditRebillMaterial
-				_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i]);
+				_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i], useOldValues);
 				String materialKey = creditRebillMaterial.getRecordKey();
 				
-				//TODO: Remove SOP debug statement below
-				//System.out.println("Price.bucketizePriceMap() materialKey[" + i + "]: " + materialKey + ", materialId: " + creditRebillMaterial.getMaterialId());
-				
 				TreeMap<String, _CreditRebillMaterial> materialList = priceMap.get(headerKey);
-				//TODO: Remove SOP debug
-				//System.out.print("materialList[" + i + "] before: " + (materialList != null ? materialList.get(materialKey) : materialList));
 				
 				if (materialList == null) { // Key not in TreeMap - new key found
 					materialList = new TreeMap<String, _CreditRebillMaterial>();
@@ -260,86 +262,152 @@ public class Price extends _API {
 		return headerKey;
 	}
 
-	private _CreditRebillMaterial hydrateCreditRebillMaterial(_CorrectionRowISO invoiceLine) {
+	private _CreditRebillMaterial hydrateCreditRebillMaterial(_CorrectionRowISO invoiceLine, boolean useOldValues) {
 		_CreditRebillMaterial creditRebillMaterial = new _CreditRebillMaterial();
 		creditRebillMaterial.setRecordKey(invoiceLine.getInvoiceId() + "-" + invoiceLine.getInvoiceLineItemNum());
 		creditRebillMaterial.setMaterialId(invoiceLine.getMaterialId());
-		creditRebillMaterial.setDc(invoiceLine.getDc());
-		creditRebillMaterial.setNewActivePrice(invoiceLine.getNewActivePrice());
-		creditRebillMaterial.setNewAwp(invoiceLine.getNewAwp());
-		creditRebillMaterial.setNewBid(invoiceLine.getNewBid());
-		creditRebillMaterial.setNewCbRef(invoiceLine.getNewCbRef());
-		creditRebillMaterial.setNewChargeBack(invoiceLine.getNewChargeBack());
-		creditRebillMaterial.setNewConRef(invoiceLine.getNewConRef());
-		creditRebillMaterial.setNewContCogPer(invoiceLine.getNewContCogPer());
-		creditRebillMaterial.setNewItemMkUpPer(invoiceLine.getNewItemMkUpPer());
-		creditRebillMaterial.setNewItemVarPer(invoiceLine.getNewItemVarPer());
-		creditRebillMaterial.setNewLead(invoiceLine.getNewLead());
-		creditRebillMaterial.setNewListPrice(invoiceLine.getNewListPrice());
-		creditRebillMaterial.setNewNoChargeBack(invoiceLine.getNewNoChargeBack());
-		creditRebillMaterial.setNewOverridePrice(invoiceLine.getNewOverridePrice());
-		creditRebillMaterial.setNewSellCd(invoiceLine.getNewSellCd());
-		creditRebillMaterial.setNewSellPrice(invoiceLine.getNewPrice());
-		creditRebillMaterial.setNewSf(invoiceLine.getNewSf());
-		creditRebillMaterial.setNewSsf(invoiceLine.getNewSsf());
-		creditRebillMaterial.setNewWac(invoiceLine.getNewWac());
-		creditRebillMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
 		creditRebillMaterial.setRebillQty(invoiceLine.getRebillQty());
 		creditRebillMaterial.setUom(invoiceLine.getUom());
-		//TODO: Check if these new fields need to be echoed in simulate price call?? 
+		creditRebillMaterial.setDc(invoiceLine.getDc());
+		//Setting new (corrected historical) value fields
+		creditRebillMaterial.setNewWac(invoiceLine.getNewWac());
+		creditRebillMaterial.setNewBid(invoiceLine.getNewBid());
+		creditRebillMaterial.setNewLead(invoiceLine.getNewLead());
+		creditRebillMaterial.setNewConRef(invoiceLine.getNewConRef());
+		/* 
+		 * Mapping newContCogPer, newItemVarPer, newWacCogPer, newItemMkUPPer changed as per last minute emails from Anujit Sen on 2018-05-03, 2018-05-11 & 2018-05-12
+		 */
+		if (invoiceLine.getSalesOrg().equals(_API.DEFAULT_SALES_ORG)) {
+			creditRebillMaterial.setNewContCogPer(invoiceLine.getNewContCogPer());
+		} else {
+			creditRebillMaterial.setNewContCogPer(invoiceLine.getCurContCogPer());
+		}
+		
+		creditRebillMaterial.setNewItemVarPer(invoiceLine.getNewItemVarPer());
+		
+		if (useOldValues) {
+			creditRebillMaterial.setNewWacCogPer(invoiceLine.getOldWacCogPer());
+			creditRebillMaterial.setNewItemMkUpPer(invoiceLine.getOldItemMkUpPer());
+			creditRebillMaterial.setNewNoChargeBack(invoiceLine.getOldNoChargeBack());
+			creditRebillMaterial.setNewOverridePrice(invoiceLine.getOldOverridePrice());
+			creditRebillMaterial.setNewSellCd(invoiceLine.getOldSellCd());
+			creditRebillMaterial.setNewSsf(invoiceLine.getOldSsf());
+			creditRebillMaterial.setNewSf(invoiceLine.getOldSf());
+			creditRebillMaterial.setNewAbd(invoiceLine.getOldAbd());
+			creditRebillMaterial.setNewPrice(invoiceLine.getOldPrice());
+			creditRebillMaterial.setNewListPrice(invoiceLine.getOldListPrice());
+			creditRebillMaterial.setNewAwp(invoiceLine.getOldAwp());
+		} else {
+			creditRebillMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
+			creditRebillMaterial.setNewItemMkUpPer(invoiceLine.getNewItemMkUpPer());
+			creditRebillMaterial.setNewNoChargeBack(invoiceLine.getNewNoChargeBack());
+			creditRebillMaterial.setNewOverridePrice(invoiceLine.getNewOverridePrice());
+			creditRebillMaterial.setNewSellCd(invoiceLine.getNewSellCd());
+			creditRebillMaterial.setNewSsf(invoiceLine.getNewSsf());
+			creditRebillMaterial.setNewSf(invoiceLine.getNewSf());
+			creditRebillMaterial.setNewAbd(invoiceLine.getNewAbd());
+			creditRebillMaterial.setNewPrice(invoiceLine.getNewPrice());
+			creditRebillMaterial.setNewListPrice(invoiceLine.getNewListPrice());
+			creditRebillMaterial.setNewAwp(invoiceLine.getNewAwp());
+		}
+		
+		creditRebillMaterial.setNewActivePrice(invoiceLine.getNewActivePrice());
+		creditRebillMaterial.setNewCbRef(invoiceLine.getNewCbRef());
+		creditRebillMaterial.setNewChargeBack(invoiceLine.getNewChargeBack());
+		//TODO: Check if these new fields are need in simulate price call?? 
 		creditRebillMaterial.setNewContType(invoiceLine.getNewContType());
 		creditRebillMaterial.setNewContrId(invoiceLine.getNewContrId());
 		creditRebillMaterial.setNewNetBill(invoiceLine.getNewNetBill());
 		creditRebillMaterial.setNewProgType(invoiceLine.getNewProgType());
+		
+		/* 
+		 * Mapping oldAwp -> newAwp and oldListPrice -> newListPrice as per last minute email from Anujit Sen on 2018-05-03
+		 */
+		//creditRebillMaterial.setNewListPrice(invoiceLine.getNewListPrice());
+		
+		//Setting old value fields
+		creditRebillMaterial.setOldAwp(invoiceLine.getOldAwp());
+		creditRebillMaterial.setOldAbd(invoiceLine.getOldAbd());
+		creditRebillMaterial.setOldBid(invoiceLine.getOldBid());
+		creditRebillMaterial.setOldChargeBack(invoiceLine.getOldChargeBack());
+		creditRebillMaterial.setOldContCogPer(invoiceLine.getOldContCogPer());
+		creditRebillMaterial.setOldItemMkUpPer(invoiceLine.getOldItemMkUpPer());
+		creditRebillMaterial.setOldItemVarPer(invoiceLine.getOldItemVarPer());
+		creditRebillMaterial.setOldWacCogPer(invoiceLine.getOldWacCogPer());
+		creditRebillMaterial.setOldLead(invoiceLine.getOldLead());
+		creditRebillMaterial.setOldListPrice(invoiceLine.getOldListPrice());
+		creditRebillMaterial.setOldNoChargeBack(invoiceLine.getOldNoChargeBack());
+		creditRebillMaterial.setOldOverridePrice(invoiceLine.getOldOverridePrice());
+		creditRebillMaterial.setOldSellCd(invoiceLine.getOldSellCd());
+		creditRebillMaterial.setOldPrice(invoiceLine.getOldPrice());
+		creditRebillMaterial.setOldSf(invoiceLine.getOldSf());
+		creditRebillMaterial.setOldSsf(invoiceLine.getOldSsf());
+		creditRebillMaterial.setOldWac(invoiceLine.getOldWac());
+		//TODO: Check if these old fields should to be sent/echoed in simulate price call?
+		//creditRebillMaterial.setOldActivePrice(invoiceLine.getOldActivePrice());
+		//creditRebillMaterial.setOldCbRef(invoiceLine.getOldCbRef());
+		//creditRebillMaterial.setoldConRef(invoiceLine.getOldConRef());
 
 		return creditRebillMaterial;
 	}
 
-	private _CorrectionRowISO[] mergeSimulatePriceValues(_CorrectionRowISO[] invoiceLines, _SimulatePriceResp simulatePriceResp) {
-		if (invoiceLines != null && invoiceLines.length > 0 && simulatePriceResp != null 
+	private _CorrectionRowISO[] mergeSimulatePriceValues(_SimulatePriceResp simulatePriceResp, boolean sopDebug) {
+		if (this.invoiceLines != null && this.invoiceLines.length > 0 && simulatePriceResp != null 
 				&& simulatePriceResp.getPriceSimulationResp() != null && simulatePriceResp.getPriceSimulationResp().length > 0) {
 			_SimulatePriceRow[] simulatePriceRows = simulatePriceResp.getPriceSimulationResp();
-			for(int i = 0; i < invoiceLines.length; i++) {
+			if (sopDebug) {
+				System.out.print("mergeSimulatedPriceValues invoiceLines[].length: " + this.invoiceLines.length + " simulatePriceRows[].length: " + simulatePriceRows.length);
+			}
+			for(int i = 0; i < this.invoiceLines.length; i++) {
 				for(int j = 0; j < simulatePriceRows.length; j++){
-					if (invoiceLines != null && invoiceLines[i] != null && invoiceLines[i].getCustomerId() != null && invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
-							&& invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
+					if (sopDebug) {
+						System.out.print("mergeSimulatedPriceValues loop invoiceLines["+i+"] > simulatedPriceRows["+j+"] ");
+						System.out.println("> invoiceLines[i].getPricingDate() equals simulatePriceRows[j].getPricingDate()? " + this.invoiceLines[i].getPricingDate() + " == " + simulatePriceRows[j].getPricingDate());
+						System.out.println("> invoiceLines[i].getCustomerId() equals simulatePriceRows[j].getCustomerId()? " + this.invoiceLines[i].getCustomerId() + " == " + simulatePriceRows[j].getCustomerId());
+					}
+					if (this.invoiceLines != null && this.invoiceLines[i] != null && this.invoiceLines[i].getCustomerId() != null && this.invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
+							&& this.invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
+						if (sopDebug) {
+							System.out.println("> customerId and pricingDate match: true");
+						}
 						_CreditRebillMaterial[] crMaterials = simulatePriceRows[j].getMaterials();
 						for(int k = 0; k < crMaterials.length; k++) {
-							String invoiceLineRecordKey = invoiceLines[i].getInvoiceId() + "-" + invoiceLines[i].getInvoiceLineItemNum();
+							String invoiceLineRecordKey = this.invoiceLines[i].getInvoiceId() + "-" + this.invoiceLines[i].getInvoiceLineItemNum();
 							if (invoiceLineRecordKey.equals(crMaterials[k].getRecordKey())) {
-								invoiceLines[i].setNewPrice(crMaterials[k].getNewSellPrice());
-								invoiceLines[i].setNewActivePrice(crMaterials[k].getNewActivePrice());
-								invoiceLines[i].setNewAwp(crMaterials[k].getNewAwp());
-								invoiceLines[i].setNewBid(crMaterials[k].getNewBid());
-								invoiceLines[i].setNewCbRef(crMaterials[k].getNewCbRef());
-								invoiceLines[i].setNewChargeBack(crMaterials[k].getNewChargeBack());
-								invoiceLines[i].setNewConRef(crMaterials[k].getNewConRef());
-								invoiceLines[i].setNewContCogPer(crMaterials[k].getNewContCogPer());
-								invoiceLines[i].setNewItemMkUpPer(crMaterials[k].getNewItemMkUpPer());
-								invoiceLines[i].setNewItemVarPer(crMaterials[k].getNewItemVarPer());
-								invoiceLines[i].setNewLead(crMaterials[k].getNewLead());
-								invoiceLines[i].setNewListPrice(crMaterials[k].getNewListPrice());
-								invoiceLines[i].setNewNoChargeBack(crMaterials[k].getNewNoChargeBack());
-								invoiceLines[i].setNewOverridePrice(crMaterials[k].getNewOverridePrice());
-								invoiceLines[i].setNewSellCd(crMaterials[k].getNewSellCd());
-								invoiceLines[i].setNewSsf(crMaterials[k].getNewSsf());
-								invoiceLines[i].setNewSf(crMaterials[k].getNewSf());
-								invoiceLines[i].setNewWac(crMaterials[k].getNewWac());
-								invoiceLines[i].setNewWacCogPer(crMaterials[k].getNewWacCogPer());
+								this.invoiceLines[i].setNewPrice(crMaterials[k].getNewSellPrice());
+								this.invoiceLines[i].setNewActivePrice(crMaterials[k].getNewActivePrice());
+								this.invoiceLines[i].setNewAwp(crMaterials[k].getNewAwp());
+								this.invoiceLines[i].setNewBid(crMaterials[k].getNewBid());
+								this.invoiceLines[i].setNewCbRef(crMaterials[k].getNewCbRef());
+								this.invoiceLines[i].setNewChargeBack(crMaterials[k].getNewChargeBack());
+								this.invoiceLines[i].setNewConRef(crMaterials[k].getNewConRef());
+								this.invoiceLines[i].setNewContCogPer(crMaterials[k].getNewContCogPer());
+								this.invoiceLines[i].setNewItemMkUpPer(crMaterials[k].getNewItemMkUpPer());
+								this.invoiceLines[i].setNewItemVarPer(crMaterials[k].getNewItemVarPer());
+								this.invoiceLines[i].setNewWacCogPer(crMaterials[k].getNewWacCogPer());
+								this.invoiceLines[i].setNewLead(crMaterials[k].getNewLead());
+								this.invoiceLines[i].setNewListPrice(crMaterials[k].getNewListPrice());
+								this.invoiceLines[i].setNewNoChargeBack(crMaterials[k].getNewNoChargeBack());
+								this.invoiceLines[i].setNewOverridePrice(crMaterials[k].getNewOverridePrice());
+								this.invoiceLines[i].setNewSellCd(crMaterials[k].getNewSellCd());
+								this.invoiceLines[i].setNewSsf(crMaterials[k].getNewSsf());
+								this.invoiceLines[i].setNewSf(crMaterials[k].getNewSf());
+								this.invoiceLines[i].setNewWac(crMaterials[k].getNewWac());
 //								TODO: Check if newAbd needs to be added to materials and add other fields
-//								invoiceLines[i].setNewAbd(crMaterials[k].getNewAbd());
-								invoiceLines[i].setNewContType(crMaterials[k].getNewContType());
-								invoiceLines[i].setNewContrId(crMaterials[k].getNewContrId());
-								invoiceLines[i].setNewNetBill(crMaterials[k].getNewNetBill());
-								invoiceLines[i].setNewProgType(crMaterials[k].getNewProgType());
-								invoiceLines[i].setDc(crMaterials[k].getDc());
+								this.invoiceLines[i].setNewAbd(crMaterials[k].getNewAbd());
+								this.invoiceLines[i].setNewContType(crMaterials[k].getNewContType());
+								this.invoiceLines[i].setNewContrId(crMaterials[k].getNewContrId());
+								this.invoiceLines[i].setNewNetBill(crMaterials[k].getNewNetBill());
+								this.invoiceLines[i].setNewProgType(crMaterials[k].getNewProgType());
+								this.invoiceLines[i].setDc(crMaterials[k].getDc());
 							}
 						}
+						break;
 					}
 				}
 			}
 		}
-		return invoiceLines;
+		return this.invoiceLines;
 	}
 	
 	private TWList mergeCorrelatedResults(Map<Integer, Set<String>> correlatedResults, _IndexedResult[] indexedResults) throws Exception {

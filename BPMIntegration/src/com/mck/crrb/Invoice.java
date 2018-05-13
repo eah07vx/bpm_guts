@@ -33,17 +33,77 @@ import teamworks.TWObjectFactory;
  */
 public class Invoice extends _API {
 	
+	public Invoice() {
+		super();
+	}
+	
 	@Override
 	String prepRequest(String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
-		return requestJSON;	//Request is already formatted in this case
+		return requestJSON;	//Request is already formatted 
 	}
 	
 	@Override
 	TWObject parseResponse(String rawResp, _HttpResponse httpResp, boolean sopDebug) throws Exception {
+		_Result asyncResp = null;
+		int respCode = httpResp.getResponseCode();
+		if (respCode == HttpsURLConnection.HTTP_ACCEPTED || respCode == HttpsURLConnection.HTTP_OK) {
+			asyncResp = parseAsyncResp(rawResp);
+		}
+		// Prepare TWObject for return
+		try {
+			TWObject twInvoiceLookupResp = TWObjectFactory.createObject();
+			TWObject httpResponse = TWObjectFactory.createObject();
+			
+			String respMsg = httpResp.getResponseMessage();
+			httpResponse.setPropertyValue("responseCode", respCode);
+			if (respMsg == null || respMsg.equals("")) {
+            	respMsg = rawResp;
+            }
+			if (respCode != HttpsURLConnection.HTTP_ACCEPTED && respCode != HttpsURLConnection.HTTP_OK) {                
+				respMsg = _API.HTTP_NOT_OK + ": " + respMsg; // Not OK - abort mission
+			}
+			httpResponse.setPropertyValue("responseMessage", respMsg);
+			twInvoiceLookupResp.setPropertyValue("httpResponse", httpResponse);
+			twInvoiceLookupResp.setPropertyValue("results", (asyncResp != null ? asyncResp.getTwResult() : null));
+
+			return twInvoiceLookupResp;
+		} catch (Exception e) {
+			e.getMessage();
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	private _Result parseAsyncResp(String rawResp) {
+		_Result invoicesResp = null;
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
+			ObjectMapper jacksonMapper = new ObjectMapper();
+			jacksonMapper.configure(
+				    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			jacksonMapper.setDateFormat(sdf);
+			
+			invoicesResp = jacksonMapper.readValue(rawResp, _Result.class);
+		} catch (JsonParseException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return invoicesResp;
+	}
+	
+	@Deprecated
+	TWObject parseSyncResponse(String rawResp, _HttpResponse httpResp, boolean sopDebug) throws Exception {
+		
 		_InvoiceLookupResp invoices = null;
 		if (httpResp.getResponseCode() == HttpsURLConnection.HTTP_OK) {
 			invoices = parseInvoiceLookupResp(rawResp);
-		}		
+		}
 		try {
 			TWObject twInvoiceLookupResp = TWObjectFactory.createObject();
 			TWList corRows = null;
@@ -81,6 +141,7 @@ public class Invoice extends _API {
 		}
 	}
 
+	@Deprecated
 	private _InvoiceLookupResp parseInvoiceLookupResp(String rawResp) {
 		_InvoiceLookupResp invoicesResp = null;
 		try {

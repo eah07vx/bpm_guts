@@ -114,9 +114,14 @@ class _APIResp {
 	
 	public String toString() {
 		String str = "startIndex: " + this.startIndex + ", endIndex: " + this.endIndex + ", totalNumberOfRecords: " + this.totalNumberOfRecords + 
-				", results.length: " + results.length + ", results: ";
-		for (int i = 0; i < results.length; i++) {
-			str += "\r\n  results[" + i + "]: " + results[i].toString();
+				", results.length: " + (results != null ? results.length : -1) + ", results: ";
+		if (results != null) {
+			for (int i = 0; i < results.length; i++) {
+				str += "\r\n  results[" + i + "]: " + results[i].toString();
+			}
+		}
+		else {
+			str += "none";
 		}
 		return str;
 	}

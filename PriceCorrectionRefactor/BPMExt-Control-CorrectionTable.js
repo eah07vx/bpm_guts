@@ -60,6 +60,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					globalSelCbx.addEventListener("change", globalSelCallback);
 				}
 			},
+
+			
 			//<< Performance hacks /////////////////////////////////////////////////////////////////////
 			//>> Utilities /////////////////////////////////////////////////////////////////////////////
 			/*
@@ -1084,51 +1086,48 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			executePartialSubmission: function(view) {
 				var instanceId = view.context.options.processInstanceId.get("value");
 				var selectedCorrectionRows = view.ui.get("Table").getSelectedRecords(true);
-				var list = view.ui.get("Table").getRecords();
-				var indices = view.ui.get("Table").getSelectedIndices();
-				var selectedRowsWithVals = [];	
-				var allCorrectionRowsWithVals = [];
+				//var list = view.ui.get("Table").getRecords();
+				//var indices = view.ui.get("Table").getSelectedIndices();
+				var actionableCRData = [];	
+				//var allCorrectionRowsWithVals = [];
 				var crrbRequest = JSON.parse(JSON.stringify(view.context.options.crrbRequest.get("value")));
-				var extraKeys = ["childrenCache", "_objectPath", "_systemCallbackHandle", "_watchCallbacks", "_inherited"];
-				//console.log("crrbRequest", crrbRequest);
-				//var selectedRowsObj = JSON.parse(selectedCorrectionRows);
-				for (var i = 0; i < indices.length; i++) {
-					for (var j = 0; j < selectedCorrectionRows.length; j++) {
-						if (selectedCorrectionRows[j].invoiceId == list[indices[i]].invoiceId && selectedCorrectionRows[j].invoiceLineItemNum == list[indices[i]].invoiceLineItemNum) {
-							selectedRowsWithVals.push(list[indices[i]]);
-						}
-					}       
-				}
-				for (var k = 0; k < list.length; k++) {
-					allCorrectionRowsWithVals.push(list[k]);
-				}
-				for (var i = 0; i < extraKeys.length; i++) {
-					//console.log("inside key for loop");
+                var extraKeys = ["childrenCache", "_objectPath", "_systemCallbackHandle", "_watchCallbacks", "_inherited"];
+                for (var i = 0; i < extraKeys.length; i++) {
 					delete crrbRequest[extraKeys[i]];
-					//console.log("before delete selectedCorrectionRows[extraKeys[i]]", selectedCorrectionRows);
-					for (var j = 0; j < selectedRowsWithVals.length; j++) {
-						delete selectedRowsWithVals[j][extraKeys[i]];
-						//console.log("after delete selectedCorrectionRows[extraKeys[i]]", selectedCorrectionRows);		
-					}
-					for (var k = 0; k < allCorrectionRowsWithVals.length; k++) {
-						delete allCorrectionRowsWithVals[k][extraKeys[i]];
-					}
 				}
-			
+				//console.log("crrbRequest", crrbRequest);
+                //var selectedRowsObj = JSON.parse(selectedCorrectionRows);
+                for (var i = 0; i < selectedCorrectionRows.length; i++) {
+                    if (!selectedCorrectionRows[i].isLocked) {
+                        var obj = {
+                            invoiceId : selectedCorrectionRows[i].invoiceId,
+                            invoiceLineItemNum : selectedCorrectionRows[i].invoiceLineItemNum,
+                            newWac : selectedCorrectionRows[i].newWac,
+                            newBid : selectedCorrectionRows[i].newBid,
+                            newLead : selectedCorrectionRows[i].newLead,
+                            newConRef : selectedCorrectionRows[i].newConRef,
+                            newContCogPer : selectedCorrectionRows[i].newContCogPer,
+                            newItemVarPer : selectedCorrectionRows[i].newItemVarPer,
+                            newWacCogPer : selectedCorrectionRows[i].newWacCogPer,
+                            newItemMkUpPer : selectedCorrectionRows[i].newItemMkUpPer,
+                            newAwp : selectedCorrectionRows[i].newAwp,
+                            newNoChargeBack : selectedCorrectionRows[i].newNoChargeBack,
+                            newOverridePrice : selectedCorrectionRows[i].newOverridePrice
+                        }
+                        actionableCRData.push(obj);
+                        console.log("actionableCRData:  ", actionableCRData);
+                    }
+                }
 				var input = {
-					selectedCorrectionRows : selectedRowsWithVals,
-					correctionTable : allCorrectionRowsWithVals,
+					selectedCorrectionRows : actionableCRData,
 					instanceId : instanceId,
-					crrbRequest : crrbRequest
+					crrbRequest : crrbRequest 
 				};
-				//console.log("input jsonstringify", JSON.stringify(input));
-				//console.log("input stringified", input);
 				var serviceArgs = {
 					params: JSON.stringify(input),
 					load: function(data) {
-						//console.log("service returned ", data);
 						view._proto.setProgressBar(view, false);
-						view.toggleSubmittedRows(view, allCorrectionRowsWithVals, selectedRowsWithVals, true);
+						view._proto.toggleSubmittedRows(view, actionableCRData);
 						view._proto.searchTable(view);
 					},
 					error: function(e) {
@@ -1140,16 +1139,16 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				view.context.options.partialSubmissionService(serviceArgs);
 				view.ui.get("Modal_Partial_Submit").setVisible(false);
 			},
-			toggleSubmittedRows: function(view, allCRs, selectedCRs, type) {
+			toggleSubmittedRows: function(view, selectedCRs) {
+                var allCRs = view.ui.get("Table").getRecords();
 				for (var i = 0; i < allCRs.length; i++) {
 					for (var j = 0; j < selectedCRs.length; j++) {
 						if (allCRs[i].invoiceId == selectedCRs[j].invoiceId && allCRs[i].invoiceLineItemNum == selectedCRs[j].invoiceLineItemNum) {
-							allCRs[i].isLocked = type;
-							allCRs[i].isSubmitted = type;
+							allCRs[i].isLocked = true;
+							allCRs[i].isSubmitted = true;
 						}
 					}
 				}	
-				//this.context.binding.set("value", allCRs);
 			},
 			createEditableDiv: function(view, record, propName, type, tableRowId){
 				var div = document.createElement("div");
@@ -1252,7 +1251,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						
 						break;
 					case 2:
-						td.innerHTML = "<div>" + record.materialId + "</div><div>" + record.materialName + "</div><div align=right style=color:red>" + dollarTerms(record.oldBid) + "</div><div align=right style=color:red>" + dollarTerms(record.curBid) + "</div>";
+						td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record.materialId + "</div><div>" + record.materialName + "</div><div align=right style=color:red>" + dollarTerms(record.oldBid) + "</div><div align=right style=color:red>" + dollarTerms(record.curBid) + "</div></div>";
 						cell.setSortValue(record.materialId);
 						
 						if(record.isLocked){

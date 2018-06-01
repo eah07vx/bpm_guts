@@ -110,6 +110,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var includeNetChange = view.ui.get("IncludeNetChange").isChecked();
 				var showLockedRows = view.ui.get("ShowLockedRows").isChecked();
 				
+				//console.log("showLockedRows: ", showLockedRows);
 				view.ui.get("Table").search(function(listItem){
 				
 					var rebillAmt = listItem.rebillQty * listItem.newPrice;
@@ -126,9 +127,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							return false;
 						}
 					}
-					
-					if(!showLockedRows){
-						if(listItem.isLocked){
+					if(!showLockedRows){	
+						if(listItem.isLocked == true){
+							//console.log("isLocked: ", listItem.isLocked);
 							return false;
 						}
 					}
@@ -274,17 +275,19 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			getMappedRecord: function(view, id)
 			{
 				//Lazy-create id to record mappings
+				// create at start
 				if(view._instance.idMap == null)
 				{
 					var data = view._instance.table.getRecords();
 					var len = data.length;
 					
-					view._instance.idMap = {};
+					view._instance.idMap = [];
 					
 					for(var i = 0; i < len; i++)
 					{
+						var rowId = data[i].invoiceId + data[i].invoiceLineItemNum; 
 						dataElt = data[i];
-						view._instance.idMap[dataElt.id] = dataElt;
+						view._instance.idMap.push(dataElt);
 					}
 				}
 				
@@ -400,7 +403,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					rowId: rowId
 				}
 				var newVal = editedElt.innerHTML;
-				newVal = Number(newVal.replace(/[^0-9\.-]+/g,""));
+				
+				// remove commas 
+				if(type == "decimal" || type == "percent"){
+					newVal = Number(newVal.replace(/[^0-9\.-]+/g,""));
+				}
+
 				editorCV.setData(newVal);
 				editedElt.parentElement.insertBefore(editorCV.context.element, editedElt);
 				domClass.add(editedElt, "editing");
@@ -433,10 +441,11 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						value
 						);
 					
-					//format the value
+					// add the changed style only if the value was changed
 					if(view._instance.edit.domElt.__originalVal != value){
 						this.addChangedStyle(view);
 					}	
+					//format the visual element value
 					if(type == "decimal"){	
 						value = view._proto.dollarTerms(value);
 					}else if(type == "percent"){
@@ -453,6 +462,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					delete view._instance.edit;
 				}
 			},
+			/*
+				Removes the changed style to the row and changes the values back to the 
+				__originalVal
+			*/
 			undoChanges: function(view, row, record, domElt){
 				for(var i = 0; i < row.childNodes.length; i++){
 					var tdItem = row.childNodes[i];
@@ -495,6 +508,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var btn = document.getElementById(btnId);
 				btn.remove();
 			},
+			/* 
+				Adds the changed style color to the row and creates the undo button which
+				has an on click event to undo the changes
+			*/
 			addChangedStyle: function(view){
 				if(!view._instance.edit.record.isChanged){
 					view._instance.edit.record.isChanged = true;
@@ -520,11 +537,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					td.appendChild(undoBtn);
 				}
 			},
+			/*
+				Appends the returned records to the table and determines if there are any records left 
+				to be returned. If there are, it calls the getCorrectionRows function
+			*/
 			onLineItemsResult: function(view, result)
 			{	
 				if(result.length != 0)
 				{
-					//view._instance.totalCount = result.totalCount;
 					view._instance.progressCtl.setMaximum(view.context.options.totalRecords.get("value"));
 				}
 
@@ -555,15 +575,20 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						view._proto.setProgress(view, view.context.options.totalRecords.get("value"));
 						view._proto.setProgressActive(view, false);
 						view.ui.get("Button_Layout").setEnabled(true);
-						view._proto.searchTable(view);
+						
 						setTimeout(function(){
 							view.ui.get("ProgressIcon").setVisible(false); 
 							view.ui.get("Progress").setVisible(false);
 							view.ui.get("ProgressBadge").setVisible(false);
+							view._proto.searchTable(view);
 						}, 1500);
 					}
 				});
 			},
+			/*
+				Calls the service that returns data for the correction rows table. It is called onLoad
+				and from the onLineItemsResult function if there are remaining records to be returned
+			*/
 			getCorrectionRows: function(view){
 				if(view._instance.offset == 0)
 				{
@@ -591,17 +616,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				view.context.options.taskDataService(serviceArgs);
 			},
 			/*
-				Empties an update field
-			*/
-			/*clearUpdateField: function(view, inputGroup)
-			{
-				var childCV = this.getChildView(view, inputGroup);
-				
-				if(childCV != null)
-					childCV.setData(null);
-			},*/
-			/*
-				Opens the update modal dialog if as least 1 record is selected
+				Called from the Mass Update button click event and opens the update modal
+				only if there are any selected records
 			*/
 			openRecordUpdateDialog: function(view)
 			{
@@ -611,21 +627,23 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
 			},
 			/*
-				Updates the selected record(s) with the updated values specified in the update dialog 
+				Updates the selected record(s) with the updated values specified in the update dialog.
+				Because of the layouts used in the modal, it needs to loop through the layouts and find
+				all the text control.   
 			*/
 			updateRecords: function(view)
 			{
 				var selected = view.ui.get("Table").getSelectedRecords(true);
-				var section = view.ui.get("UpdateFieldHolder");
-				var hLayouts = [];
-				var vLayouts = this.getChildViews(view, section);
+				var section = view.ui.get("UpdateFieldHolder"); // the parent layout in the modal
+				//var hLayouts = [];
+				var vLayouts = this.getChildViews(view, section); // the two child layouts in the "UpdateFieldHolder" layout
 				var propNameList = [];
 				
 				for(var i = 0; i < vLayouts.length; i++){
 					var current = vLayouts[i];
-					for(var subviewId in current.context.subview){
+					for(var subviewId in current.context.subview){ // the subview is a horizontal layout that contains the text and checkbox
 						var hl = current.context.getSubview(subviewId)[0];
-						var subCV = this.getChildView(view, hl);
+						var subCV = this.getChildView(view, hl); // the subCv is the text control
 						var propName = subCV.context.options._metadata.helpText.get("value");
 						
 						for(var j = 0; j < selected.length; j++){
@@ -664,7 +682,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							this.setElementValue(view, propName, elt, value);
 							this.addChangedStyle(view);
 							
-							// ?
 							delete view._instance.edit;
 						}
 						subCV.setData(null); //Reset the field to null so it's empty next time						
@@ -674,6 +691,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				view.ui.get("Mass_Update_Modal").setVisible(false, true);
 				//view._instance.table.setAllRecordsSelected(false, true);
 			},
+			/*
+				Calculates the totals for the Case tab
+			*/
 			calculateSelectedTotals: function(view){
 				var selected = view._instance.table.getSelectedRecords(false);
 				var ctx = {};
@@ -691,7 +711,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						totals.selectedRebillTotal += selected[i].newPrice * selected[i].rebillQty;
 						totals.selectedLineCount++; // Atleast 1 line is present for this group
 						
-						//DEFECT ON selected[i].newNoChargeBack.trim() == ""
 						if (selected[i].newNoChargeBack == null) {
 							totals.selectedCBTotal += ((selected[i].newChargeBack - selected[i].oldChargeBack) * selected[i].rebillQty);	
 						}
@@ -705,6 +724,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					view.ui.get("Selected_Lines_Count").setData(totals.selectedLineCount);
 				}
 			},
+			/*
+				Called when a new record is selected and when a tab is switched. Calculates 
+				various totals from the selected records
+			*/
 			groupByCalc: function(view){
 				var tabIndex = view.ui.get("TotalTab").getCurrentPane();
 				var items = view._instance.table.getRecords();
@@ -860,7 +883,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							load: function(data) {
 								var returned = JSON.stringify(data);
 								view._proto.setProgressBar(view, false);
-								console.log("data: ", data.selectedCorrectionRows.correctionRows.items[0])
+								//console.log("data: ", data.selectedCorrectionRows.correctionRows.items[0])
 								var indexedResults = data.selectedCorrectionRows.results.items;
 								var simulatedRows = data.selectedCorrectionRows.correctionRows.items;
 								if (view._proto.checkForSimFailures(view, indexedResults, simulatedRows)) {
@@ -1095,7 +1118,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
                 for (var i = 0; i < extraKeys.length; i++) {
 					delete crrbRequest[extraKeys[i]];
 				}
-				//console.log("crrbRequest", crrbRequest);
                 //var selectedRowsObj = JSON.parse(selectedCorrectionRows);
                 for (var i = 0; i < selectedCorrectionRows.length; i++) {
                     if (!selectedCorrectionRows[i].isLocked) {
@@ -1115,7 +1137,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
                             newOverridePrice : selectedCorrectionRows[i].newOverridePrice
                         }
                         actionableCRData.push(obj);
-                        console.log("actionableCRData:  ", actionableCRData);
                     }
                 }
 				var input = {
@@ -1140,16 +1161,76 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				view.ui.get("Modal_Partial_Submit").setVisible(false);
 			},
 			toggleSubmittedRows: function(view, selectedCRs) {
-                var allCRs = view.ui.get("Table").getRecords();
+				var allCRs = view.ui.get("Table").getRecords();
+				var propArray = ["newWac", "newBid", "newLead", "newConRef", "newContCogPer", "newItemVarPer", "newWacCogPer", "newItemMkUpPer", "newAwp", "newNoChargeBack", "newOverridePrice"];
+
 				for (var i = 0; i < allCRs.length; i++) {
 					for (var j = 0; j < selectedCRs.length; j++) {
+						var curCR = allCRs[i]; 
 						if (allCRs[i].invoiceId == selectedCRs[j].invoiceId && allCRs[i].invoiceLineItemNum == selectedCRs[j].invoiceLineItemNum) {
 							allCRs[i].isLocked = true;
 							allCRs[i].isSubmitted = true;
+
+							// only the displayed rows need the html changes:
+							// add locked style
+							var rowId = allCRs[i].invoiceId + allCRs[i].invoiceLineItemNum;
+							var row = document.getElementById(rowId);
+							//view._proto.setRecordPropValue(this, allCRs[i], isLocked, true)
+							if(row != null){
+								var td = row.childNodes[1];
+								
+								row.setAttribute('class', 'lockedRow');
+								var lockBtn = document.createElement("button");
+								lockBtn.disabled = true;
+								lockBtn.style.backgroundColor = "red";
+								var span = document.createElement("span");
+								
+								domClass.add(lockBtn, "btn btn-default btn-xs");
+								domClass.add(span, "btn-label icon fa fa-lock");
+								
+								lockBtn.appendChild(span);
+								td.appendChild(lockBtn);
+								
+								// remove editable field
+								var sel = allCRs[i];
+								for(var prop in sel){
+									for(var j = 0; j < propArray.length; j++){
+										if(prop == propArray[j]){
+											propName = prop;
+											var elt = sel.getVisualElement(propName);
+											if(elt == null)
+												continue;
+											
+											var type = elt.__type;										
+											var parent = elt.parentNode;
+											parent.removeChild(elt)
+
+											var value = sel[propName];
+											if(type == "decimal"){	
+												value = view._proto.dollarTerms(value);
+											}else if(type == "percent"){
+												value = view._proto.percentTerms(value);
+											}
+											parent.innerHTML += "<div align=right>" + value + "</div>"
+											//Update record data
+											//view._proto.setRecordPropValue(this, record, propName, value);
+										}
+									}
+								}
+							}
 						}
 					}
-				}	
+				}
 			},
+			getMappedSubmittedRecords: function(data, id){	
+				for(var i = 0; i < data.length; i++){
+					var item = data[i];
+					if(item.rowId = id){
+						return item.record;
+					}
+				}
+			},
+
 			createEditableDiv: function(view, record, propName, type, tableRowId){
 				var div = document.createElement("div");
 				div.className = "editableField";
@@ -1163,19 +1244,51 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					if(!value){value = 0;};
 					value = view._proto.percentTerms(value);
 				}else if(!value){
-					value = "&nbsp";
+					value = "";
 				}
-
-				//console.log("PropName: ", propName, " value: ", value);
 
 				div.__originalVal = record[propName];
 				div.__propName = propName;
+				div.__type = type;
 
 				this.setElementValue(view, propName, div, value);
 				record.setVisualElement(view, propName, div);
 				this.setupChangeHandler(view, type, record, propName, div, tableRowId);
 				
 				return div;
+			},
+			setInnerHTML: function(view, td, record, tableRowId, h1, h2, v1, v2, v3, type){
+				var fnFormat;
+				if(type == "decimal"){
+					fnFormat = view._proto.dollarTerms;
+				}else if(type == "percent"){
+					fnFormat = view._proto.percentTerms;
+				}
+				td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record[h1] + "</div>"
+				
+				if(h2 != "h2"){
+					td.innerHTML += "<div>" + record[h2] + "</div>"
+				}
+				if(record[v1] != null && record[v1] != ""){
+					td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v1]) : record[v1]) + "</div>"
+				}else{
+					td.innerHTML += "<div align=right style=color:red>" + "&nbsp" + "</div>";
+				}
+				if(record[v2] != null && record[v2] != ""){
+					td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v2]) : record[v2]) + "</div></div>";
+				}else{
+					td.innerHTML += "<div align=right style=color:red>&nbsp</div></div>";
+				}
+				 
+				if(record.isLocked){
+					td.innerHTML += "<div align=right>"+ (fnFormat ? fnFormat(record[v3]) : record[v3]) + "</div>";	
+				}else{
+					var div = this.createEditableDiv(view, record, v3, type, tableRowId);
+					td.appendChild(div);
+					td.style.verticalAlign = "bottom"
+				}
+
+				return td;
 			},
 			percentTerms: function(x) {
 				return Number.parseFloat(x).toFixed(3) + "%";
@@ -1213,12 +1326,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var td = cell.td;
 				var tableRowId = cell.row.data.invoiceId + cell.row.data.invoiceLineItemNum;
 				td.parentNode.setAttribute('id', tableRowId);
-				
 				switch(cell.colIndex)
 				{
 					case 0:
-						if(record.isLocked || record.rebillQty == 0){
-							record.isLocked = true;
+						if(record.isLocked){
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
@@ -1235,7 +1346,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						this.setupDataToVisualElements(view, record);
 						break;
 					case 1:
-						td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record.customerId + "</div><div>" + record.customerName + "</div><div align=right style=color:red>" + dollarTerms(record.oldWac) + "</div><div align=right style=color:red>" + dollarTerms(record.curWac) + "</div></div>";
+						/*td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record.customerId + "</div><div>" + record.customerName + "</div><div align=right style=color:red>" + dollarTerms(record.oldWac) + "</div><div align=right style=color:red>" + dollarTerms(record.curWac) + "</div></div>";
 						cell.setSortValue(record.customerId);
 						
 						if(record.isLocked){
@@ -1244,14 +1355,17 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							var div = this.createEditableDiv(view, record, "newWac", "decimal", tableRowId);
 							td.appendChild(div);
 							td.style.verticalAlign = "bottom"
-						}
-						
+						}*/	
 						// single line html creation:
-						//td = view._proto.setInnerHTML(view, td, record, "customerId", "customerName", "oldWac", "curWac", "newWac", "decimal", tableRowId);
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "customerId", "customerName", "oldWac", "curWac", "newWac", "decimal");
+						
+						cell.setSortValue(record.customerId);
 						
 						break;
 					case 2:
 						td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record.materialId + "</div><div>" + record.materialName + "</div><div align=right style=color:red>" + dollarTerms(record.oldBid) + "</div><div align=right style=color:red>" + dollarTerms(record.curBid) + "</div></div>";
+						//td.innerHTML = view._proto.setInnerHTML(view, record, "customerId", "customerName", "oldWac", "curWac", "decimal");
+
 						cell.setSortValue(record.materialId);
 						
 						if(record.isLocked){
@@ -1289,7 +1403,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						if(record.isLocked){
 							td.innerHTML += "<div align=right>"+ record.newConRef + "</div>";	
 						}else{
-							var div = this.createEditableDiv(view, record, "newConRef", "int", tableRowId);
+							var div = this.createEditableDiv(view, record, "newConRef", "string", tableRowId);
 							td.appendChild(div);
 							td.style.verticalAlign = "bottom"
 						}
@@ -1365,16 +1479,18 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						td.style.verticalAlign = "bottom"
 						break;
 					case 13:
-						td.innerHTML = "<div>" + record.billType + "</div><div align=right style=color:red>" + "&nbsp" + "</div><div align=right style=color:red>" + record.curNoChargeBack + "</div>";
+						//td.innerHTML = "<div>" + record.billType + "</div><div align=right style=color:red>" + "&nbsp" + "</div><div align=right style=color:red>" + record.curNoChargeBack + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "billType", "h2", "oldNoChargeback", "curNoChargeBack", "newNoChargeBack", "string");
+
 						cell.setSortValue(record.billType);
 						
-						if(record.isLocked){
+						/*if(record.isLocked){
 							td.innerHTML += "<div align=right>"+ record.newNoChargeBack + "</div>";	
 						}else{
-							var div = this.createEditableDiv(view, record, "newNoChargeBack", "int", tableRowId);
+							var div = this.createEditableDiv(view, record, "newNoChargeBack", "string", tableRowId);
 							td.appendChild(div);
 							td.style.verticalAlign = "bottom"
-						}
+						}*/
 						break;
 					case 14:
 						td.innerHTML = "<div>" + record.chainId + "</div><div>" + record.chainName + "</div><div align=right style=color:red>" + record.oldActivePrice + "</div><div align=right style=color:red>" + record.curActivePrice + "</div><div align=right>" + record.newActivePrice + "</div>";
@@ -1418,31 +1534,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
 				//cell.row.data
 				//return null;
-			},
-			setInnerHTML: function(view, td, record, h1, h2, v1, v2, v3, type, tableRowId){
-				var fnFormat;
-				if(type == "decimal"){
-					fnFormat = view._proto.dollarTerms;
-				}else if(type == "percent"){
-					fnFormat = view._proto.percentTerms;
-				}
-				td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record[h1] + "</div>"
-				
-				if(h2 != "h2"){
-					td.innerHTML += "<div>" + record[h2] + "</div>"
-				}
-
-				td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v1]) : record[v1]) + "</div><div align=right style=color:red>" + (fnFormat ? fnFormat(record[v2]) : record[v2]) + "</div></div>";
-				
-				//cell.setSortValue(record.h1);
-				if(record.isLocked){
-					td.innerHTML += "<div align=right>"+ fnFormat(record[v3]) + "</div>";	
-				}else{
-					var div = this.createEditableDiv(view, record, v3, type, tableRowId);
-					td.appendChild(div);
-					td.style.verticalAlign = "bottom"
-				}
-				return td;
 			},
 			setProgressBar: function(view, status){
 				view.ui.get("ProgressModal").setVisible(status);

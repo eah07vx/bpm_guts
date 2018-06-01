@@ -1257,7 +1257,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				
 				return div;
 			},
-			setInnerHTML: function(view, td, record, tableRowId, h1, h2, v1, v2, v3, type){
+
+			//TODO: Clean this up
+			setInnerHTML: function(view, td, record, tableRowId, h1, h2, v1, v2, v3, type, editable){
 				var fnFormat;
 				if(type == "decimal"){
 					fnFormat = view._proto.dollarTerms;
@@ -1265,22 +1267,34 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					fnFormat = view._proto.percentTerms;
 				}
 				td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record[h1] + "</div>"
-				
 				if(h2 != "h2"){
 					td.innerHTML += "<div>" + record[h2] + "</div>"
 				}
-				if(record[v1] != null && record[v1] != ""){
-					td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v1]) : record[v1]) + "</div>"
+				if(type == "string"){
+					
+					if(record[v1] == "" || record[v1] == undefined){
+						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" + "</div>";
+					}else{
+						td.innerHTML += "<div align=right style=color:red>" + record[v1] + "</div>"
+					}
+					if(record[v2] == "" || record[v1] == undefined){
+						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" +  "</div></div>";
+					}else{
+						td.innerHTML += "<div align=right style=color:red>" + record[v2] + "</div></div>";
+					}
 				}else{
-					td.innerHTML += "<div align=right style=color:red>" + "&nbsp" + "</div>";
+					if((record[v1] != null && record[v1] != "") || record[v1] == 0){
+						td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v1]) : record[v1]) + "</div>"
+					}else{
+						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" + "</div>";
+					}
+					if((record[v2] != null && record[v2] != "") || record[v2] == 0){
+						td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v2]) : record[v2]) + "</div></div>";
+					}else{
+						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" +  "</div></div>";
+					}
 				}
-				if(record[v2] != null && record[v2] != ""){
-					td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v2]) : record[v2]) + "</div></div>";
-				}else{
-					td.innerHTML += "<div align=right style=color:red>&nbsp</div></div>";
-				}
-				 
-				if(record.isLocked){
+				if(record.isLocked || !editable){
 					td.innerHTML += "<div align=right>"+ (fnFormat ? fnFormat(record[v3]) : record[v3]) + "</div>";	
 				}else{
 					var div = this.createEditableDiv(view, record, v3, type, tableRowId);
@@ -1290,8 +1304,18 @@ bpmext_control_InitCorrectionTable = function(domClass)
 
 				return td;
 			},
-			percentTerms: function(x) {
-				return Number.parseFloat(x).toFixed(3) + "%";
+			percentTerms: function(nStr) {
+				nStr = Number.parseFloat(nStr).toFixed(3);
+				nStr += '';
+				var x = nStr.split('.');
+				var x1 = x[0];
+				var x2 = x.length > 1 ? '.' + x[1] : '';
+				var rgx = /(\d+)(\d{3})/;
+				while (rgx.test(x1)) {
+					x1 = x1.replace(rgx, '$1' + ',' + '$2');
+				}
+				var x3 = x1 + x2 + "%";
+				return x1 + x2 + "%";
 			},
 
 			dollarTerms: function(nStr) {
@@ -1346,178 +1370,86 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						this.setupDataToVisualElements(view, record);
 						break;
 					case 1:
-						/*td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record.customerId + "</div><div>" + record.customerName + "</div><div align=right style=color:red>" + dollarTerms(record.oldWac) + "</div><div align=right style=color:red>" + dollarTerms(record.curWac) + "</div></div>";
-						cell.setSortValue(record.customerId);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ dollarTerms(record.newWac) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newWac", "decimal", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}*/	
 						// single line html creation:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "customerId", "customerName", "oldWac", "curWac", "newWac", "decimal");
-						
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "customerId", "customerName", "oldWac", "curWac", "newWac", "decimal", true);
 						cell.setSortValue(record.customerId);
-						
 						break;
 					case 2:
-						td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record.materialId + "</div><div>" + record.materialName + "</div><div align=right style=color:red>" + dollarTerms(record.oldBid) + "</div><div align=right style=color:red>" + dollarTerms(record.curBid) + "</div></div>";
-						//td.innerHTML = view._proto.setInnerHTML(view, record, "customerId", "customerName", "oldWac", "curWac", "decimal");
-
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "customerId", "customerName", "oldWac", "curWac", "newBid", "decimal");
 						cell.setSortValue(record.materialId);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ dollarTerms(record.newBid) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newBid", "decimal", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
-						//td = view._proto.setInnerHTML(view, td, record, "materialName", "h2", "oldBid", "curBid", "newBid", "decimal", tableRowId);
 						break;
 					case 3:
-						
-						td.innerHTML = "<div>" + dateTerm(record.pricingDate) + "</div><div align=right style=color:red>" + record.oldLead + "</div><div align=right style=color:red>" + record.curLead + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "pricingDate", "h2", "oldLead", "curLead", "newLead", "int", true);
 						cell.setSortValue(record.pricingDate);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ record.newLead + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newLead", "int", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
-						//td = view._proto.setInnerHTML(view, td, record, "pricingDate", "h2", "oldBid", "curBid", "newBid", "decimal", tableRowId);
 						break;
-					case 4:
+					case 4: //*
 						td.innerHTML = "<div>" + record.invoiceId +"/"+ "</div><div>" + record.invoiceLineItemNum + "</div><div align=right style=color:red>" + dollarTerms(record.oldPrice) + "</div><div align=right style=color:red>" + dollarTerms(record.curPrice) + "</div><div align=right>" + dollarTerms(record.newPrice) + "</div>";
 						cell.setSortValue(record.invoiceId);
 						td.style.verticalAlign = "bottom"
 						break;
 					case 5:
-						td.innerHTML = "<div>" + record.supplierId + "</div><div>" + record.supplierName + "</div><div align=right style=color:red>" + record.oldConRef + "</div><div align=right style=color:red>" + record.curConRef + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "supplierId", "supplierName", "oldConRef", "curConRef", "newConRef", "string", true);
 						cell.setSortValue(record.supplierId);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ record.newConRef + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newConRef", "string", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
 						break;
-					case 6:
+					case 6: //*
 						td.innerHTML = "<div>" + record.billQty + "+ (" + record.retQty + "+" + record.crQty + ")" + "</div><div align=right style=color:red>" + record.oldCbRef + "</div><div align=right style=color:red>" + record.curCbRef + "</div><div align=right>" + record.newCbRef + "</div>";
 						cell.setSortValue(record.billQty);
 						td.style.verticalAlign = "bottom"
 						break;
 					case 7:
-						td.innerHTML = "<div>" + record.rebillQty + "</div><div align=right style=color:red>" + percentTerms(record.oldContCogPer) + "</div><div align=right style=color:red>" + percentTerms(record.curContCogPer) + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "rebillQty", "h2", "oldContCogPer", "curContCogPer", "newContCogPer", "percent", true);
 						cell.setSortValue(record.rebillQty);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ percentTerms(record.newContCogPer) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newContCogPer", "percent", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
 						break;
 					case 8:
-						td.innerHTML = "<div>" + record.uom + "</div><div align=right style=color:red>" + percentTerms(record.oldItemVarPer) + "</div><div align=right style=color:red>" + percentTerms(record.curItemVarPer) + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "uom", "h2", "oldItemVarPer", "curItemVarPer", "newItemVarPer", "percent", true);
 						cell.setSortValue(record.uom);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ percentTerms(record.newItemVarPer) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newItemVarPer", "percent", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
 						break;
 					case 9:
-						td.innerHTML = "<div>" + dateTerm(record.createdOn) + "</div><div align=right style=color:red>" + percentTerms(record.oldWacCogPer) + "</div><div align=right style=color:red>" + percentTerms(record.curWacCogPer) + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "createdOn", "h2", "oldWacCogPer", "curWacCogPer", "newWacCogPer", "percent", true);
 						cell.setSortValue(record.createdOn);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ percentTerms(record.newWacCogPer) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newWacCogPer", "percent", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
 						break;
 					case 10:
-						td.innerHTML = "<div>" + record.dc + "</div><div align=right style=color:red>" + percentTerms(record.oldItemMkUpPer) + "</div><div align=right style=color:red>" + percentTerms(record.curItemMkUpPer) + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "dc", "h2", "oldItemMkUpPer", "curItemMkUpPer", "newItemMkUpPer", "percent", true);
 						cell.setSortValue(record.dc);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ percentTerms(record.newItemMkUpPer) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newItemMkUpPer", "percent", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
 						break;
 					case 11:
-						td.innerHTML = "<div>" + record.poNumber + "</div><div align=right style=color:red>" + dollarTerms(record.oldAwp) + "</div><div align=right style=color:red>" + dollarTerms(record.curAwp) + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "poNumber", "h2", "oldAwp", "curAwp", "newAwp", "decimal", true);
 						cell.setSortValue(record.poNumber);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ dollarTerms(record.newAwp) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newAwp", "decimal", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
 						break;
 					case 12:
-						td.innerHTML = "<div>" + record.ndcUpc + "</div><div align=right style=color:red>" + record.oldSellCd + "</div><div align=right style=color:red>" + record.curSellCd + "</div><div align=right>" + record.newSellCd + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "ndcUpc", "h2", "oldSellCd", "curSellCd", "newSellCd", "string", false);
 						cell.setSortValue(record.ndcUpc);
-						td.style.verticalAlign = "bottom"
 						break;
 					case 13:
-						//td.innerHTML = "<div>" + record.billType + "</div><div align=right style=color:red>" + "&nbsp" + "</div><div align=right style=color:red>" + record.curNoChargeBack + "</div>";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "billType", "h2", "oldNoChargeback", "curNoChargeBack", "newNoChargeBack", "string");
-
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "billType", "h2", "oldNoChargeback", "curNoChargeBack", "newNoChargeBack", "string", true);
 						cell.setSortValue(record.billType);
-						
-						/*if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ record.newNoChargeBack + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newNoChargeBack", "string", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}*/
 						break;
 					case 14:
-						td.innerHTML = "<div>" + record.chainId + "</div><div>" + record.chainName + "</div><div align=right style=color:red>" + record.oldActivePrice + "</div><div align=right style=color:red>" + record.curActivePrice + "</div><div align=right>" + record.newActivePrice + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "chainId", "chainName", "oldActivePrice", "curActivePrice", "newActivePrice", "string", false);
 						cell.setSortValue(record.chainId);
-						td.style.verticalAlign = "bottom"
 						break;
-					case 15:
+					case 15: //*
+						//td = view._proto.setInnerHTML(view, td, record, tableRowId, "chainId", "chainName", "oldActivePrice", "curActivePrice", "newNoChargeBack", "decimal");
+						//cell.setSortValue(record.chainId);
+						
 						td.innerHTML = "<div>" + record.groupId + "</div><div>" + record.groupName + "/" + "</div><div>" + record.subgroupId + "</div><div>" + record.subgroupName + "</div><div align=right style=color:red>" + dollarTerms(record.oldChargeBack) + "</div><div align=right style=color:red>" + dollarTerms(record.curChargeBack) + "</div><div align=right>" + dollarTerms(record.newChargeBack) + "</div>";
 						cell.setSortValue(record.groupId);
 						td.style.verticalAlign = "bottom"
 						break;
-					case 16:
+					case 16: //*
 						td.innerHTML = "<div>" + record.origInvoiceId + "</div><div>" +"/"+ record.origInvoiceLineItemNum + "</div><div align=right style=color:red>" + record.oldSsf + "</div><div align=right style=color:red>" + record.curSsf + "</div><div align=right>" + record.newSsf + "</div>";
 						cell.setSortValue(record.origInvoiceId);
 						td.style.verticalAlign = "bottom"
 						break;
 					case 17:
-						td.innerHTML = "<div>" + record.orgDbtMemoId + "</div><div align=right style=color:red>" + record.oldSf + "</div><div align=right style=color:red>" + record.curSf + "</div><div align=right>" + record.newSf + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "orgDbtMemoId", "h2", "oldSf", "curSf", "newSf", "string", false);
 						cell.setSortValue(record.orgDbtMemoId);
-						td.style.verticalAlign = "bottom"
 						break;
 					case 18:
-						td.innerHTML = "<div>" + record.orgVendorAccAmt + "</div><div align=right style=color:red>" + dollarTerms(record.oldListPrice) + "</div><div align=right style=color:red>" + dollarTerms(record.curListPrice) + "</div><div align=right>" + dollarTerms(record.newListPrice) + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, "orgVendorAccAmt", "h2", "oldListPrice", "curListPrice", "newListPrice", "string", false);
 						cell.setSortValue(record.orgVendorAccAmt);
-						td.style.verticalAlign = "bottom"
 						break;
-					case 19:
+					case 19: //*
 						td.innerHTML = "<div align=right style=color:red>" + dollarTerms(record.oldOverridePrice) + "</div><div align=right style=color:red>" + dollarTerms(record.curOverridePrice) + "</div>";
 						cell.setSortValue(record.oldOverridePrice);
 						

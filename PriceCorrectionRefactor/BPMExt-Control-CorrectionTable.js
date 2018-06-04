@@ -60,7 +60,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					globalSelCbx.addEventListener("change", globalSelCallback);
 				}
 			},
-
 			
 			//<< Performance hacks /////////////////////////////////////////////////////////////////////
 			//>> Utilities /////////////////////////////////////////////////////////////////////////////
@@ -512,29 +511,38 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				Adds the changed style color to the row and creates the undo button which
 				has an on click event to undo the changes
 			*/
-			addChangedStyle: function(view){
-				if(!view._instance.edit.record.isChanged){
-					view._instance.edit.record.isChanged = true;
-					var row = document.getElementById(view._instance.edit.rowId);
-					var record = view._instance.edit.record;
-					var domElt = view._instance.edit.domElt; //document.getElementsByClassName("editableField" + row.id);
-					
-					document.getElementById(view._instance.edit.rowId).classList.add('editedRow');
-					
-					var undoBtn = document.createElement("button");
-					var btnId = 'undoBtn' + row.id;
-					
-					undoBtn.setAttribute('id', btnId);
-					undoBtn.onclick = function(){
-						view._proto.undoChanges(view, row, record, domElt);
+			addChangedStyle: function(view, pageIdx){
+				if(!pageIdx){
+					if(!view._instance.edit.record.isChanged){
+						view._instance.edit.record.isChanged = true;
+						var row = document.getElementById(view._instance.edit.rowId);
+						var record = view._instance.edit.record;
+						var domElt = view._instance.edit.domElt; //document.getElementsByClassName("editableField" + row.id);
+						
+						document.getElementById(view._instance.edit.rowId).classList.add('editedRow');
+						
+						var undoBtn = document.createElement("button");
+						var btnId = 'undoBtn' + row.id;
+						
+						undoBtn.setAttribute('id', btnId);
+						undoBtn.onclick = function(){
+							view._proto.undoChanges(view, row, record, domElt);
+						}
+						var span = document.createElement("span");
+						domClass.add(undoBtn, "btn btn-info btn-xs");
+						domClass.add(span, "btn-label icon fa fa-undo");
+						undoBtn.appendChild(span);
+						
+						var td = document.getElementById(view._instance.edit.rowId).childNodes[1];
+						td.appendChild(undoBtn);
 					}
-					var span = document.createElement("span");
-					domClass.add(undoBtn, "btn btn-info btn-xs");
-					domClass.add(span, "btn-label icon fa fa-undo");
-					undoBtn.appendChild(span);
-					
-					var td = document.getElementById(view._instance.edit.rowId).childNodes[1];
-					td.appendChild(undoBtn);
+				}else{
+					var table = document.getElementsByClassName("table table-bordered")[0].childNodes[1];
+					for(var i = 0; i < table.childNodes.length; i++){
+						var id = table.childNodes[i].id;
+						var row = document.getElementById(id);
+						console.log(row)
+					}
 				}
 			},
 			/*
@@ -1258,44 +1266,43 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				return div;
 			},
 
-			//TODO: Clean this up
-			setInnerHTML: function(view, td, record, tableRowId, h1, h2, v1, v2, v3, type, editable){
+			setInnerHTML: function(view, td, record, tableRowId, colIndex, header, v1, v2, v3, type, editable){
 				var fnFormat;
 				if(type == "decimal"){
 					fnFormat = view._proto.dollarTerms;
 				}else if(type == "percent"){
 					fnFormat = view._proto.percentTerms;
 				}
-				td.innerHTML = "<div class=colgroup><span class=tooltiptext>Customer<div class=littleRight><br>Old WAC<br>Cur WAC<br>New WAC</div></span><div>" + record[h1] + "</div>"
-				if(h2 != "h2"){
-					td.innerHTML += "<div>" + record[h2] + "</div>"
-				}
+				var innerHTML = "";
+				var tooltiptext = view.ui.get("Table").getColumns()[colIndex].label;
+				innerHTML = "<div class=colgroup><span class=tooltiptext>" + String(tooltiptext) + "</span><div>" + header + "</div>"
 				if(type == "string"){
 					
 					if(record[v1] == "" || record[v1] == undefined){
-						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" + "</div>";
+						innerHTML += "<div>" + "&nbsp" + "</div>";
 					}else{
-						td.innerHTML += "<div align=right style=color:red>" + record[v1] + "</div>"
+						innerHTML += "<div class=cellValues>" + record[v1] + "</div>"
 					}
 					if(record[v2] == "" || record[v1] == undefined){
-						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" +  "</div></div>";
+						innerHTML += "<div>" + "&nbsp" +  "</div></div>";
 					}else{
-						td.innerHTML += "<div align=right style=color:red>" + record[v2] + "</div></div>";
+						innerHTML += "<div class=cellValues>" + record[v2] + "</div></div>";
 					}
 				}else{
 					if((record[v1] != null && record[v1] != "") || record[v1] == 0){
-						td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v1]) : record[v1]) + "</div>"
+						innerHTML += "<div class=cellValues>" + (fnFormat ? fnFormat(record[v1]) : record[v1]) + "</div>"
 					}else{
-						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" + "</div>";
+						innerHTML += "<div>" + "&nbsp" + "</div>";
 					}
 					if((record[v2] != null && record[v2] != "") || record[v2] == 0){
-						td.innerHTML += "<div align=right style=color:red>" + (fnFormat ? fnFormat(record[v2]) : record[v2]) + "</div></div>";
+						innerHTML += "<div class=cellValues>" + (fnFormat ? fnFormat(record[v2]) : record[v2]) + "</div></div>";
 					}else{
-						td.innerHTML += "<div align=right style=color:red>" + "&nbsp" +  "</div></div>";
+						innerHTML += "<div>" + "&nbsp" +  "</div></div>";
 					}
 				}
+				td.innerHTML = innerHTML;
 				if(record.isLocked || !editable){
-					td.innerHTML += "<div align=right>"+ (fnFormat ? fnFormat(record[v3]) : record[v3]) + "</div>";	
+					td.innerHTML += "<div class=nonEditableField>"+ (fnFormat ? fnFormat(record[v3]) : record[v3]) + "</div>";	
 				}else{
 					var div = this.createEditableDiv(view, record, v3, type, tableRowId);
 					td.appendChild(div);
@@ -1348,9 +1355,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var dec = ","; // Decimal separator	
 				var record = cell.row.data;
 				var td = cell.td;
+				var colIndex = cell.colIndex;
 				var tableRowId = cell.row.data.invoiceId + cell.row.data.invoiceLineItemNum;
 				td.parentNode.setAttribute('id', tableRowId);
-				switch(cell.colIndex)
+				switch(colIndex)
 				{
 					case 0:
 						if(record.isLocked){
@@ -1370,96 +1378,99 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						this.setupDataToVisualElements(view, record);
 						break;
 					case 1:
-						// single line html creation:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "customerId", "customerName", "oldWac", "curWac", "newWac", "decimal", true);
+						var header = "<div>" + record.customerId + "</div><div>" + record.customerName + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldWac", "curWac", "newWac", "decimal", true);
 						cell.setSortValue(record.customerId);
 						break;
 					case 2:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "customerId", "customerName", "oldWac", "curWac", "newBid", "decimal");
+						var header = "<div>" + record.materialId + "</div><div>" + record.materialName + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldBid", "curBid", "newBid", "decimal");
 						cell.setSortValue(record.materialId);
 						break;
 					case 3:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "pricingDate", "h2", "oldLead", "curLead", "newLead", "int", true);
+						var header = "<div>" + record.pricingDate + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldLead", "curLead", "newLead", "int", true);
 						cell.setSortValue(record.pricingDate);
 						break;
-					case 4: //*
-						td.innerHTML = "<div>" + record.invoiceId +"/"+ "</div><div>" + record.invoiceLineItemNum + "</div><div align=right style=color:red>" + dollarTerms(record.oldPrice) + "</div><div align=right style=color:red>" + dollarTerms(record.curPrice) + "</div><div align=right>" + dollarTerms(record.newPrice) + "</div>";
+					case 4: 
+						var header = "<div>" + record.invoiceId + "/" + "</div>"  +  "<div>" + record.invoiceLineItemNum + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldPrice", "curPrice", "newPrice", "decimal", true);
 						cell.setSortValue(record.invoiceId);
-						td.style.verticalAlign = "bottom"
 						break;
 					case 5:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "supplierId", "supplierName", "oldConRef", "curConRef", "newConRef", "string", true);
+						var header = "<div>" + record.supplierId + "</div><div>" + record.supplierName + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldConRef", "curConRef", "newConRef", "string", true);
 						cell.setSortValue(record.supplierId);
 						break;
-					case 6: //*
-						td.innerHTML = "<div>" + record.billQty + "+ (" + record.retQty + "+" + record.crQty + ")" + "</div><div align=right style=color:red>" + record.oldCbRef + "</div><div align=right style=color:red>" + record.curCbRef + "</div><div align=right>" + record.newCbRef + "</div>";
+					case 6: 
+						var header = "<div>" + record.billQty  + "+ (" + record.retQty + "+" + record.crQty + ")" + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldCbRef", "curCbRef", "newCbRef", "string", true);					
 						cell.setSortValue(record.billQty);
-						td.style.verticalAlign = "bottom"
 						break;
 					case 7:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "rebillQty", "h2", "oldContCogPer", "curContCogPer", "newContCogPer", "percent", true);
+						var header = "<div>" + record.rebillQty + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldContCogPer", "curContCogPer", "newContCogPer", "percent", true);
 						cell.setSortValue(record.rebillQty);
 						break;
 					case 8:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "uom", "h2", "oldItemVarPer", "curItemVarPer", "newItemVarPer", "percent", true);
+						var header = "<div>" + record.uom + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldItemVarPer", "curItemVarPer", "newItemVarPer", "percent", true);
 						cell.setSortValue(record.uom);
 						break;
 					case 9:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "createdOn", "h2", "oldWacCogPer", "curWacCogPer", "newWacCogPer", "percent", true);
+						var header = "<div>" + record.createdOn + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldWacCogPer", "curWacCogPer", "newWacCogPer", "percent", true);
 						cell.setSortValue(record.createdOn);
 						break;
 					case 10:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "dc", "h2", "oldItemMkUpPer", "curItemMkUpPer", "newItemMkUpPer", "percent", true);
+						var header = "<div>" + record.dc + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldItemMkUpPer", "curItemMkUpPer", "newItemMkUpPer", "percent", true);
 						cell.setSortValue(record.dc);
 						break;
 					case 11:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "poNumber", "h2", "oldAwp", "curAwp", "newAwp", "decimal", true);
+						var header = "<div>" + record.poNumber + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldAwp", "curAwp", "newAwp", "decimal", true);
 						cell.setSortValue(record.poNumber);
 						break;
 					case 12:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "ndcUpc", "h2", "oldSellCd", "curSellCd", "newSellCd", "string", false);
+						var header = "<div>" + record.ndcUpc + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSellCd", "curSellCd", "newSellCd", "string", false);
 						cell.setSortValue(record.ndcUpc);
 						break;
 					case 13:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "billType", "h2", "oldNoChargeback", "curNoChargeBack", "newNoChargeBack", "string", true);
+						var header = "<div>" + record.billType + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldNoChargeback", "curNoChargeBack", "newNoChargeBack", "string", true);
 						cell.setSortValue(record.billType);
 						break;
 					case 14:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "chainId", "chainName", "oldActivePrice", "curActivePrice", "newActivePrice", "string", false);
+						var header = "<div>" + record.chainId + "</div><div>" + record.chainName + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldActivePrice", "curActivePrice", "newActivePrice", "string", false);
 						cell.setSortValue(record.chainId);
 						break;
 					case 15: //*
-						//td = view._proto.setInnerHTML(view, td, record, tableRowId, "chainId", "chainName", "oldActivePrice", "curActivePrice", "newNoChargeBack", "decimal");
-						//cell.setSortValue(record.chainId);
-						
-						td.innerHTML = "<div>" + record.groupId + "</div><div>" + record.groupName + "/" + "</div><div>" + record.subgroupId + "</div><div>" + record.subgroupName + "</div><div align=right style=color:red>" + dollarTerms(record.oldChargeBack) + "</div><div align=right style=color:red>" + dollarTerms(record.curChargeBack) + "</div><div align=right>" + dollarTerms(record.newChargeBack) + "</div>";
+						var header = "<div>" + record.groupId + "</div><div>" + record.groupName + "/" + "</div><div>" + record.subgroupId + "</div><div>" + record.subgroupName + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldChargeBack", "curChargeBack", "newChargeBack", "decimal", false);	
 						cell.setSortValue(record.groupId);
-						td.style.verticalAlign = "bottom"
 						break;
-					case 16: //*
-						td.innerHTML = "<div>" + record.origInvoiceId + "</div><div>" +"/"+ record.origInvoiceLineItemNum + "</div><div align=right style=color:red>" + record.oldSsf + "</div><div align=right style=color:red>" + record.curSsf + "</div><div align=right>" + record.newSsf + "</div>";
+					case 16: 
+						var header = "<div>" + record.origInvoiceId + "</div>" + "/" +  "<div>" + record.origInvoiceLineItemNum + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSsf", "curSsf", "newSsf", "int", false);
 						cell.setSortValue(record.origInvoiceId);
-						td.style.verticalAlign = "bottom"
 						break;
 					case 17:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "orgDbtMemoId", "h2", "oldSf", "curSf", "newSf", "string", false);
+						var header = "<div>" + record.orgDbtMemoId + "</div>";						
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSf", "curSf", "newSf", "string", false);
 						cell.setSortValue(record.orgDbtMemoId);
 						break;
 					case 18:
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, "orgVendorAccAmt", "h2", "oldListPrice", "curListPrice", "newListPrice", "string", false);
+						var header = "<div>" + record.orgVendorAccAmt + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldListPrice", "curListPrice", "newListPrice", "string", false);
 						cell.setSortValue(record.orgVendorAccAmt);
 						break;
-					case 19: //*
-						td.innerHTML = "<div align=right style=color:red>" + dollarTerms(record.oldOverridePrice) + "</div><div align=right style=color:red>" + dollarTerms(record.curOverridePrice) + "</div>";
+					case 19:
+						var header = "";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldOverridePrice", "curOverridePrice", "newOverridePrice", "decimal", true);
 						cell.setSortValue(record.oldOverridePrice);
-						
-						if(record.isLocked){
-							td.innerHTML += "<div align=right>"+ dollarTerms(record.newOverridePrice) + "</div>";	
-						}else{
-							var div = this.createEditableDiv(view, record, "newOverridePrice", "decimal", tableRowId);
-							td.appendChild(div);
-							td.style.verticalAlign = "bottom"
-						}
 						break;
 					default:
 						return "H";
@@ -1510,6 +1521,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 
     this.constructor.prototype.load = function ()
     {
+		var view = this;
 		bpmext.ui.loadView(this);
 		
 		//Caching references to often-used CV children to avoid recurring lookup overhead
@@ -1526,6 +1538,26 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		
 		this._proto.setProgress(this, 0);
 		this._proto.getCorrectionRows(this);
+
+		 
+		this._instance.table.constructor.prototype.setPageIndex = this._instance.table.constructor.prototype.setPageIndex2 = function(idx)
+		{
+			var ps = this.context.options.pageSize.get("value");
+			var maxPageIdx = ps > 0 ? Math.ceil(this._instance.list.length() / ps) - 1 : 0;
+			
+			if(idx > maxPageIdx)
+				idx = maxPageIdx;
+			else if(idx < 0)
+				idx = 0;
+			
+			this._instance.pageIdx = idx;
+			
+			if(ps > 0)
+			{
+				this._proto._reloadList(this, true);
+			}
+			view._proto.addChangedStyle(this, this._instance.pageIdx);
+		}
     }
     
     this.constructor.prototype.view = function ()

@@ -402,12 +402,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					rowId: rowId
 				}
 				var newVal = editedElt.innerHTML;
-				
 				// remove commas 
-				if(type == "decimal" || type == "percent"){
+				if((type == "decimal" || type == "percent") && newVal != ""){
 					newVal = Number(newVal.replace(/[^0-9\.-]+/g,""));
 				}
-
 				editorCV.setData(newVal);
 				editedElt.parentElement.insertBefore(editorCV.context.element, editedElt);
 				domClass.add(editedElt, "editing");
@@ -445,9 +443,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						this.addChangedStyle(view);
 					}	
 					//format the visual element value
-					if(type == "decimal"){	
+					if(type == "decimal" && value != null){	
 						value = view._proto.dollarTerms(value);
-					}else if(type == "percent"){
+					}else if(type == "percent" && value != null){
 						value = view._proto.percentTerms(value);
 					}
 					//Update the value in the DOM element in the cell
@@ -473,7 +471,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						if(tdItem.lastElementChild.hasOwnProperty("__originalVal")){
 							if(tdItem.lastElementChild.hasOwnProperty("__propName")){
 								var propName = tdItem.lastElementChild.__propName; 
-								var domElm = tdItem.getElementsByClassName("editableField")[0];
+								var domElm = tdItem.lastElementChild; //tdItem.getElementsByClassName("editableField")[0];
 								var type = domElm.classList[1];
 								
 								this.setRecordPropValue(
@@ -511,37 +509,102 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				Adds the changed style color to the row and creates the undo button which
 				has an on click event to undo the changes
 			*/
-			addChangedStyle: function(view, pageIdx){
-				if(!pageIdx){
-					if(!view._instance.edit.record.isChanged){
-						view._instance.edit.record.isChanged = true;
-						var row = document.getElementById(view._instance.edit.rowId);
-						var record = view._instance.edit.record;
-						var domElt = view._instance.edit.domElt; //document.getElementsByClassName("editableField" + row.id);
-						
-						document.getElementById(view._instance.edit.rowId).classList.add('editedRow');
-						
-						var undoBtn = document.createElement("button");
-						var btnId = 'undoBtn' + row.id;
-						
-						undoBtn.setAttribute('id', btnId);
-						undoBtn.onclick = function(){
-							view._proto.undoChanges(view, row, record, domElt);
-						}
-						var span = document.createElement("span");
-						domClass.add(undoBtn, "btn btn-info btn-xs");
-						domClass.add(span, "btn-label icon fa fa-undo");
-						undoBtn.appendChild(span);
-						
-						var td = document.getElementById(view._instance.edit.rowId).childNodes[1];
-						td.appendChild(undoBtn);
+			addChangedStyle: function(view){
+				if(!view._instance.edit.record.isChanged){
+					view._instance.edit.record.isChanged = true;
+					var row = document.getElementById(view._instance.edit.rowId);
+					var record = view._instance.edit.record;
+					var domElt = view._instance.edit.domElt; //document.getElementsByClassName("editableField" + row.id);
+					
+					document.getElementById(view._instance.edit.rowId).classList.add('editedRow');
+					
+					var undoBtn = document.createElement("button");
+					var btnId = 'undoBtn' + row.id;
+					
+					undoBtn.setAttribute('id', btnId);
+					undoBtn.onclick = function(){
+						view._proto.undoChanges(view, row, record, domElt);
 					}
-				}else{
-					var table = document.getElementsByClassName("table table-bordered")[0].childNodes[1];
-					for(var i = 0; i < table.childNodes.length; i++){
-						var id = table.childNodes[i].id;
+					var span = document.createElement("span");
+					domClass.add(undoBtn, "btn btn-info btn-xs");
+					domClass.add(span, "btn-label icon fa fa-undo");
+					undoBtn.appendChild(span);
+					
+					var td = document.getElementById(view._instance.edit.rowId).childNodes[1];
+					td.appendChild(undoBtn);
+				}
+			},
+			addLockedStyled: function(view, pageIdx){
+				if(pageIdx){
+					var propArray = ["newWac", "newBid", "newLead", "newConRef", "newContCogPer", "newItemVarPer", "newWacCogPer", "newItemMkUpPer", "newAwp", "newNoChargeBack", "newOverridePrice"];
+					var records = view.ui.get("Table").getRecordsOnPage();
+					for(var k = 0; k < records.length; k++){
+						var sel = records[k];
+						var id = sel.invoiceId + sel.invoiceLineItemNum;
 						var row = document.getElementById(id);
-						console.log(row)
+						if(sel.isLocked && row.classList.value.indexOf("lockedRow") == -1){
+							var td = row.childNodes[1];
+							
+							row.setAttribute('class', 'lockedRow');
+							var lockBtn = document.createElement("button");
+							lockBtn.disabled = true;
+							lockBtn.style.backgroundColor = "red";
+							var span = document.createElement("span");
+							
+							domClass.add(lockBtn, "btn btn-default btn-xs");
+							domClass.add(span, "btn-label icon fa fa-lock");
+							
+							lockBtn.appendChild(span);
+							td.appendChild(lockBtn);
+
+							row.classList.remove('editedRow');				
+							var btnId = 'undoBtn' + row.id;
+							var btn = document.getElementById(btnId);
+							if(btn)
+							btn.remove();
+							for(var prop in sel){
+								for(var j = 0; j < propArray.length; j++){
+									if(prop == propArray[j]){
+										propName = prop;
+										var elt = sel.getVisualElement(propName);
+										if(elt == null)
+											continue;
+										
+										var type = elt.__type;										
+										var parent = elt.parentNode;
+										parent.removeChild(elt)
+	
+										var value = sel[propName];
+										if(type == "decimal"){	
+											value = view._proto.dollarTerms(value);
+										}else if(type == "percent"){
+											value = view._proto.percentTerms(value);
+										}
+										parent.innerHTML += "<div class=nonEditableField>" + value + "</div>"
+										//Update record data
+										//view._proto.setRecordPropValue(this, record, propName, value);
+									}
+								}
+							}
+						}	
+					}
+				}
+			},
+			/*
+				Checks if the tooltips should be shown based on the Hide Popup Lables checkbox.
+				Called from search function, and when the table page is changed. 
+			*/
+			toggleTooltip: function(view){
+				var status = view.ui.get("HideTooltips").isChecked();
+				var tooltips = document.getElementsByClassName("tooltiptext");
+				if(status){
+					for(var i = 0; i < tooltips.length; i++){
+						tooltips[i].classList.add("tooltiptextHidden")
+					}
+				}
+				else if(!status){
+					for(var i = 0; i < tooltips.length; i++){
+						tooltips[i].classList.remove("tooltiptextHidden")
 					}
 				}
 			},
@@ -560,7 +623,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				
 				var allRecsLoaded = view._instance.offset >= view.context.options.totalRecords.get("value");
 				view._instance.table.appendRecords2(result, allRecsLoaded);
-				
 				setTimeout(function(){
 					if(!allRecsLoaded)
 					{	
@@ -589,6 +651,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							view.ui.get("Progress").setVisible(false);
 							view.ui.get("ProgressBadge").setVisible(false);
 							view._proto.searchTable(view);
+							//view._proto.addLockedStyled(view, view._instance.pageIdx);
+							//view._proto.toggleTooltip(view);
 						}, 1500);
 					}
 				});
@@ -614,10 +678,22 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var serviceArgs = {
 					params: JSON.stringify(input),
 					load: function(data) {
-						view._proto.onLineItemsResult(view, data.correctionRow.items)
+						if(!data.correctionRow || data.correctionRow.items.length == 0 || data.correctionRow == null){
+							view.ui.get("Submit_Button").setEnabled(false);
+							var alert = view.ui.get("Alerts");
+							alert.context.options.autoFadeDelay.set("value", 0)
+							alert.setVisible(true)
+							alert.appendAlert("No lines returned in this request.", "Please return or close the request.")
+						}else{
+							view._proto.onLineItemsResult(view, data.correctionRow.items);
+						}
 					},
 					error: function(e) {
-						
+						view.ui.get("Submit_Button").setEnabled(false);
+						var alert = view.ui.get("Alerts");
+						alert.context.options.autoFadeDelay.set("value", 0)
+						alert.setVisible(true)
+						alert.appendAlert("The service has failed.", "Admin has been notified.")
 					}
 				}
 				view._proto.setProgressActive(view, true);
@@ -681,9 +757,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								rowId: rowId
 							}
 							var type = elt.classList[1];
-							if(type == "decimal"){	
+							if(type == "decimal" && value != null){	
 								value = view._proto.dollarTerms(value);
-							}else if(type == "percent"){
+							}else if(type == "percent" && value != null){
 								value = view._proto.percentTerms(value);
 							}
 
@@ -703,7 +779,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				Calculates the totals for the Case tab
 			*/
 			calculateSelectedTotals: function(view){
-				var selected = view._instance.table.getSelectedRecords(false);
+				var selected = view._instance.table.getSelectedRecords(true);
 				var ctx = {};
 				
 				if(selected != null && selected.length > 0){
@@ -719,7 +795,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						totals.selectedRebillTotal += selected[i].newPrice * selected[i].rebillQty;
 						totals.selectedLineCount++; // Atleast 1 line is present for this group
 						
-						if (selected[i].newNoChargeBack == null) {
+						if (!selected[i].newNoChargeBack) {
 							totals.selectedCBTotal += ((selected[i].newChargeBack - selected[i].oldChargeBack) * selected[i].rebillQty);	
 						}
 					}
@@ -862,7 +938,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					var rows = view.ui.get("Table").getSelectedRecords(true);
 					var priceSimMaxLength = view.context.options.priceSimMaxLength.get("value");
 					if (rows.length > priceSimMaxLength) {
-						//this.populateModalAlerts("overPriceSimulation", priceSimMaxLength);
+						view._proto.populateModalAlerts(view, "overPriceSimulation", priceSimMaxLength);
 						return false;
 					}
 					else {
@@ -883,7 +959,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						}
 						var input = {
 							selectedCorrectionRowsJSON: JSON.stringify(selectedRowsWithVals),
-							instanceId: "1722", //view.context.bpm.system.instanceId, //using the 'bpm' context, using the options context variable was bringing unnecessary metadata with it
+							instanceId: view.context.options.processInstanceId.get("value"), //using the 'bpm' context, using the options context variable was bringing unnecessary metadata with it
 							isUseOldValues: false //flag to let API know whether this call is being invoked as a background operation (== true) before 'Correct Price' or by user on 'Correct Price' UI (== false)
 						};
 						var serviceArgs = {
@@ -916,8 +992,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 														
 														if(elt == null)
 															continue;
-														
-															var type = elt.classList[1];
+														var type = elt.classList[1];
 														if(type == "decimal"){	
 															value = view._proto.dollarTerms(value);
 														}else if(type == "percent"){
@@ -976,75 +1051,59 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						//console.log("failureArray ", failureArray);
 				   if (!isSuccess) {
 						var failedMessage = "The Price Simulation failed for the Invoice Line Items below.  Therefore, none of the rows were processed.  Please correct the data and try again. \n" + view._proto.getFailedItems(view, failedRows);
-						//this.populateModalAlerts("failure", failedMessage);
+						view._proto.populateModalAlerts(view, "failure", failedMessage);
 				   }
 					return isSuccess;
 				}
 			},
-			determineSubmissionType: function(view) {
-				//var isPartialSubmitData = view.context.options.get("isPartialSubmit");
-				var isPartialSubmit = false;
-				var diff = 0;
-				var filteredSelectedRecords = view.ui.get("Table").getSelectedRecords(true); //mix-match work-around to counter 'myList.get("listAllSelectedIndices")' not taking into account filtered table results
-				var listValues = view.ui.get("Table").getRecords();
-				var selectedListIndices = view.ui.get("Table").getSelectedIndices() 
-				var allSelectedListValues = [];
-				var qualifiedListValues = [];
-				var qualifiedSelectedListValues = [];
-				for (var i = 0; i < listValues.length; i++) {
-					if (!listValues[i].isLocked && listValues[i].rebillQty > 0) {
-						qualifiedListValues.push(listValues[i]);
-					}
-				}
-				for (var j = 0; j < selectedListIndices.length; j++) {
-					for (var k = 0; k < filteredSelectedRecords.length; k++) {
-						if (filteredSelectedRecords[k].invoiceId == listValues[selectedListIndices[j]].invoiceId && filteredSelectedRecords[k].invoiceLineItemNum == listValues[selectedListIndices[j]].invoiceLineItemNum) {
-							allSelectedListValues.push(listValues[selectedListIndices[j]]);
-						}
-						if (filteredSelectedRecords[k].invoiceId == listValues[selectedListIndices[j]].invoiceId && filteredSelectedRecords[k].invoiceLineItemNum == listValues[selectedListIndices[j]].invoiceLineItemNum && !listValues[selectedListIndices[j]].isLocked && listValues[selectedListIndices[j]].rebillQty > 0) {
-							qualifiedSelectedListValues.push(listValues[selectedListIndices[j]]);
-						}
-					}
-				}
-				
-				if (selectedListIndices.length == 0) {
-					view._proto.populateModalAlerts(view, "submitNoRows");
-					return false;
-				}
-				if (qualifiedSelectedListValues.length == 0) {
-					view._proto.populateModalAlerts(view, "unqualifiedSubmit");
-					return false;
-				}
-				if (qualifiedListValues.length > 0 && qualifiedListValues.length > qualifiedSelectedListValues.length) {
-					isPartialSubmit = true;
-					var crTot = 0;
-					var rbTot = 0;
-					var prCRTot = 0;
-					var prRBTot = 0;
-					var crDiff = 0;
-					var rbDiff = 0;
-					for (var i = 0; i < qualifiedListValues.length; i++) {
-						crTot += qualifiedListValues[i].oldPrice * qualifiedListValues[i].rebillQty;
-						rbTot += qualifiedListValues[i].newPrice * qualifiedListValues[i].rebillQty;
-					}
-					for (var j = 0; j < qualifiedSelectedListValues.length; j++) {
-						prCRTot += qualifiedSelectedListValues[j].oldPrice * qualifiedSelectedListValues[j].rebillQty;
-						prRBTot += qualifiedSelectedListValues[j].newPrice * qualifiedSelectedListValues[j].rebillQty;
-					}
-					crDiff = crTot - prCRTot;
-					rbDiff = rbTot - prRBTot;
-					view._proto.showPartialSubmissionModal(view, crTot, prCRTot, crDiff, rbTot, prRBTot, rbDiff);//, selectedTableRows);
-					view.context.options.isPartialSubmit.set("value", isPartialSubmit);
-					view.context.options.selectedCorrectionRows.set("value", allSelectedListValues);
+			/*
+				Called from the Return Request button. Restricts returning the request it has been partially submitted
+			*/
+			checkReturnRequest: function(view) {
+				var isPartialSubmitData = view.context.options.get("isPartialSubmit");
+				if (isPartialSubmitData == true) {
+					view._proto.populateModalAlerts(view, "returnRequestDenial", null);
 					return false;
 				}
 				else {
-					view.context.options.isPartialSubmit = isPartialSubmit;
-					//isPartialSubmitDataCntrl.setData(isPartialSubmit);
-					// this object is passed out from the coach, no service is invoked if not a partial submit
-					view.context.options.selectedCorrectionRows.set("value", allSelectedListValues);
-						return true;
+					view.ui.get("Send_Inquiry_Modal").setVisible(true);
 				}
+			},
+			/*
+				Adds the 'Return Request' comment to the BPM Portal comment stream
+			*/
+			addCommentToStream: function(view) {
+				var comment = view.ui.get("Return_Reason").getData();
+				var navEvent = view.ui.get("Return_Navigation");
+				if (!comment || comment == "") {
+					alert("You must enter a reason for returning this request");
+				}
+				else {
+					var taskId = view.context.bpm.system.taskId;
+					var restContext = view.context.contextRootMap.rest;
+					//console.log("RESTCONTEXT", restContext);
+					var url = restContext + "/v1/social/task/" + taskId + "/comment?message=";
+					var encodedComment = encodeURI(comment);
+					var modalSection = view.ui.get("Send_Inquiry_Modal");
+					var xhr = new XMLHttpRequest();
+					xhr.responseType = "json";
+					xhr.onload = function() {
+						var status = xhr.status;
+						if(status == 200) {
+							var results = xhr.response;
+							//console.log("This call worked:", results);
+						}
+						else {
+							console.log(status);
+							console.log(xhr.response);
+						}
+					}
+					xhr.open("post", url + encodedComment, true);
+					xhr.send(null); 
+					modalSection.hide();
+					view.context.options.crrbRequest.get("value").set("isReturningRequest", true);
+					navEvent.fire();
+				}	
 			},
 			populateModalAlerts: function(view, type, simPriceFailedMsg) {
 				var modalAlert = view.ui.get("Modal_Alert1");
@@ -1091,6 +1150,72 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					modalAlert.setText("This request cannot be returned as some of the lines have already been submitted for correction.");
 					modalAlert.setVisible(true);
 					break;
+				}
+			},
+			/*
+				Called from the submit button. Check if this is a full or partial submit
+			*/
+			determineSubmissionType: function(view) {
+				var isPartialSubmit = false;
+				var diff = 0;
+				var filteredSelectedRecords = view.ui.get("Table").getSelectedRecords(true); //mix-match work-around to counter 'myList.get("listAllSelectedIndices")' not taking into account filtered table results
+				var listValues = view.ui.get("Table").getRecords();
+				var selectedListIndices = view.ui.get("Table").getSelectedIndices() 
+				var allSelectedListValues = [];
+				var qualifiedListValues = [];
+				var qualifiedSelectedListValues = [];
+				for (var i = 0; i < listValues.length; i++) {
+					if (!listValues[i].isLocked && listValues[i].rebillQty > 0) {
+						qualifiedListValues.push(listValues[i]);
+					}
+				}
+				for (var j = 0; j < selectedListIndices.length; j++) {
+					for (var k = 0; k < filteredSelectedRecords.length; k++) {
+						if (filteredSelectedRecords[k].invoiceId == listValues[selectedListIndices[j]].invoiceId && filteredSelectedRecords[k].invoiceLineItemNum == listValues[selectedListIndices[j]].invoiceLineItemNum) {
+							allSelectedListValues.push(listValues[selectedListIndices[j]]);
+						}
+						if (filteredSelectedRecords[k].invoiceId == listValues[selectedListIndices[j]].invoiceId && filteredSelectedRecords[k].invoiceLineItemNum == listValues[selectedListIndices[j]].invoiceLineItemNum && !listValues[selectedListIndices[j]].isLocked && listValues[selectedListIndices[j]].rebillQty > 0) {
+							qualifiedSelectedListValues.push(listValues[selectedListIndices[j]]);
+						}
+					}
+				}
+				
+				if (selectedListIndices.length == 0) {
+					view._proto.populateModalAlerts(view, "submitNoRows", null);
+					return false;
+				}
+				if (qualifiedSelectedListValues.length == 0) {
+					view._proto.populateModalAlerts(view, "unqualifiedSubmit", null);
+					return false;
+				}
+				if (qualifiedListValues.length > 0 && qualifiedListValues.length > qualifiedSelectedListValues.length) {
+					isPartialSubmit = true;
+					var crTot = 0;
+					var rbTot = 0;
+					var prCRTot = 0;
+					var prRBTot = 0;
+					var crDiff = 0;
+					var rbDiff = 0;
+					for (var i = 0; i < qualifiedListValues.length; i++) {
+						crTot += qualifiedListValues[i].oldPrice * qualifiedListValues[i].rebillQty;
+						rbTot += qualifiedListValues[i].newPrice * qualifiedListValues[i].rebillQty;
+					}
+					for (var j = 0; j < qualifiedSelectedListValues.length; j++) {
+						prCRTot += qualifiedSelectedListValues[j].oldPrice * qualifiedSelectedListValues[j].rebillQty;
+						prRBTot += qualifiedSelectedListValues[j].newPrice * qualifiedSelectedListValues[j].rebillQty;
+					}
+					crDiff = crTot - prCRTot;
+					rbDiff = rbTot - prRBTot;
+					view._proto.showPartialSubmissionModal(view, crTot, prCRTot, crDiff, rbTot, prRBTot, rbDiff);//, selectedTableRows);
+					view.context.options.isPartialSubmit.set("value", isPartialSubmit);
+					view.context.options.selectedCorrectionRows.set("value", allSelectedListValues);
+					return false;
+				}
+				else {
+					view.context.options.isPartialSubmit.set("value", isPartialSubmit);
+					// this object is passed out from the coach, no service is invoked if not a partial submit
+					view.context.options.selectedCorrectionRows.set("value", allSelectedListValues);
+						return true;
 				}
 			},
 			showPartialSubmissionModal: function(view, crOA, crTot, crDiff, rbOA, rbTot, rbDiff) {
@@ -1178,6 +1303,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						if (allCRs[i].invoiceId == selectedCRs[j].invoiceId && allCRs[i].invoiceLineItemNum == selectedCRs[j].invoiceLineItemNum) {
 							allCRs[i].isLocked = true;
 							allCRs[i].isSubmitted = true;
+							allCRs[i].isChanged = false;
 
 							// only the displayed rows need the html changes:
 							// add locked style
@@ -1198,6 +1324,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								
 								lockBtn.appendChild(span);
 								td.appendChild(lockBtn);
+
+								row.classList.remove('editedRow');				
+								var btnId = 'undoBtn' + row.id;
+								var btn = document.getElementById(btnId);
+								if(btn)
+								btn.remove();
 								
 								// remove editable field
 								var sel = allCRs[i];
@@ -1208,7 +1340,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 											var elt = sel.getVisualElement(propName);
 											if(elt == null)
 												continue;
-											
+
+											console.log(propName, ": ", elt);
 											var type = elt.__type;										
 											var parent = elt.parentNode;
 											parent.removeChild(elt)
@@ -1219,7 +1352,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 											}else if(type == "percent"){
 												value = view._proto.percentTerms(value);
 											}
-											parent.innerHTML += "<div align=right>" + value + "</div>"
+											parent.innerHTML += "<div align=right>" + value + "</div>";
 											//Update record data
 											//view._proto.setRecordPropValue(this, record, propName, value);
 										}
@@ -1230,6 +1363,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}
 				}
 			},
+			// REMOVE
 			getMappedSubmittedRecords: function(data, id){	
 				for(var i = 0; i < data.length; i++){
 					var item = data[i];
@@ -1238,7 +1372,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}
 				}
 			},
-
 			createEditableDiv: function(view, record, propName, type, tableRowId){
 				var div = document.createElement("div");
 				div.className = "editableField";
@@ -1262,6 +1395,32 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				this.setElementValue(view, propName, div, value);
 				record.setVisualElement(view, propName, div);
 				this.setupChangeHandler(view, type, record, propName, div, tableRowId);
+				
+				return div;
+			},
+			createNonEditableDiv: function(view, record, propName, type, tableRowId){
+				var div = document.createElement("div");
+				div.className = "nonEditableField";
+				div.classList.add(type);
+				var value = record[propName];				
+
+				if(type == "decimal"){	
+					if(!value){value = 0;};
+					value = view._proto.dollarTerms(value);
+				}else if(type == "percent"){
+					if(!value){value = 0;};
+					value = view._proto.percentTerms(value);
+				}else if(!value){
+					value = "";
+				}
+
+				div.__originalVal = record[propName];
+				div.__propName = propName;
+				div.__type = type;
+
+				this.setElementValue(view, propName, div, value);
+				record.setVisualElement(view, propName, div);
+				//this.setupChangeHandler(view, type, record, propName, div, tableRowId);
 				
 				return div;
 			},
@@ -1302,11 +1461,13 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
 				td.innerHTML = innerHTML;
 				if(record.isLocked || !editable){
-					td.innerHTML += "<div class=nonEditableField>"+ (fnFormat ? fnFormat(record[v3]) : record[v3]) + "</div>";	
+					var div = this.createNonEditableDiv(view, record, v3, type, tableRowId);
+					td.appendChild(div);
+					td.style.verticalAlign = "bottom";
 				}else{
 					var div = this.createEditableDiv(view, record, v3, type, tableRowId);
 					td.appendChild(div);
-					td.style.verticalAlign = "bottom"
+					td.style.verticalAlign = "bottom";
 				}
 
 				return td;
@@ -1374,7 +1535,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							lockBtn.appendChild(span);
 							td.appendChild(lockBtn);		
 						}
-						
+						td.style.verticalAlign = "middle";
 						this.setupDataToVisualElements(view, record);
 						break;
 					case 1:
@@ -1384,17 +1545,17 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						break;
 					case 2:
 						var header = "<div>" + record.materialId + "</div><div>" + record.materialName + "</div>";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldBid", "curBid", "newBid", "decimal");
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldBid", "curBid", "newBid", "decimal", true);
 						cell.setSortValue(record.materialId);
 						break;
 					case 3:
-						var header = "<div>" + record.pricingDate + "</div>";
+						var header = "<div>" + dateTerm(record.pricingDate) + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldLead", "curLead", "newLead", "int", true);
 						cell.setSortValue(record.pricingDate);
 						break;
 					case 4: 
 						var header = "<div>" + record.invoiceId + "/" + "</div>"  +  "<div>" + record.invoiceLineItemNum + "</div>";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldPrice", "curPrice", "newPrice", "decimal", true);
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldPrice", "curPrice", "newPrice", "decimal", false);
 						cell.setSortValue(record.invoiceId);
 						break;
 					case 5:
@@ -1404,7 +1565,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						break;
 					case 6: 
 						var header = "<div>" + record.billQty  + "+ (" + record.retQty + "+" + record.crQty + ")" + "</div>";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldCbRef", "curCbRef", "newCbRef", "string", true);					
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldCbRef", "curCbRef", "newCbRef", "string", false);					
 						cell.setSortValue(record.billQty);
 						break;
 					case 7:
@@ -1418,7 +1579,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						cell.setSortValue(record.uom);
 						break;
 					case 9:
-						var header = "<div>" + record.createdOn + "</div>";	
+						var header = "<div>" + dateTerm(record.createdOn) + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldWacCogPer", "curWacCogPer", "newWacCogPer", "percent", true);
 						cell.setSortValue(record.createdOn);
 						break;
@@ -1443,28 +1604,28 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						cell.setSortValue(record.billType);
 						break;
 					case 14:
-						var header = "<div>" + record.chainId + "</div><div>" + record.chainName + "</div>";	
+						var header = "<div>" + record.chainId + " " + record.chainName + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldActivePrice", "curActivePrice", "newActivePrice", "string", false);
 						cell.setSortValue(record.chainId);
 						break;
-					case 15: //*
-						var header = "<div>" + record.groupId + "</div><div>" + record.groupName + "/" + "</div><div>" + record.subgroupId + "</div><div>" + record.subgroupName + "</div>";
+					case 15:
+						var header = "<div>" + record.groupId + " " + record.groupName + "/" + "</div><div>" + record.subgroupId + " " + record.subgroupName + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldChargeBack", "curChargeBack", "newChargeBack", "decimal", false);	
 						cell.setSortValue(record.groupId);
 						break;
 					case 16: 
-						var header = "<div>" + record.origInvoiceId + "</div>" + "/" +  "<div>" + record.origInvoiceLineItemNum + "</div>";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSsf", "curSsf", "newSsf", "int", false);
+						var header = "<div>" + record.origInvoiceId + "/" + "</div>" +  "<div>" + record.origInvoiceLineItemNum + "</div>";
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSsf", "curSsf", "newSsf", "decimal", false);
 						cell.setSortValue(record.origInvoiceId);
 						break;
 					case 17:
 						var header = "<div>" + record.orgDbtMemoId + "</div>";						
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSf", "curSf", "newSf", "string", false);
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSf", "curSf", "newSf", "decimal", false);
 						cell.setSortValue(record.orgDbtMemoId);
 						break;
 					case 18:
-						var header = "<div>" + record.orgVendorAccAmt + "</div>";	
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldListPrice", "curListPrice", "newListPrice", "string", false);
+						var header = "<div>" + dollarTerms(record.orgVendorAccAmt) + "</div>";	
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldListPrice", "curListPrice", "newListPrice", "decimal", false);
 						cell.setSortValue(record.orgVendorAccAmt);
 						break;
 					case 19:
@@ -1556,7 +1717,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			{
 				this._proto._reloadList(this, true);
 			}
-			view._proto.addChangedStyle(this, this._instance.pageIdx);
+			view._proto.addLockedStyled(view, this._instance.pageIdx);
+			view._proto.toggleTooltip(view);
 		}
     }
     

@@ -2,6 +2,13 @@ bpmext_control_InitCorrectionTable = function(domClass)
 {
  	this._instance = {
 		offset: 0,
+		totalRecords: 0,
+		getLockedRows: false,
+		hasLockedRows: false,
+		getAddBillRows: false,
+		hasAddBillRows: false,
+		getNoNetChangeRows: false,
+		hasNoNetChangeRows: false
 	};
 
 	if (!this.constructor.prototype._proto)
@@ -110,6 +117,36 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var year = String(date.getFullYear());
 				var fullDateStr = (forceUTC ? year + '-' + month + '-' + day + 'T00:00:00.000Z' : year + month + day);
 				return fullDateStr;
+			},
+			getLockedRows:function (view, checkedStatus){
+				
+				if(checkedStatus && !view._instance.hasLockedRows){
+					view._proto.setProgressBar(view, true); //TODO: reuse function
+					view._instance.getLockedRows = true;
+					view._proto.getCorrectionRows(view); // add params
+				}else{
+					searchTable();
+				}
+			},
+			getAddBillRows:function (view, checkedStatus){
+				
+				if(checkedStatus && !view._instance.hasAddBillRows){
+					view._proto.setProgressBar(view, true); //TODO: reuse function
+					view._instance.getAddBillRows = true;
+					view._proto.getCorrectionRows(view); // add params
+				}else{
+					searchTable();
+				}
+			},
+			getNoNetChangeRows:function (view, checkedStatus){
+				
+				if(checkedStatus && !view._instance.hasNoNetChangeRows){
+					view._proto.setProgressBar(view, true); //TODO: reuse function
+					view._instance.getNoNetChangeRows = true;
+					view._proto.getCorrectionRows(view); // add params
+				}else{
+					searchTable();
+				}
 			},
 			searchTable: function(view){ 
 				var searchItems = view.ui.get("Criteria").getData().items;
@@ -635,12 +672,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			{	
 				if(result.length != 0)
 				{
-					view._instance.progressCtl.setMaximum(view.context.options.totalRecords.get("value"));
+					view._instance.progressCtl.setMaximum(view._instance.totalRecords);
 				}
 
 				view._instance.offset += view.context.options.numRecords.get("value");
 				
-				var allRecsLoaded = view._instance.offset >= view.context.options.totalRecords.get("value");
+				var allRecsLoaded = view._instance.offset >= view._instance.totalRecords;
 				view._instance.table.appendRecords2(result, allRecsLoaded);
 				setTimeout(function(){
 					if(!allRecsLoaded)
@@ -659,9 +696,20 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						}
 					}				
 					else
-					{	// no more records to get					
+					{	// no more records to get	
+						view._instance.isInitialLoad = false;
+
+						if(view._instance.getLockedRows){
+							view._instance.hasLockedRows = true;
+						}
+						if(view._instance.getAddBillRows){
+							view._instance.hasAddBillRows = true;
+						}
+						if(view._instance.getNoNetChangeRows){
+							view._instance.hasNoNetChangeRows = true;
+						}				
 						view._instance.offset = 0;
-						view._proto.setProgress(view, view.context.options.totalRecords.get("value"));
+						view._proto.setProgress(view, view._instance.totalRecords);
 						view._proto.setProgressActive(view, false);
 						view.ui.get("Button_Layout").setEnabled(true);
 						
@@ -669,7 +717,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							view.ui.get("ProgressIcon").setVisible(false); 
 							view.ui.get("Progress").setVisible(false);
 							view.ui.get("ProgressBadge").setVisible(false);
-							view._proto.searchTable(view);
+							//view._proto.searchTable(view); // TODO: might be able to remove this
 						}, 1500);
 					}
 				});
@@ -688,21 +736,30 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var input = {processInstanceId: view.context.options.processInstanceId.get("value"),
 							lockRequestId: view.context.options.lockRequestId.get("value"),
 							numRecords: view.context.options.numRecords.get("value"),
-							totalRecords: view.context.options.totalRecords.get("value"),
-							rowIndex: view._instance.offset
+							rowIndex: view._instance.offset,
+							isInitialLoad: view._instance.isInitialLoad,
+							isGetLocked: view._instance.getLockedRows,
+							hasGetLocked: view._instance.hasLockedRows,
+							isGetAddBill: view._instance.getAddBillRows,
+							hasGetAddBill: view._instance.hasAddBillRows,
+							isGetNoNetChange: view._instance.getNoNetChangeRows,
+							hasGetNoNetChange: view._instance.hasNoNetChangeRows,
+							caseType: view.context.options.crrbRequest.get("value").get("caseType")
 							};
-							
 				var serviceArgs = {
 					params: JSON.stringify(input),
 					load: function(data) {
-						if(!data.correctionRow || data.correctionRow.items.length == 0 || data.correctionRow == null){
+						console.log("data: ", data);
+						if(!data.taskData || !data.taskData.corrRowResults || data.taskData.corrRowResults.items.length == 0 || data.taskData.corrRowResults == null){
 							view.ui.get("Submit_Button").setEnabled(false);
 							var alert = view.ui.get("Alerts");
 							alert.context.options.autoFadeDelay.set("value", 0)
 							alert.setVisible(true)
 							alert.appendAlert("No lines returned in this request.", "Please return or close the request.")
 						}else{
-							view._proto.onLineItemsResult(view, data.correctionRow.items);
+							
+							view._instance.totalRecords = data.taskData.currentTotalNumberOfRecords;
+							view._proto.onLineItemsResult(view, data.taskData.corrRowResults.items);
 						}
 					},
 					error: function(e) {
@@ -711,6 +768,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						alert.context.options.autoFadeDelay.set("value", 0)
 						alert.setVisible(true)
 						alert.appendAlert("The service has failed.", "Admin has been notified.")
+						console.log(e);
 					}
 				}
 				view._proto.setProgressActive(view, true);
@@ -984,7 +1042,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							load: function(data) {
 								var returned = JSON.stringify(data);
 								view._proto.setProgressBar(view, false);
-								//console.log("data: ", data.selectedCorrectionRows.correctionRows.items[0])
 								var indexedResults = data.selectedCorrectionRows.results.items;
 								var simulatedRows = data.selectedCorrectionRows.correctionRows.items;
 								if (view._proto.checkForSimFailures(view, indexedResults, simulatedRows)) {
@@ -1361,7 +1418,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 											if(elt == null)
 												continue;
 
-											console.log(propName, ": ", elt);
 											var type = elt.__type;										
 											var parent = elt.parentNode;
 											parent.removeChild(elt)
@@ -1677,7 +1733,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						break;
 					case 20:
 						var header = "";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "poNumber", null, "poNumber", "string", true);
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "poNumber", null, "newPurchaseOrder", "string", true);
 						cell.setSortValue(record.oldOverridePrice);
 						break;
 					default:
@@ -1736,6 +1792,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		this._instance.table = this.ui.get("Table");
 		this._instance.progressCtl = this.ui.get("Progress");
 		this._instance.progressBadgeCtl = this.ui.get("ProgressBadge");
+		this._instance.isInitialLoad = this.ui.get("isInitialLoad");
+		
 		//Workaround for table performance & selection detection issue
 		var view = this;
 		

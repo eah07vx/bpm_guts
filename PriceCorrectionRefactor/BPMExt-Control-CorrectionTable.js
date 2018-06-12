@@ -119,9 +119,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				return fullDateStr;
 			},
 			getLockedRows:function (view, checkedStatus){
-				debugger;
 				if(checkedStatus && !view._instance.hasLockedRows){
-					view._proto.lockScreen(view, true);
+					//view._proto.lockScreen(view, true);
+					view.ui.get("Header_Layout").setEnabled(true);
 					view._instance.getLockedRows = true;
 					view._proto.getCorrectionRows(view); // add params
 				}else{
@@ -129,9 +129,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
 			},
 			getAddBillRows:function (view, checkedStatus){
-				debugger;
 				if(checkedStatus && !view._instance.hasAddBillRows){
-					view._proto.lockScreen(view, true);
+					//view._proto.lockScreen(view, true);
+					view.ui.get("Header_Layout").setEnabled(true);
 					view._instance.getAddBillRows = true;
 					view._proto.getCorrectionRows(view); // add params
 				}else{
@@ -139,12 +139,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
 			},
 			getNoNetChangeRows:function (view, checkedStatus){
-				debugger;
 				if(checkedStatus && !view._instance.hasNoNetChangeRows){
-					view._proto.lockScreen(view, true);
+					//view._proto.lockScreen(view, true);
+					view.ui.get("Header_Layout").setEnabled(true);
 					view._instance.getNoNetChangeRows = true;
 					view._proto.getCorrectionRows(view); // add params
-				}else{
+				}else if(!view._instance.isInitialLoad){
 					view._proto.searchTable(view);
 				}
 			},
@@ -155,14 +155,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var showLockedRows = view.ui.get("ShowLockedRows").isChecked();
 				var isPOCorrection = view.context.options.crrbRequest.get("value").get("caseType");
 				
-				if (isPOCorrection == "PO") {
+				/*if (isPOCorrection == "PO") {
 					view.ui.get("IncludeNetChange").setChecked(true);
 					var includeNetChange = view.ui.get("IncludeNetChange").isChecked();
 					view.ui.get("IncludeNetChange").setEnabled(false);
 				}
 				else {
 					var includeNetChange = view.ui.get("IncludeNetChange").isChecked();		
-				}
+				}*/
 
 				view.ui.get("Table").search(function(listItem){
 
@@ -330,7 +330,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				view.ui.get("Search_Modal").hide(true);	
 			},
 			clearSearchFilters: function(view){
-				view.ui.get("Table").clearSearch();
+				view._instance.table.clearSearch();
 				view.ui.get("Criteria").clear();
 				view.ui.get("Search_Modal").hide(true);
 				view._proto.searchTable(view);
@@ -525,8 +525,11 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						);
 					
 					// add the changed style only if the value was changed
-					if(view._instance.edit.domElt.__originalVal != value){
-						this.addChangedStyle(view);
+					if(view._instance.edit.domElt.__originalVal != value && value != null){
+						if(!view._instance.edit.record.isChanged){
+							view._instance.edit.record.isChanged = true;
+							this.addChangedStyle(view);
+						}
 					}	
 					//format the visual element value
 					if(type == "decimal" && value != null){	
@@ -596,34 +599,57 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				has an on click event to undo the changes
 			*/
 			addChangedStyle: function(view){
-				if(!view._instance.edit.record.isChanged){
-					view._instance.edit.record.isChanged = true;
-					var row = document.getElementById(view._instance.edit.rowId);
-					var record = view._instance.edit.record;
-					var domElt = view._instance.edit.domElt; //document.getElementsByClassName("editableField" + row.id);
-					
-					document.getElementById(view._instance.edit.rowId).classList.add('editedRow');
-					
-					var undoBtn = document.createElement("button");
-					var btnId = 'undoBtn' + row.id;
-					
-					undoBtn.setAttribute('id', btnId);
-					undoBtn.onclick = function(){
-						view._proto.undoChanges(view, row, record, domElt);
-					}
-					var span = document.createElement("span");
-					domClass.add(undoBtn, "btn btn-info btn-xs");
-					domClass.add(span, "btn-label icon fa fa-undo");
-					undoBtn.appendChild(span);
-					
-					var td = document.getElementById(view._instance.edit.rowId).childNodes[1];
-					td.appendChild(undoBtn);
+				var row = document.getElementById(view._instance.edit.rowId);
+				var record = view._instance.edit.record;
+				var domElt = view._instance.edit.domElt; //document.getElementsByClassName("editableField" + row.id);
+				
+				document.getElementById(view._instance.edit.rowId).classList.add('editedRow');
+				
+				var undoBtn = document.createElement("button");
+				var btnId = 'undoBtn' + row.id;
+				
+				undoBtn.setAttribute('id', btnId);
+				undoBtn.onclick = function(){
+					view._proto.undoChanges(view, row, record, domElt);
 				}
+				var span = document.createElement("span");
+				domClass.add(undoBtn, "btn btn-info btn-xs");
+				domClass.add(span, "btn-label icon fa fa-undo");
+				undoBtn.appendChild(span);
+				
+				var td = document.getElementById(view._instance.edit.rowId).childNodes[1];
+				td.appendChild(undoBtn);
+			
 			},
+			/*
+				Loops through the current records on the page and adds the "editedRow" class to edited rows.
+				Called when the page is changed to ensure that an edited row gets the css class.  
+			*/
+			updatedChangedStyle: function(view, pageIdx){
+				var records = view._instance.table.getRecordsOnPage();
+				for(var i = 0; i < records.length; i++){
+					var sel = records[i];
+					var id = sel.invoiceId + sel.invoiceLineItemNum;
+					var row = document.getElementById(id);
+					if(sel.isChanged && row.classList.value.indexOf("editedRow") == -1){
+						view._instance.edit = {
+							record: sel,
+							rowId: id
+						}
+						view._proto.addChangedStyle(view); 
+						delete view._instance.edit;
+					}
+				}
+				
+			},
+			/*
+				Loops through the current records on the page and adds the "locked" class to locked rows.
+				Called when the page is changed to ensure that a locked row gets the css class.  
+			*/
 			addLockedStyled: function(view, pageIdx){
 				if(pageIdx){
 					var propArray = ["newWac", "newBid", "newLead", "newConRef", "newContCogPer", "newItemVarPer", "newWacCogPer", "newItemMkUpPer", "newAwp", "newNoChargeBack", "newOverridePrice"];
-					var records = view.ui.get("Table").getRecordsOnPage();
+					var records = view._instance.table.getRecordsOnPage();
 					for(var k = 0; k < records.length; k++){
 						var sel = records[k];
 						var id = sel.invoiceId + sel.invoiceLineItemNum;
@@ -695,6 +721,42 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
 			},
 			/*
+				Updates necessary variables used in getCorrectionRows and resets the progress bar controls.
+				Called when all records have been returned, and when no records are returned on non-initialLoad service call. 
+			*/
+			setCompleteServiceVars: function(view, progressBarValue){
+				view._instance.isInitialLoad = false;
+
+				// if was getting locked rows, set "has" to true
+				if(view._instance.getLockedRows){
+					view._instance.getLockedRows = false;
+					view._instance.hasLockedRows = true;
+				}
+				// if was getting addBill rows, set "has" to true
+				if(view._instance.getAddBillRows){
+					view._instance.getAddBillRows = false;
+					view._instance.hasAddBillRows = true;
+				}
+				// if was getting noNetChange rows, set "has" to true
+				if(view._instance.getNoNetChangeRows){
+					view._instance.getNoNetChangeRows = false;
+					view._instance.hasNoNetChangeRows = true;
+				}				
+				view._instance.offset = 0;
+				// update the progress bar to complete
+				view._proto.setProgressValue(view, progressBarValue);
+				
+				view.ui.get("Button_Layout").setEnabled(true);
+				
+				// remove any screen locks, hide the progress bar, and reset the progress bar values
+				setTimeout(function(){
+					view.ui.get("Header_Layout").setEnabled(true);
+					view._proto.setProgressActive(view, false);
+					view._proto.setProgressValue(view, view._instance.offset);
+					//view._proto.searchTable(view); // TODO: might be able to remove this
+				}, 1500);
+			},
+			/*
 				Appends the returned records to the table and determines if there are any records left 
 				to be returned. If there are, it calls the getCorrectionRows function
 			*/
@@ -721,6 +783,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						else
 						{
 							delete view._instance.cancelled;
+							// TODO: reset bar value to 0 before 
 							view._proto.lockScreen(view, false);
 							view._proto.setProgressActive(view, false);
 							view._instance.table.refreshStats();
@@ -728,31 +791,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}				
 					else
 					{	// no more records to get	
-						view._instance.isInitialLoad = false;
-
-						if(view._instance.getLockedRows){
-							view._instance.getLockedRows = false;
-							view._instance.hasLockedRows = true;
-						}
-						if(view._instance.getAddBillRows){
-							view._instance.getAddBillRows = false;
-							view._instance.hasAddBillRows = true;
-						}
-						if(view._instance.getNoNetChangeRows){
-							view._instance.getNoNetChangeRows = false;
-							view._instance.hasNoNetChangeRows = true;
-						}				
-						view._instance.offset = 0;
-						view._proto.setProgressValue(view, view._instance.totalRecords);
-						
-						view.ui.get("Button_Layout").setEnabled(true);
-						
-						setTimeout(function(){
-							view._proto.lockScreen(view, false);
-							view._proto.setProgressActive(view, false);
-							view._proto.setProgressValue(view, view._instance.offset);
-							//view._proto.searchTable(view); // TODO: might be able to remove this
-						}, 1500);
+						view._proto.setCompleteServiceVars(view, view._instance.totalRecords)
 					}
 				});
 			},
@@ -781,14 +820,18 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							};
 				var serviceArgs = {
 					params: JSON.stringify(input),
-					load: function(data) {
-						console.log("data: ", data);
-						if(!data.taskData || !data.taskData.corrRowResults || data.taskData.corrRowResults.items.length == 0 || data.taskData.corrRowResults == null){
-							view.ui.get("Submit_Button").setEnabled(false);
-							var alert = view.ui.get("Alerts");
-							alert.context.options.autoFadeDelay.set("value", 0)
-							alert.setVisible(true)
-							alert.appendAlert("No lines returned in this request.", "Please return or close the request.")
+					load: function(data) {						
+						if(!data.taskData || !data.taskData.corrRowResults || !data.taskData.corrRowResults.items || data.taskData.corrRowResults.items.length <= 0 || data.taskData.corrRowResults.items[0] == null){
+							if(view._instance.isInitialLoad){
+								view.ui.get("Submit_Button").setEnabled(false);
+								var alert = view.ui.get("Alerts");
+								alert.context.options.autoFadeDelay.set("value", 0);
+								alert.setVisible(true);
+								alert.appendAlert("No lines returned in this request.", "Please return or close the request.");
+							}else{
+								view._instance.progressCtl.setMaximum(100);
+								view._proto.setCompleteServiceVars(view, 100);
+							}
 						}else{
 							
 							view._instance.totalRecords = data.taskData.currentTotalNumberOfRecords;
@@ -806,6 +849,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
 				view._proto.setProgressActive(view, true);
 				view.context.options.taskDataService(serviceArgs);
+				view.ui.get("Header_Layout").setEnabled(false);
 			},
 			/*
 				Called from the Mass Update button click event and opens the update modal
@@ -813,7 +857,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			*/
 			openRecordUpdateDialog: function(view)
 			{
-				if(view.ui.get("Table").getSelectedRecordCount(true) > 0)
+				if(view._instance.table.getSelectedRecordCount(true) > 0)
 				{
 					view.ui.get("Mass_Update_Modal").setVisible(true);
 				}
@@ -825,7 +869,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			*/
 			updateRecords: function(view)
 			{
-				var selected = view.ui.get("Table").getSelectedRecords(true);
+				var selected = view._instance.table.getSelectedRecords(true);
 				var section = view.ui.get("UpdateFieldHolder"); // the parent layout in the modal
 				//var hLayouts = [];
 				var vLayouts = this.getChildViews(view, section); // the two child layouts in the "UpdateFieldHolder" layout
@@ -837,9 +881,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						var hl = current.context.getSubview(subviewId)[0];
 						var subCV = this.getChildView(view, hl); // the subCv is the text control
 						var propName = subCV.context.options._metadata.helpText.get("value");
-						
+						console.log("propName: ", propName)
 						for(var j = 0; j < selected.length; j++){
 							var sel = selected[j];
+							sel.isChanged = true;
 							var value;
 							
 							if(subCV.isEnabled()){
@@ -847,6 +892,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							}else if(!subCV.isEnabled()){
 								value = null;
 							}
+							console.log("value: ", value);
 							sel[propName] = value;
 							
 							if(!sel.getVisualElement)
@@ -859,29 +905,23 @@ bpmext_control_InitCorrectionTable = function(domClass)
 
 							var td = elt.parentElement;
 							var rowId = td.parentElement.id;
-							
-							view._instance.edit = {
-								record: sel,
-								rowId: rowId
-							}
+
 							var type = elt.classList[1];
 							if(type == "decimal" && value != null){	
 								value = view._proto.dollarTerms(value);
 							}else if(type == "percent" && value != null){
 								value = view._proto.percentTerms(value);
 							}
-
-							this.setElementValue(view, propName, elt, value);
-							this.addChangedStyle(view);
 							
-							delete view._instance.edit;
+							this.setElementValue(view, propName, elt, value);							
 						}
 						subCV.setData(null); //Reset the field to null so it's empty next time						
 					}
 				}
+
+				view._proto.updatedChangedStyle(view, view._instance.table.getPageIndex());
 				
 				view.ui.get("Mass_Update_Modal").setVisible(false, true);
-				//view._instance.table.setAllRecordsSelected(false, true);
 			},
 			/*
 				Calculates the totals for the Case tab
@@ -1041,9 +1081,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 
 			},
 			simulatePrice: function(view){
-				if (view.ui.get("Table").getSelectedIndices().length > 0){
+				if (view._instance.table.getSelectedIndices().length > 0){
 				
-					var rows = view.ui.get("Table").getSelectedRecords(true);
+					var rows = view._instance.table.getSelectedRecords(true);
 					var priceSimMaxLength = view.context.options.priceSimMaxLength.get("value");
 					if (rows.length > priceSimMaxLength) {
 						view._proto.populateModalAlerts(view, "overPriceSimulation", priceSimMaxLength);
@@ -1052,9 +1092,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					else {
 						view._proto.setProgressValue(view, 100);
 						view._proto.lockScreen(view, true);
-						var selected = view.ui.get("Table").getSelectedRecords(true); //mix-match work-around to counter 'myList.get("listAllSelectedIndices")' not taking into account filtered table results
-						var list = view.ui.get("Table").getRecords();
-						var indices = view.ui.get("Table").getSelectedIndices()
+						var selected = view._instance.table.getSelectedRecords(true); //mix-match work-around to counter 'myList.get("listAllSelectedIndices")' not taking into account filtered table results
+						var list = view._instance.table.getRecords();
+						var indices = view._instance.table.getSelectedIndices()
 						var selectedRowsWithVals = [];
 						if (indices && indices.length > 0) {
 							for (var i = 0; i < indices.length; i++) {
@@ -1118,7 +1158,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								}
 							},
 							error: function(e) {
-								//console.log("service call failed:", e);
+								console.log("service call failed:", e);
 								view._proto.populateModalAlerts(view, "systemError", null);
 								view._proto.lockScreen(view, false);
 							}
@@ -1145,10 +1185,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var failedRows = [];
 				var failedItem = "";
 				if (results && results.length > 0) {
-					//console.log("check for sim failures ", JSON.stringify(results));
 					for (var i = 0; i < results.length; i++) {
 						if (results[i].status == "failure") {
-							//console.log("failure at sim", results[i].recordKeys.items);
 									isSuccess = false;
 									var keys = results[i].recordKeys.items;
 							for (var j = 0; j < keys.length; j++) {
@@ -1156,7 +1194,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							}
 						}
 					}
-						//console.log("failureArray ", failureArray);
 				   if (!isSuccess) {
 						var failedMessage = "The Price Simulation failed for the Invoice Line Items below.  Therefore, none of the rows were processed.  Please correct the data and try again. \n" + view._proto.getFailedItems(view, failedRows);
 						view._proto.populateModalAlerts(view, "failure", failedMessage);
@@ -1168,7 +1205,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				Called from the Return Request button. Restricts returning the request it has been partially submitted
 			*/
 			checkReturnRequest: function(view) {
-				var isPartialSubmitData = view.context.options.get("isPartialSubmit");
+				var isPartialSubmitData = view.context.options.isPartialSubmit.get("value");
 				if (isPartialSubmitData == true) {
 					view._proto.populateModalAlerts(view, "returnRequestDenial", null);
 					return false;
@@ -1189,7 +1226,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				else {
 					var taskId = view.context.bpm.system.taskId;
 					var restContext = view.context.contextRootMap.rest;
-					//console.log("RESTCONTEXT", restContext);
 					var url = restContext + "/v1/social/task/" + taskId + "/comment?message=";
 					var encodedComment = encodeURI(comment);
 					var modalSection = view.ui.get("Send_Inquiry_Modal");
@@ -1199,7 +1235,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						var status = xhr.status;
 						if(status == 200) {
 							var results = xhr.response;
-							//console.log("This call worked:", results);
 						}
 						else {
 							console.log(status);
@@ -1266,9 +1301,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			determineSubmissionType: function(view) {
 				var isPartialSubmit = false;
 				var diff = 0;
-				var filteredSelectedRecords = view.ui.get("Table").getSelectedRecords(true); //mix-match work-around to counter 'myList.get("listAllSelectedIndices")' not taking into account filtered table results
-				var listValues = view.ui.get("Table").getRecords();
-				var selectedListIndices = view.ui.get("Table").getSelectedIndices() 
+				var filteredSelectedRecords = view._instance.table.getSelectedRecords(true); //mix-match work-around to counter 'myList.get("listAllSelectedIndices")' not taking into account filtered table results
+				var listValues = view._instance.table.getRecords();
+				var selectedListIndices = view._instance.table.getSelectedIndices() 
 				var allSelectedListValues = [];
 				var qualifiedListValues = [];
 				var qualifiedSelectedListValues = [];
@@ -1349,7 +1384,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			},
 			executePartialSubmission: function(view) {
 				var instanceId = view.context.options.processInstanceId.get("value");
-				var selectedCorrectionRows = view.ui.get("Table").getSelectedRecords(true);
+				var selectedCorrectionRows = view._instance.table.getSelectedRecords(true);
 				//var list = view.ui.get("Table").getRecords();
 				//var indices = view.ui.get("Table").getSelectedIndices();
 				var actionableCRData = [];	
@@ -1555,25 +1590,25 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				if(type == "string"){
 					
 					if(record[v1] == "" || record[v1] == undefined){
-						innerHTML += "<div>" + "&nbsp" + "</div>";
+						innerHTML += "<div>" + "&nbsp;" + "</div>";
 					}else{
 						innerHTML += "<div class=cellValues1>" + record[v1] + "</div>"
 					}
 					if(!record[v2] || record[v2] == "" || record[v1] == undefined){
-						innerHTML += "<div>" + "&nbsp" +  "</div></div>";
+						innerHTML += "<div>" + "&nbsp;" +  "</div></div>";
 					}else{
 						innerHTML += "<div class=cellValues2>" + record[v2] + "</div></div>";
 					}
-				}else{
+				}else{					
 					if((record[v1] != null && record[v1] != "") || record[v1] == 0){
 						innerHTML += "<div class=cellValues1>" + (fnFormat ? fnFormat(record[v1]) : record[v1]) + "</div>"
 					}else{
-						innerHTML += "<div>" + "&nbsp" + "</div>";
+						innerHTML += "<div>" + "&nbsp;" + "</div>";
 					}
 					if((record[v2] != null && record[v2] != "") || record[v2] == 0){
 						innerHTML += "<div class=cellValues2>" + (fnFormat ? fnFormat(record[v2]) : record[v2]) + "</div></div>";
 					}else{
-						innerHTML += "<div>" + "&nbsp" +  "</div></div>";
+						innerHTML += "<div>" + "&nbsp;" +  "</div></div>";
 					}
 				}
 				td.innerHTML = innerHTML;
@@ -1590,6 +1625,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				return td;
 			},
 			percentTerms: function(nStr) {
+				if(nStr == null || nStr == undefined || nStr == NaN){
+					return "&nbsp;";
+				}
 				nStr = Number.parseFloat(nStr).toFixed(3);
 				nStr += '';
 				var x = nStr.split('.');
@@ -1604,6 +1642,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			},
 
 			dollarTerms: function(nStr) {
+				if(nStr == null || nStr == undefined || nStr == NaN){
+					return "&nbsp;";
+				}
 				nStr = Number.parseFloat(nStr).toFixed(2);
 				nStr += '';
 				var x = nStr.split('.');
@@ -1683,7 +1724,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						break;
 					case 3:
 						var header = "<div class=cellHeader>" + dateTerms(record.pricingDate) + "</div>";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldLead", "curLead", "newLead", "int", true);
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldLead", "curLead", "newLead", "string", true);
 						cell.setSortValue(record.pricingDate);
 						break;
 					case 4: 
@@ -1824,6 +1865,13 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		this._instance.progressCtl = this.ui.get("Progress");
 		this._instance.progressBadgeCtl = this.ui.get("ProgressBadge");
 		this._instance.isInitialLoad = this.context.options.isInitialLoad.get("value");
+		var isPOCorrection = view.context.options.crrbRequest.get("value").get("caseType");
+
+		if(isPOCorrection == "PO"){
+			view._instance.hasNoNetChangeRows = true;
+			view.ui.get("IncludeNetChange").setChecked(true);
+			view.ui.get("IncludeNetChange").setEnabled(false);
+		}
 		
 		//Workaround for table performance & selection detection issue
 		var view = this;
@@ -1853,6 +1901,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				this._proto._reloadList(this, true);
 			}
 			view._proto.addLockedStyled(view, this._instance.pageIdx);
+			view._proto.updatedChangedStyle(view, this._instance.pageIdx);
 			view._proto.toggleTooltip(view);
 		}
     }

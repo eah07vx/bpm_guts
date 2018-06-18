@@ -8,7 +8,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		getAddBillRows: false,
 		hasAddBillRows: false,
 		getNoNetChangeRows: false,
-		hasNoNetChangeRows: false
+		hasNoNetChangeRows: false,
+		tableRecords: []
 	};
 
 	if (!this.constructor.prototype._proto)
@@ -42,6 +43,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						//Temporarily replacing reload w/ NOOP 
 						this.constructor.prototype._proto._reloadList = function(){};
 						//Appending the records to the table (now computationally cheaper)
+						
 						this.appendRecords(records);
 					}
 					finally
@@ -384,7 +386,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			setProgressActive: function(view, active)
 			{
 				//view._instance.progressCtl.context.options.active.set("value", active);
-				view.ui.get("ProgressIcon").setVisible(active); 
+				//view.ui.get("ProgressIcon").setVisible(active); 
 				view.ui.get("Progress").setVisible(active);
 				view.ui.get("ProgressBadge").setVisible(active);
 			},
@@ -449,7 +451,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				record[propName] = value;
 				
 				//Recompute total associated with this record property
-				this.calculateSelectedTotals(view, propName);
+				this.calculateSelectedTotals(view);
 			},
 			/*
 				Adds click support on a DOM element for in-place editing
@@ -468,7 +470,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			showValueEditor: function(view, type, record, propName, editedElt, rowId)
 			{
 				if(view._instance.editor != null)
-					throw new Error("Editor already in use");
+					console.log("Editor already in use");
 				
 				//Assumes editor CV naming convention <type>Editor
 				var editorId = type + "Editor";
@@ -523,9 +525,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						view._instance.edit.propName,
 						value
 						);
-					
 					// add the changed style only if the value was changed
-					if(view._instance.edit.domElt.__originalVal != value && value != null){
+					if(view._instance.edit.domElt.__originalVal != value){
 						if(!view._instance.edit.record.isChanged){
 							view._instance.edit.record.isChanged = true;
 							this.addChangedStyle(view);
@@ -769,10 +770,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 
 				view._instance.offset += view.context.options.numRecords.get("value");
 				
-				var allRecsLoaded = view._instance.offset >= view._instance.totalRecords;
-				view._instance.table.appendRecords2(result, allRecsLoaded);
+				view._instance.allRecsLoaded = view._instance.offset >= view._instance.totalRecords;
+				
+				//Array.prototype.push.apply(view._instance.tableRecords, result);
+				view._instance.table.appendRecords2(result, view._instance.allRecsLoaded);
 				setTimeout(function(){
-					if(!allRecsLoaded)
+
+					//console.log("setTimeout start", (new Date()).toISOString());
+					if(!view._instance.allRecsLoaded)
 					{	
 						view._proto.setProgressValue(view, view._instance.offset);
 						
@@ -791,9 +796,16 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}				
 					else
 					{	// no more records to get	
-						view._proto.setCompleteServiceVars(view, view._instance.totalRecords)
+					
+						//view._instance.table.appendRecords(view._instance.tableRecords);
+						//view._proto.appendRecordsLight(view._instance.table, view._instance.tableRecords);
+						view._proto.setCompleteServiceVars(view, view._instance.totalRecords);
+						view._proto.calculateSelectedTotals(view);
+						view._proto.calculateCaseTotals(view);
 					}
+					//console.log("setTimeout end", (new Date()).toISOString());
 				});
+				
 			},
 			/*
 				Calls the service that returns data for the correction rows table. It is called onLoad
@@ -820,7 +832,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							};
 				var serviceArgs = {
 					params: JSON.stringify(input),
-					load: function(data) {						
+					load: function(data) {	
+						var d2 = new Date();
+						console.log("data returned: ", d2.toISOString());				
 						if(!data.taskData || !data.taskData.corrRowResults || !data.taskData.corrRowResults.items || data.taskData.corrRowResults.items.length <= 0 || data.taskData.corrRowResults.items[0] == null){
 							if(view._instance.isInitialLoad){
 								view.ui.get("Submit_Button").setEnabled(false);
@@ -848,8 +862,16 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}
 				}
 				view._proto.setProgressActive(view, true);
+				var d1 = new Date();
+				console.log("service called ", d1.toISOString());	
 				view.context.options.taskDataService(serviceArgs);
 				view.ui.get("Header_Layout").setEnabled(false);
+			},
+			appendRecordsLight: function(table, elts){
+				for(var i = 0; i < elts.length; i++)
+            	{
+                	table._instance.list.add(elts[i]);
+				}
 			},
 			/*
 				Called from the Mass Update button click event and opens the update modal
@@ -881,7 +903,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						var hl = current.context.getSubview(subviewId)[0];
 						var subCV = this.getChildView(view, hl); // the subCv is the text control
 						var propName = subCV.context.options._metadata.helpText.get("value");
-						console.log("propName: ", propName)
 						for(var j = 0; j < selected.length; j++){
 							var sel = selected[j];
 							sel.isChanged = true;
@@ -892,7 +913,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							}else if(!subCV.isEnabled()){
 								value = null;
 							}
-							console.log("value: ", value);
 							sel[propName] = value;
 							
 							if(!sel.getVisualElement)
@@ -929,15 +949,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			calculateSelectedTotals: function(view){
 				var selected = view._instance.table.getSelectedRecords(true);
 				var ctx = {};
-				
+				var totals = {};
+				totals.selectedCreditTotal = 0;
+				totals.selectedRebillTotal = 0;
+				totals.selectedNetDiff = 0; // totals.selectedRebillTotal - totals.selectedCreditTotal;
+				totals.selectedCBTotal = 0;
+				totals.selectedLineCount = 0;
+				console.log("total: ", totals);
 				if(selected != null && selected.length > 0){
-					var totals = {};
-					totals.selectedCreditTotal = 0;
-					totals.selectedRebillTotal = 0;
-					totals.selectedNetDiff = 0; // totals.selectedRebillTotal - totals.selectedCreditTotal;
-					totals.selectedCBTotal = 0;
-					totals.selectedLineCount = 0;
-					
 					for(var i = 0; i < selected.length; i++){
 						totals.selectedCreditTotal += selected[i].oldPrice * selected[i].rebillQty;
 						totals.selectedRebillTotal += selected[i].newPrice * selected[i].rebillQty;
@@ -948,19 +967,35 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						}
 					}
 					totals.selectedNetDiff = totals.selectedCreditTotal - totals.selectedRebillTotal;
-					
-					view.ui.get("Selected_Credit_Total").setData(totals.selectedCreditTotal);
-					view.ui.get("Selected_Rebill_Total").setData(totals.selectedRebillTotal);
-					view.ui.get("Selected_Net_Difference").setData(totals.selectedNetDiff);
-					view.ui.get("Selected_CB_Total").setData(totals.selectedCBTotal);
-					view.ui.get("Selected_Lines_Count").setData(totals.selectedLineCount);
 				}
+				view.ui.get("Selected_Credit_Total").setData(totals.selectedCreditTotal);
+				view.ui.get("Selected_Rebill_Total").setData(totals.selectedRebillTotal);
+				view.ui.get("Selected_Net_Difference").setData(totals.selectedNetDiff);
+				view.ui.get("Selected_CB_Total").setData(totals.selectedCBTotal);
+				view.ui.get("Selected_Lines_Count").setData(totals.selectedLineCount);
+			},
+			calculateCaseTotals: function(view){
+				var records = view._instance.table.getRecords();
+				var creditTotal = 0;
+				var rebillTotal = 0;
+				var cbTotal = 0;
+
+				for(var i = 0; i < records.length; i++){
+					creditTotal += (records[i].oldPrice * records[i].rebillQty);
+					rebillTotal += (records[i].newPrice * records[i].rebillQty);
+					cbTotal += (records[i].newNoChargeBack == null || records[i].newNoChargeBack == "" ? (records[i].newNoChargeBack - records[i].oldChargeBack) * records[i].rebillQty :0);
+				}
+				view.ui.get("Credit_Total").setData(creditTotal);
+				view.ui.get("Rebill_Total").setData(rebillTotal);
+				view.ui.get("Net_Difference").setData(creditTotal-rebillTotal);
+				view.ui.get("CB_Total").setData(cbTotal);
 			},
 			/*
 				Called when a new record is selected and when a tab is switched. Calculates 
 				various totals from the selected records
 			*/
 			groupByCalc: function(view){
+				
 				var tabIndex = view.ui.get("TotalTab").getCurrentPane();
 				var items = view._instance.table.getRecords();
 				
@@ -971,9 +1006,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				
 				switch (tabIndex){
 					case 0:
-						view.ui.get("Credit_Total").recalculate();
-						view.ui.get("Rebill_Total").recalculate();
-						view.ui.get("CB_Total").recalculate();
+						//view.ui.get("Credit_Total").recalculate();
+						//view.ui.get("Rebill_Total").recalculate();
+						//view.ui.get("CB_Total").recalculate();
 						view._proto.calculateSelectedTotals(view);
 						return;
 					case 1:
@@ -1146,7 +1181,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 														}else if(type == "percent" && value != null){
 															value = view._proto.percentTerms(value);
 														}
-														
+														//view._proto.setRecordPropValue(view, sel, propName, value);
+
 														view._proto.setElementValue(view, propName, elt, value);
 													}
 												}
@@ -1155,6 +1191,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 										}
 									}
 									view._proto.populateModalAlerts(view, "success", null);
+									view._proto.calculateSelectedTotals(view);  
 								}
 							},
 							error: function(e) {
@@ -1163,7 +1200,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								view._proto.lockScreen(view, false);
 							}
 						}
-						setTimeout(function(){view.context.options.simulatePriceService(serviceArgs);}, 100);    
+						setTimeout(function(){view.context.options.simulatePriceService(serviceArgs);}, 100); 
+						 
 					}
 				}
 				else{
@@ -1809,7 +1847,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						break;
 					case 20:
 						var header = "";
-						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "poNumber", null, "newPurchaseOrder", "string", true);
+						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "poNumber", null, "consolidatedPONumber", "string", true);
 						cell.setSortValue(record.oldOverridePrice);
 						break;
 					default:
@@ -1874,7 +1912,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		}
 		
 		//Workaround for table performance & selection detection issue
-		var view = this;
+		var _this = this;
 		
 		this._proto.fixTable(this, this._instance.table, function(){
 			view._proto.calculateSelectedTotals(view);
@@ -1883,7 +1921,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		this._proto.setProgressValue(this, 0);
 		this._proto.getCorrectionRows(this);
 
-		 
+		// OTHER HACKS 
 		this._instance.table.constructor.prototype.setPageIndex = this._instance.table.constructor.prototype.setPageIndex2 = function(idx)
 		{
 			var ps = this.context.options.pageSize.get("value");
@@ -1900,12 +1938,35 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			{
 				this._proto._reloadList(this, true);
 			}
-			view._proto.addLockedStyled(view, this._instance.pageIdx);
-			view._proto.updatedChangedStyle(view, this._instance.pageIdx);
-			view._proto.toggleTooltip(view);
+			_this._proto.addLockedStyled(view, this._instance.pageIdx);
+			_this._proto.updatedChangedStyle(view, this._instance.pageIdx);
+			_this._proto.toggleTooltip(view);
+		}
+		this._instance.table._proto._setDisablerHeight = this._instance.table._proto._setDisablerHeight2 = function(view, height)
+		{
+			if(_this._instance.allRecsLoaded){
+				console.log("disabler height");
+				if (view._instance.disabler && view._instance.outerBody && view._instance.scrollableArea && view._instance.headerRow && view._instance.heading)
+                {
+                    if (height != null && height != "")
+                    {
+                        view._instance.disabler.style.top = view._instance.heading.clientHeight + 55 + "px";
+                        view._instance.disabler.style.width = "auto";
+                        view._instance.disabler.style.left = "0px";
+                        view._instance.disabler.style.right = (view._instance.outerBody.clientWidth - view._instance.scrollableArea.offsetWidth)/2 + view._instance.scrollableArea.offsetWidth - view._instance.scrollableArea.clientWidth + "px";
+                    }
+                    else
+                    {
+                        view._instance.disabler.style.top = ((view._instance.outerBody.clientHeight - view._instance.scrollableArea.clientHeight)/2) + view._instance.headerRow.clientHeight + view._instance.heading.clientHeight + "px";
+                        view._instance.disabler.style.width = "100%";
+                        view._instance.disabler.style.right = "0px";
+                    }
+                }
+			}
 		}
     }
-    
+	
+	
     this.constructor.prototype.view = function ()
     {
     }

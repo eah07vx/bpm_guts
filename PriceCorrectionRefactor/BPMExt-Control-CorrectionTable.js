@@ -9,7 +9,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		hasAddBillRows: false,
 		getNoNetChangeRows: false,
 		hasNoNetChangeRows: false,
-		tableRecords: []
+		tableRecords: [],
+		isContinue: false
 	};
 
 	if (!this.constructor.prototype._proto)
@@ -721,6 +722,27 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}
 				}
 			},
+			cancelLargeCall: function(view){
+				view.ui.get("Large_Call_Modal").setVisible(false);
+				view._instance.offset = 0;
+				// update the progress bar to complete
+				view._proto.setProgressValue(view, 100);
+				
+				view.ui.get("Return_Request").setEnabled(true);
+				view.ui.get("Manual_Close").setEnabled(true);
+				// remove any screen locks, hide the progress bar, and reset the progress bar values
+				setTimeout(function(){
+					//view.ui.get("Return_Request").setEnabled(true);
+					view._proto.setProgressActive(view, false);
+					view._proto.setProgressValue(view, view._instance.offset);
+					//view._proto.searchTable(view); // TODO: might be able to remove this
+				}, 1500);
+			},
+			continueLargeCall: function(view){
+				view._instance.isContinue = true;
+				view.ui.get("Large_Call_Modal").setVisible(false);
+				view._proto.getCorrectionRows(view);
+			},
 			/*
 				Updates necessary variables used in getCorrectionRows and resets the progress bar controls.
 				Called when all records have been returned, and when no records are returned on non-initialLoad service call. 
@@ -768,7 +790,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					view._instance.progressCtl.setMaximum(view._instance.totalRecords);
 				}
 
-				view._instance.offset += view.context.options.numRecords.get("value");
+				view._instance.offset += view._instance.numRecords;
 				
 				view._instance.allRecsLoaded = view._instance.offset >= view._instance.totalRecords;
 				
@@ -780,18 +802,22 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					if(!view._instance.allRecsLoaded)
 					{	
 						view._proto.setProgressValue(view, view._instance.offset);
-						
-						if(!view._instance.cancelled)
-						{
-							view._proto.getCorrectionRows(view);
-						}
-						else
-						{
-							delete view._instance.cancelled;
-							// TODO: reset bar value to 0 before 
-							view._proto.lockScreen(view, false);
-							view._proto.setProgressActive(view, false);
-							view._instance.table.refreshStats();
+						if(view._instance.totalRecords >= 20000 && !view._instance.isContinue){
+							view.ui.get("Large_Call_Modal").setVisible(true);
+							// add time estimate
+						}else{
+							if(!view._instance.cancelled)
+							{
+								view._proto.getCorrectionRows(view);
+							}
+							else
+							{
+								delete view._instance.cancelled;
+								// TODO: reset bar value to 0 before 
+								view._proto.lockScreen(view, false);
+								view._proto.setProgressActive(view, false);
+								view._instance.table.refreshStats();
+							}
 						}
 					}				
 					else
@@ -816,10 +842,15 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				{
 					view._proto.setProgressValue(view, 0);
 					this.resetMappedRecords(view);
+					if(view._instance.isInitialLoad){
+						view._instance.numRecords = 250;
+					}
+				}else{
+					view._instance.numRecords = view.context.options.numRecords.get("value");
 				}
 				var input = {processInstanceId: view.context.options.processInstanceId.get("value"),
 							lockRequestId: view.context.options.lockRequestId.get("value"),
-							numRecords: view.context.options.numRecords.get("value"),
+							numRecords: view._instance.numRecords,
 							rowIndex: view._instance.offset,
 							isInitialLoad: view._instance.isInitialLoad,
 							isGetLocked: view._instance.getLockedRows,
@@ -1331,6 +1362,18 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					modalAlert.setText("This request cannot be returned as some of the lines have already been submitted for correction.");
 					modalAlert.setVisible(true);
 					break;
+					case "partialSubmissionSuccess":
+					modalAlert.setColorStyle("G");		
+					modalAlert.setTitle("Partial Submission Success!");
+					modalAlert.setText("The selected rows have been submitted successfully. These rows are now locked.");
+					modalAlert.setVisible(true);
+					break;
+					case "partialSubmissionFailure":
+					modalAlert.setColorStyle("G");		
+					modalAlert.setTitle("Partial Submission Failed!");
+					modalAlert.setText("The Partial Submission was unsuccessful due to a service failure, your systems administrator has been notified.");
+					modalAlert.setVisible(true);
+					break;
 				}
 			},
 			/*
@@ -1467,9 +1510,11 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						view._proto.searchTable(view);
 						view._proto.addLockedStyled(view, view._instance.table.getPageIndex());
 						view._proto.toggleTooltip(view);
+						view._proto.populateModalAlerts(view, "partialSubmissionSuccess", null);
 					},
 					error: function(e) {
 						console.log("service call failed: ", e);
+						view._proto.populateModalAlerts(view, "partialSubmissionFailure", null);
 						view._proto.lockScreen(view, false);
 					}
 				}

@@ -54,30 +54,38 @@ public class CPResponseHandler {
 			
 			for (int i = 0; i < this.correctionRows.length; i++) {
 				if (this.correctionRows[i] != null) {
-//					if (sopDebug) {
-//						System.out.println("-- correctionRows[" + i + "]: " + this.correctionRows[i].toString());
-//					}
+					if (sopDebug) {
+						System.out.println("-- correctionRows[" + i + "]: " + this.correctionRows[i].toString());
+					}
 					currentPriceLoop:
 					for(int j = 0; j < this.currPriceLines.length; j++){
-//						if (sopDebug) {
-//							System.out.println("---- currPriceLines[" + j + "]: " + this.currPriceLines[j].toString());
-//						}
+						if (sopDebug) {
+							System.out.println("---- currPriceLines[" + j + "]: " + this.currPriceLines[j].toString());
+						}
 						if (this.currPriceLines[j] != null && 
-								this.correctionRows[i].getCustomerId().equals(this.currPriceLines[j].getCustomerId()) &&  
-								this.correctionRows[i].getPricingDate().compareTo(this.currPriceLines[j].getPricingDate()) == 0) {
+								this.correctionRows[i].getCustomerId().equals(this.currPriceLines[j].getCustomerId()) &&
+								_Utility.compareDates(this.correctionRows[i].getPricingDate(), this.currPriceLines[j].getPricingDate()) == 0) {
+//								this.correctionRows[i].getPricingDate().compareTo(this.currPriceLines[j].getPricingDate()) == 0) {
 								
 							_CurrentPriceMaterial[] materials = this.currPriceLines[j].getMaterials();
 							if (materials != null) {
 								for(int k = 0; k < materials.length; k++) {
-//									System.out.println("------ materials[" + k + "]: " + materials[k].toString());
+									if (sopDebug) {
+										System.out.println("------ materials[" + k + "]: " + materials[k].toString());
+									}
 									if (this.correctionRows[i].getMaterialId().equals(materials[k].getMaterialId())) {
-//										System.out.println("-------- materialsIds matched[" + k + "]: " + this.correctionRows[i].getMaterialId());
-										merge(i, materials[k]);
+										if (sopDebug) {
+											System.out.println("-------- materialsIds matched[" + k + "]: " + this.correctionRows[i].getMaterialId());
+										}
+										merge(i, materials[k], sopDebug);
 										break currentPriceLoop; 
 									}
 								}
 							}
 						}
+					}
+					if (sopDebug) {
+						System.out.println("Returning twCorrectionRows[" + i + "].isCustInactive: " + this.correctionRows[i].getTwCorrectionRow().getPropertyValue("isCustInactive"));
 					}
 					twCorrectionRows.addArrayData(this.correctionRows[i].getTwCorrectionRow());
 				}
@@ -97,12 +105,10 @@ public class CPResponseHandler {
 		return null;
 	}
 	
-	//TODO: Remove echo method or implement it as a test
-	public TWList echo(String invoiceLines, String currentPrice, boolean sopDebug) throws Exception {
-		return TWObjectFactory.createList(); // returning empty list
-	}
-	
-	void merge(int position, _CurrentPriceMaterial material) {
+	void merge(int position, _CurrentPriceMaterial material, boolean sopDebug) {
+		if (sopDebug) {
+			System.out.println("CP Response Handler merge _CorrectionRow.setCustInactive - isCustInactive: " + this.correctionRows[position].isCustInactive() + ", this.correctionRows[i].getPropertyValue - " + this.correctionRows[position].getTwCorrectionRow().getPropertyValue("isCustInactive"));
+		}
 		this.correctionRows[position].setCurSellCd(material.getCurSellCd());
 		this.correctionRows[position].setCurPrice(material.getCurPrice());
 		this.correctionRows[position].setCurActivePrice(material.getCurActivePrice());

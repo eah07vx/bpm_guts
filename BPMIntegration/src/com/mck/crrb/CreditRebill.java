@@ -131,6 +131,7 @@ public class CreditRebill extends _API {
 			if (priceCorrectionRowHeader != null) {
 				pricingReq.put("index", i++);
 				pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
+				pricingReq.put("correctionType", priceCorrectionRowHeader.getCorrectionType());
 				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
 				//pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
 				pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
@@ -236,7 +237,7 @@ public class CreditRebill extends _API {
 		headerKey.setOrderType(invoiceLine.getOrderType());
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());
-		headerKey.setEdiSuppression(invoiceLine.getEdiSuppression());		
+		headerKey.setEdiSuppression(invoiceLine.getEdiSuppression());
 		headerKey.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber());
 		/*
 		 * UPDATE: EDI Suppression flag and Consolidated PO Number are part of the response from invoice lookup and thus they are available.

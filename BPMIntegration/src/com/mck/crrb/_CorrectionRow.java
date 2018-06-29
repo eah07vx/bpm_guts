@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import teamworks.TWObject;
 import teamworks.TWObjectFactory;
 
@@ -186,8 +188,11 @@ public class _CorrectionRow {
 	private String idtCaseType;
 	private String idtCaseNumber;
 	private String submittedBy;
+	//Customer attributes (billing attributes)
 	private String ediSuppression;
 	private String consolidatedPONumber;
+	//NOTE: json property for custInactive is named isCustInactive - see getter & setter methods
+	private boolean custInactive;
 	//Item DC Markup trifecta
 	private float oldItemDcMarkUpPer;
 	private float curItemDcMarkUpPer;
@@ -334,6 +339,12 @@ public class _CorrectionRow {
 		this.newPurchaseOrder = (String)this.twCorrectionRow.getPropertyValue("newPurchaseOrder");
 		this.origInvoiceId = (String)this.twCorrectionRow.getPropertyValue("origInvoiceId");
 		this.origInvoiceLineItemNum = (String)this.twCorrectionRow.getPropertyValue("origInvoiceLineItemNum");
+		this.ediSuppression = (String)this.twCorrectionRow.getPropertyValue("ediSuppression");
+		this.consolidatedPONumber = (String)this.twCorrectionRow.getPropertyValue("consolidatedPONumber");
+		this.custInactive = Boolean.parseBoolean((String)this.twCorrectionRow.getPropertyValue("isCustInactive"));
+		this.oldItemDcMarkUpPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("oldItemDcMarkUpPer"));
+		this.curItemDcMarkUpPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("curItemDcMarkUpPer"));
+		this.newItemDcMarkUpPer = Float.parseFloat((String)this.twCorrectionRow.getPropertyValue("newItemDcMarkUpPer"));
 		
 		try {
 			String tmp = (String)this.twCorrectionRow.getPropertyValue("pricingDate");
@@ -1534,6 +1545,17 @@ public class _CorrectionRow {
 		this.ediSuppression = ediSuppression;
 		this.twCorrectionRow.setPropertyValue("ediSuppression", this.ediSuppression);
 	}
+	
+	@JsonProperty("isCustInactive")
+	public boolean isCustInactive() {
+		return custInactive;
+	}
+	
+	@JsonProperty("isCustInactive")
+	public void setCustInactive(boolean custInactive) {
+		this.custInactive = custInactive;
+		this.twCorrectionRow.setPropertyValue("isCustInactive", this.custInactive);
+	}
 
 	public String getConsolidatedPONumber() {
 		return consolidatedPONumber;
@@ -1642,6 +1664,7 @@ public class _CorrectionRow {
 				", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +
 				", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", submittedBy: " + submittedBy + 
 				", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber +
+				", isCustInactive(): " + custInactive + 
 				", oldItemDcMarkUpPer : " + oldItemDcMarkUpPer + ", curItemDcMarkUpPer: " + curItemDcMarkUpPer +  
 				", newItemDcMarkUpPer: " + newItemDcMarkUpPer +
 				", pricingDate: " + this.getPricingDate() + ", createdOn: " + this.getCreatedOn();

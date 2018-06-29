@@ -2,6 +2,12 @@
  * 
  */
 package com.mck.crrb;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 /*
 import java.lang.reflect.Field;
 import java.util.Set;
@@ -60,6 +66,31 @@ public class _Utility {
 	}
 	
 	/*
+	 * 
+	 */
+	public static int compareDates(Date d1, Date d2) {
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(d1);
+		int year1 = cal1.get(Calendar.YEAR);
+		int month1 = cal1.get(Calendar.MONTH);
+		int day1 = cal1.get(Calendar.DAY_OF_MONTH);
+		
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(d2);
+		int year2 = cal2.get(Calendar.YEAR);
+		int month2 = cal2.get(Calendar.MONTH);
+		int day2 = cal2.get(Calendar.DAY_OF_MONTH);
+		
+//		System.out.println("d1: " + year1 + "/" + month1 + "/" + day1);
+//		System.out.println("d2: " + year2 + "/" + month2 + "/" + day2);
+//		System.out.println("yf: " + (year1 - year2));
+//		System.out.println("mf: " + (month1 - month2));
+//		System.out.println("df: " + (day1 - day2));
+//		System.out.println("return: " + (year1 - year2 | month1 - month2 | day1 - day2));
+		return year1 - year2 | month1 - month2 | day1 - day2;
+	}
+	
+	/*
 	public CorrectionRow TWtoJavaCorrectionRow(TWObject twCorrectionRow) {
 		this.twCorrectionRow = twCorrectionRow;
 		this.invoiceId = twCorrectionRow.getPropertyValue("invoiceId").toString();
@@ -91,6 +122,24 @@ public class _Utility {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+	    SimpleDateFormat sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+		try {
+			
+		    String d1Str = "02/20/2013 07:00:00";
+			Date d1 = sd.parse(d1Str);
+
+		    String d2Str = "12/10/2012 08:00:00";
+		    Date d2 = sd.parse(d2Str);
+		    
+		    compareDates(d1, d2);
+		    
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println();
+		
 		System.out.println(">" + trimLeadingChars("0000032", "0") + "<");
 		System.out.println(">" + trimLeadingChars("00000a", "0") + "<");
 		System.out.println(">" + trimLeadingChars("asdf", "0") + "<");

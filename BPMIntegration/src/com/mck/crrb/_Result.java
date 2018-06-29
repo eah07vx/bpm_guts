@@ -3,6 +3,7 @@
  */
 package com.mck.crrb;
 
+import teamworks.TWList;
 import teamworks.TWObject;
 import teamworks.TWObjectFactory;
 
@@ -17,6 +18,8 @@ class _Result {
 	private String message;
 	private String errorCode;
 	private String responseCode;
+	private String groupMessageId;
+	private String[] subgroupMessageIds;
 	private TWObject twResult;
 	
 	public _Result() {
@@ -75,6 +78,28 @@ class _Result {
 	public void setResponseCode(String responseCode) {
 		this.responseCode = responseCode;
 		this.twResult.setPropertyValue("responseCode", this.responseCode);
+	}
+
+	public String getGroupMessageId() {
+		return groupMessageId;
+	}
+
+	public void setGroupMessageId(String groupMessageId) {
+		this.groupMessageId = groupMessageId;
+		this.twResult.setPropertyValue("groupMessageId", this.groupMessageId);
+	}
+
+	public String[] getSubgroupMessageIds() {
+		return subgroupMessageIds;
+	}
+
+	public void setSubgroupMessageIds(String[] subgroupMessageIds) throws Exception {
+		this.subgroupMessageIds = subgroupMessageIds;
+		TWList twSubgroupMessageIds = TWObjectFactory.createList(); 
+		for (int i = 0; i < subgroupMessageIds.length; i++) {
+			twSubgroupMessageIds.addArrayData(subgroupMessageIds[i]);
+		}
+		this.twResult.setPropertyValue("subgroupMessageIds", twSubgroupMessageIds);
 	}
 
 	public TWObject getTwResult() {

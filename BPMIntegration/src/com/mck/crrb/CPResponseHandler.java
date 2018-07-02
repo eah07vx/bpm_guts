@@ -65,7 +65,6 @@ public class CPResponseHandler {
 						if (this.currPriceLines[j] != null && 
 								this.correctionRows[i].getCustomerId().equals(this.currPriceLines[j].getCustomerId()) &&
 								_Utility.compareDates(this.correctionRows[i].getPricingDate(), this.currPriceLines[j].getPricingDate()) == 0) {
-//								this.correctionRows[i].getPricingDate().compareTo(this.currPriceLines[j].getPricingDate()) == 0) {
 								
 							_CurrentPriceMaterial[] materials = this.currPriceLines[j].getMaterials();
 							if (materials != null) {

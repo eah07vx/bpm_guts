@@ -66,7 +66,11 @@ public class _Utility {
 	}
 	
 	/*
+	 * Compares date components of the two dates - ignoring the time and time zone values.
 	 * 
+	 * @param d1 the first date to use in comparison; order of dates doesn't matter if using zero for equal dates
+	 * @param d2 the second date to use in comparison; order of dates doesn't matter if using zero for equal dates
+	 * @return non-zero value if the dates are different; zero if equal
 	 */
 	public static int compareDates(Date d1, Date d2) {
 		Calendar cal1 = Calendar.getInstance();
@@ -126,13 +130,13 @@ public class _Utility {
 
 		try {
 			
-		    String d1Str = "02/20/2013 07:00:00";
+		    String d1Str = "05/20/2018 07:00:00";
 			Date d1 = sd.parse(d1Str);
 
-		    String d2Str = "12/10/2012 08:00:00";
+		    String d2Str = "05/20/2017 08:02:01";
 		    Date d2 = sd.parse(d2Str);
 		    
-		    compareDates(d1, d2);
+		    System.out.println(compareDates(d1, d2));
 		    
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

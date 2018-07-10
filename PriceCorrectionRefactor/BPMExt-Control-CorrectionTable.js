@@ -690,10 +690,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							row.setAttribute('class', 'lockedRow');
 							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
-							lockBtn.style.backgroundColor = "red";
+							//lockBtn.style.backgroundColor = "red";
 							var span = document.createElement("span");
 							
-							domClass.add(lockBtn, "btn btn-default btn-xs");
+							domClass.add(lockBtn, "btn btn-primary btn-xs");
 							domClass.add(span, "btn-label icon fa fa-lock");
 							
 							lockBtn.appendChild(span);
@@ -1600,10 +1600,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								row.setAttribute('class', 'lockedRow');
 								var lockBtn = document.createElement("button");
 								lockBtn.disabled = true;
-								lockBtn.style.backgroundColor = "red";
+								//lockBtn.style.backgroundColor = "red";
 								var span = document.createElement("span");
 								
-								domClass.add(lockBtn, "btn btn-default btn-xs");
+								domClass.add(lockBtn, "btn btn-primary btn-xs");
 								domClass.add(span, "btn-label icon fa fa-lock");
 								
 								lockBtn.appendChild(span);
@@ -1859,10 +1859,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
-							lockBtn.style.backgroundColor = "red";
+							//lockBtn.style.backgroundColor = "red";
 							var span = document.createElement("span");
 							
-							domClass.add(lockBtn, "btn btn-default btn-xs");
+							domClass.add(lockBtn, "btn btn-primary btn-xs");
 							domClass.add(span, "btn-label icon fa fa-lock");
 							
 							lockBtn.appendChild(span);
@@ -1872,11 +1872,11 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var inactiveBtn = document.createElement("button");
 							inactiveBtn.disabled = true;
-							inactiveBtn.style.backgroundColor = "red";
+							//inactiveBtn.style.backgroundColor = "red";
 							var span = document.createElement("span");
 							
-							domClass.add(inactiveBtn, "btn btn-default btn-xs");
-							domClass.add(span, "btn-label icon fa fa-times-circle");
+							domClass.add(inactiveBtn, "btn btn-warning btn-xs");
+							domClass.add(span, "btn-label icon fa fa-ban");
 							
 							inactiveBtn.appendChild(span);
 							td.appendChild(inactiveBtn);

@@ -67,7 +67,7 @@ public class Price extends _API {
 		if (sopDebug) {
 			for (int i = 0; this.invoiceLines != null && i < this.invoiceLines.length; i++) {
 				if (this.invoiceLines[i] != null) {
-					System.out.println("Invoice.simulatePriceJSON() invoiceLines[" + i + "]: " + this.invoiceLines[i].toString());
+					System.out.println(this.getClass().getName() + ".prepRequest() invoiceLines[" + i + "]: " + this.invoiceLines[i].toString());
 				}
 			}
 		}
@@ -224,7 +224,7 @@ public class Price extends _API {
 				//Hydrate key as SimulatePriceRowHeader
 				_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], idx++); 
 				if (sopDebug) {
-					System.out.println((i+1) + ". \n" + this.getClass().getName() + ".bucketizePriceMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
+					System.out.println(this.getClass().getName() + ".bucketizePriceMap() invoiceLines[" + i + "].headerKey has:\n customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
 				}
 				//Hydrate creditRebillMaterial
 				_CreditRebillMaterial creditRebillMaterial = hydrateCreditRebillMaterial(invoiceLines[i], useOldValues);
@@ -236,7 +236,7 @@ public class Price extends _API {
 					materialList = new TreeMap<String, _CreditRebillMaterial>();
 					materialList.put(materialKey, creditRebillMaterial);	// First material in list
 					if (sopDebug) {
-						System.out.println(this.getClass().getName() + ".bucketizePriceMap() headerKey before put in treemap [" + i + "] \n" + headerKey.toString()); 
+						System.out.println(this.getClass().getName() + ".bucketizePriceMap() headerKey before put in treemap [" + i + "]:\n" + headerKey.toString()); 
 					}
 					priceMap.put(headerKey, materialList);
 				}
@@ -244,7 +244,7 @@ public class Price extends _API {
 					materialList.put(materialKey, creditRebillMaterial);
 				}
 				if (sopDebug) {
-					System.out.println("	materialList[" + i + "] after putting in treemap: " + materialList.get(materialKey) + "\n");
+					System.out.println("	materialList[" + i + "] after putting in treemap:\n" + materialList.get(materialKey));
 				}
 			}
 		}
@@ -288,7 +288,10 @@ public class Price extends _API {
 		if (useOldValues) {
 			creditRebillMaterial.setNewWacCogPer(invoiceLine.getOldWacCogPer());
 			creditRebillMaterial.setNewItemMkUpPer(invoiceLine.getOldItemMkUpPer());
-			creditRebillMaterial.setNewNoChargeBack(invoiceLine.getOldNoChargeBack());
+			/*
+			 * Removing oldNoChargeBack mapping to newNoChargeBack based on Anujit Sen's email on 5/15/2018
+			 */
+			//creditRebillMaterial.setNewNoChargeBack(invoiceLine.getOldNoChargeBack());
 			creditRebillMaterial.setNewOverridePrice(invoiceLine.getOldOverridePrice());
 			creditRebillMaterial.setNewSellCd(invoiceLine.getOldSellCd());
 			creditRebillMaterial.setNewSsf(invoiceLine.getOldSsf());
@@ -300,7 +303,6 @@ public class Price extends _API {
 		} else {
 			creditRebillMaterial.setNewWacCogPer(invoiceLine.getNewWacCogPer());
 			creditRebillMaterial.setNewItemMkUpPer(invoiceLine.getNewItemMkUpPer());
-			creditRebillMaterial.setNewNoChargeBack(invoiceLine.getNewNoChargeBack());
 			creditRebillMaterial.setNewOverridePrice(invoiceLine.getNewOverridePrice());
 			creditRebillMaterial.setNewSellCd(invoiceLine.getNewSellCd());
 			creditRebillMaterial.setNewSsf(invoiceLine.getNewSsf());
@@ -311,6 +313,8 @@ public class Price extends _API {
 			creditRebillMaterial.setNewAwp(invoiceLine.getNewAwp());
 		}
 		
+		creditRebillMaterial.setNewNoChargeBack(invoiceLine.getNewNoChargeBack());
+
 		creditRebillMaterial.setNewActivePrice(invoiceLine.getNewActivePrice());
 		creditRebillMaterial.setNewCbRef(invoiceLine.getNewCbRef());
 		creditRebillMaterial.setNewChargeBack(invoiceLine.getNewChargeBack());
@@ -359,14 +363,20 @@ public class Price extends _API {
 				System.out.print("mergeSimulatedPriceValues invoiceLines[].length: " + this.invoiceLines.length + " simulatePriceRows[].length: " + simulatePriceRows.length);
 			}
 			for(int i = 0; i < this.invoiceLines.length; i++) {
+				simPriceRows:
 				for(int j = 0; j < simulatePriceRows.length; j++){
 					if (sopDebug) {
 						System.out.print("mergeSimulatedPriceValues loop invoiceLines["+i+"] > simulatedPriceRows["+j+"] ");
 						System.out.println("> invoiceLines[i].getPricingDate() equals simulatePriceRows[j].getPricingDate()? " + this.invoiceLines[i].getPricingDate() + " == " + simulatePriceRows[j].getPricingDate());
 						System.out.println("> invoiceLines[i].getCustomerId() equals simulatePriceRows[j].getCustomerId()? " + this.invoiceLines[i].getCustomerId() + " == " + simulatePriceRows[j].getCustomerId());
 					}
-					if (this.invoiceLines != null && this.invoiceLines[i] != null && this.invoiceLines[i].getCustomerId() != null && this.invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
-							&& this.invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
+					if (this.invoiceLines != null && this.invoiceLines[i] != null && this.invoiceLines[i].getCustomerId() != null 
+							&& this.invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
+							&& _Utility.compareDates(this.invoiceLines[i].getPricingDate(), simulatePriceRows[j].getPricingDate()) == 0
+							&& this.invoiceLines[i].getBillType().equals(simulatePriceRows[j].getBillType()) 
+							&& this.invoiceLines[i].getSalesOrg().equals(simulatePriceRows[j].getSalesOrg())) {
+
+							//&& this.invoiceLines[i].getPricingDate().compareTo(simulatePriceRows[j].getPricingDate()) == 0) {
 						if (sopDebug) {
 							System.out.println("> customerId and pricingDate match: true");
 						}
@@ -374,6 +384,9 @@ public class Price extends _API {
 						for(int k = 0; k < crMaterials.length; k++) {
 							String invoiceLineRecordKey = this.invoiceLines[i].getInvoiceId() + "-" + this.invoiceLines[i].getInvoiceLineItemNum();
 							if (invoiceLineRecordKey.equals(crMaterials[k].getRecordKey())) {
+								if (sopDebug) {
+									System.out.println("> invoiceLineRecordKey and crMaterials record key match: " + invoiceLineRecordKey + " == " + crMaterials[k].getRecordKey());
+								}
 								this.invoiceLines[i].setNewPrice(crMaterials[k].getNewSellPrice());
 								this.invoiceLines[i].setNewActivePrice(crMaterials[k].getNewActivePrice());
 								this.invoiceLines[i].setNewAwp(crMaterials[k].getNewAwp());
@@ -400,9 +413,13 @@ public class Price extends _API {
 								this.invoiceLines[i].setNewNetBill(crMaterials[k].getNewNetBill());
 								this.invoiceLines[i].setNewProgType(crMaterials[k].getNewProgType());
 								this.invoiceLines[i].setDc(crMaterials[k].getDc());
+								this.invoiceLines[i].setNewCustomerName(crMaterials[k].getNewCustomerName());
+								//this.invoiceLines[i].setNewRebillCust();
+								this.invoiceLines[i].setNewPurchaseOrder(crMaterials[k].getNewPurchaseOrder());
+								this.invoiceLines[i].setNewItemDcMarkUpPer(crMaterials[k].getNewItemDcMarkUpPer());
+								break simPriceRows;
 							}
 						}
-						break;
 					}
 				}
 			}

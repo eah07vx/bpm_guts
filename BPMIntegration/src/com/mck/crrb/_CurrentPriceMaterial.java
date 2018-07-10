@@ -266,7 +266,7 @@ public class _CurrentPriceMaterial extends _Material {
 
 	@Override
 	public String toString() {
-		String str = "\n " + super.toString() + "\n";
+		String str = super.toString() + "\n";
 
 		str += " curSellCd: " + curSellCd + ", curNoChargeBack: " + curNoChargeBack + ", curActivePrice: " + curActivePrice +
 				" curLead: " + curLead + ", curConRef: " + curConRef + ", curCbRef: " + curCbRef +

@@ -79,6 +79,8 @@ public class _CreditRebillMaterial extends _Material {
 	//Account Switch - customer Ids
 	private String oldCustomer;
 	private String newCustomer;
+	private String oldCustomerName;
+	private String newCustomerName;
 	//Invoice information
 	private String invoiceId;
 	private String invoiceLineItemNum;
@@ -86,6 +88,9 @@ public class _CreditRebillMaterial extends _Material {
 	private String origInvoiceId;
 	private String origInvoiceLineItemNum;
 	private String prcGroup5;
+	
+	//TODO: Do we need these values?
+	private float newItemDcMarkUpPer;
 	
     public String getRecordKey() {
 		return recordKey;
@@ -467,6 +472,18 @@ public class _CreditRebillMaterial extends _Material {
 	public void setNewCustomer(String newCustomer) {
 		this.newCustomer = newCustomer;
 	}
+	public String getOldCustomerName() {
+		return oldCustomerName;
+	}
+	public void setOldCustomerName(String oldCustomerName) {
+		this.oldCustomerName = oldCustomerName;
+	}
+	public String getNewCustomerName() {
+		return newCustomerName;
+	}
+	public void setNewCustomerName(String newCustomerName) {
+		this.newCustomerName = newCustomerName;
+	}
 	public String getInvoiceId() {
 		return invoiceId;
 	}
@@ -496,6 +513,12 @@ public class _CreditRebillMaterial extends _Material {
 	}
 	public void setPrcGroup5(String prcGroup5) {
 		this.prcGroup5 = prcGroup5;
+	}
+	public float getNewItemDcMarkUpPer() {
+		return newItemDcMarkUpPer;
+	}
+	public void setNewItemDcMarkUpPer(float newItemDcMarkUpPer) {
+		this.newItemDcMarkUpPer = newItemDcMarkUpPer;
 	}
 	@Override
 	public String toString() {

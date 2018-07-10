@@ -14,6 +14,7 @@ import teamworks.TWObject;
 public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	private int index; 
 	private String correlationId;
+	private String correctionType;
 	private String customerId;
 	private Date pricingDate;
 	private String orderType;
@@ -29,6 +30,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	public _APIReqHeader (TWObject reqHeader) {
 		if (reqHeader != null) { 
 			this.setCorrelationId((String)reqHeader.getPropertyValue("correlationId"));
+			this.setCorrectionType((String)reqHeader.getPropertyValue("correctionType"));
 			this.setIdtCaseType((String)reqHeader.getPropertyValue("idtCaseType"));
 			this.setIdtCaseNumber((String)reqHeader.getPropertyValue("idtCaseNumber"));
 			this.setReasonCode((String)reqHeader.getPropertyValue("reasonCode"));
@@ -48,6 +50,14 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	public void setCorrelationId(String correlationId) {
 		this.correlationId = correlationId;
 	}
+	public String getCorrectionType() {
+		return correctionType;
+	}
+
+	public void setCorrectionType(String correctionType) {
+		this.correctionType = correctionType;
+	}
+
 	public String getCustomerId() {
 		return customerId;
 	}

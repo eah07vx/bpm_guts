@@ -61,7 +61,6 @@ public class _ConsolidatedCPRow {
 				str += "\n" + materials[i].toString();
 			}
 		}
-		str += "\n " + super.toString();
 		return str;
 	}
 }

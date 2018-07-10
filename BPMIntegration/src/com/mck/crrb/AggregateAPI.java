@@ -119,7 +119,8 @@ public class AggregateAPI {
 	 */
 	public TWObject getBillingAttributes(String url, String httpMethod, String sslAlias, String requestJSON, boolean sopDebug) throws Exception  {
 		return new BillingAttributes().process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
-	}	
+		//return new CompositeBillingAttributes().process(url, httpMethod, sslAlias, requestJSON, null, sopDebug);
+	}
 	
 	/**
 	 * Convenience method that does the same job as consolidate. 

@@ -174,7 +174,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var includeAdbill = view.ui.get("IncludeAdbill").isChecked();
 				var includeNetChange = view.ui.get("IncludeNetChange").isChecked();
 				var showLockedRows = view.ui.get("ShowLockedRows").isChecked();
-				var isPOCorrection = view.context.options.crrbRequest.get("value").get("caseType");
+				//this._instance.isPOCorrection = view.context.options.crrbRequest.get("value").get("caseType");
 				
 				/*if (isPOCorrection == "PO") {
 					view.ui.get("IncludeNetChange").setChecked(true);
@@ -690,7 +690,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							row.setAttribute('class', 'lockedRow');
 							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
-							//lockBtn.style.backgroundColor = "red";
+							lockBtn.style.opacity = 1;
 							var span = document.createElement("span");
 							
 							domClass.add(lockBtn, "btn btn-primary btn-xs");
@@ -896,8 +896,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							};
 				var serviceArgs = {
 					params: JSON.stringify(input),
-					load: function(data) {				
+					load: function(data) {
+
 						if(!data.taskData){}
+						// if the case has no records
 						else if(data.taskData.totalCorrectionRows <= 0){
 							view.ui.get("Submit_Button").setEnabled(false);
 								view.ui.get("Return_Request").setEnabled(true);
@@ -907,6 +909,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								alert.setVisible(true);
 								alert.appendAlert("No lines returned in this request.", "Please return or close the request.");
 						}
+						// if the current filter results has no records
 						else if(!data.taskData.corrRowResults || !data.taskData.corrRowResults.items || data.taskData.corrRowResults.items.length <= 0 || data.taskData.corrRowResults.items[0] == null){
 							if(view._instance.isInitialLoad){
 																
@@ -922,7 +925,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								view._proto.setCompleteServiceVars(view, 100);
 							}
 						}else{
-							
+							view._instance.allRecordCounts = data.taskData.totalCorrectionRows;
 							view._instance.totalRecords = data.taskData.currentTotalNumberOfRecords;
 							view._proto.onLineItemsResult(view, data.taskData.corrRowResults.items);
 						}
@@ -1437,7 +1440,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var qualifiedListValues = [];
 				var qualifiedSelectedListValues = [];
 				for (var i = 0; i < listValues.length; i++) {
-					if (!listValues[i].isLocked && listValues[i].rebillQty > 0) {
+					if (!listValues[i].isLocked && listValues[i].rebillQty > 0 && !listValues[i].isCustInactive && listValues[i].isCustEligible != false) {
 						qualifiedListValues.push(listValues[i]);
 					}
 				}
@@ -1461,8 +1464,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					view._proto.populateModalAlerts(view, "unqualifiedSubmit", null);
 					return false;
 				}
-				
-				if (qualifiedListValues.length > 0 && qualifiedListValues.length > qualifiedSelectedListValues.length) {
+				console.log("qualified: ", qualifiedListValues.length);
+				if ((qualifiedListValues.length > 0 && qualifiedListValues.length > qualifiedSelectedListValues.length) || listValues.length < view._instance.allRecordCounts) {
 					isPartialSubmit = true;
 					var crTot = 0;
 					var rbTot = 0;
@@ -1529,7 +1532,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				}
                 //var selectedRowsObj = JSON.parse(selectedCorrectionRows);
                 for (var i = 0; i < selectedCorrectionRows.length; i++) {
-                    if (!selectedCorrectionRows[i].isLocked) {
+                    if (!selectedCorrectionRows[i].isLocked && !selectedCorrectionRows[i].isCustInactive && selectedCorrectionRows[i].isCustEligible != false) {
                         var obj = {
                             invoiceId : selectedCorrectionRows[i].invoiceId,
                             invoiceLineItemNum : selectedCorrectionRows[i].invoiceLineItemNum,
@@ -1600,7 +1603,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								row.setAttribute('class', 'lockedRow');
 								var lockBtn = document.createElement("button");
 								lockBtn.disabled = true;
-								//lockBtn.style.backgroundColor = "red";
+								lockBtn.style.opacity = 1;
 								var span = document.createElement("span");
 								
 								domClass.add(lockBtn, "btn btn-primary btn-xs");
@@ -1760,7 +1763,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}
 				}
 				td.innerHTML = innerHTML;
-				if(record.isLocked || record.isCustInactive || !editable){
+				if(record.isLocked || record.isCustInactive || record.isCustEligible == false || !editable){
 					var div = this.createNonEditableDiv(view, record, v3, type, tableRowId);
 					td.appendChild(div);
 					td.style.verticalAlign = "bottom";
@@ -1852,6 +1855,174 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var colIndex = cell.colIndex;
 				var tableRowId = cell.row.data.invoiceId + cell.row.data.invoiceLineItemNum;
 				td.parentNode.setAttribute('id', tableRowId);
+				
+				// The columns are different with Account Switch. 
+				if(view._instance.isPOCorrection == "AS"){
+					view._proto.createAccountSwitch(view, cell);
+				}else{
+					switch(colIndex)
+					{
+						case 0:
+							if(record.isLocked){
+								td.parentNode.setAttribute('class', 'lockedRow');
+								var lockBtn = document.createElement("button");
+								lockBtn.disabled = true;
+								lockBtn.style.opacity = 1;
+								var span = document.createElement("span");
+								
+								domClass.add(lockBtn, "btn btn-primary btn-xs");
+								domClass.add(span, "btn-label icon fa fa-lock");
+								
+								lockBtn.appendChild(span);
+								td.appendChild(lockBtn);		
+							}
+							else if(record.isCustInactive){
+								td.parentNode.setAttribute('class', 'lockedRow');
+								var inactiveBtn = document.createElement("button");
+								inactiveBtn.disabled = true;
+								inactiveBtn.style.opacity = 1;
+								var span = document.createElement("span");
+								
+								domClass.add(inactiveBtn, "btn btn-warning btn-xs");
+								domClass.add(span, "btn-label icon fa fa-ban");
+								
+								inactiveBtn.appendChild(span);
+								td.appendChild(inactiveBtn);
+							}
+							else if(record.isCustEligible = false){
+								td.parentNode.setAttribute('class', 'lockedRow');
+								var inactiveBtn = document.createElement("button");
+								inactiveBtn.disabled = true;
+								inactiveBtn.style.opacity = 1;
+								var span = document.createElement("span");
+								
+								domClass.add(inactiveBtn, "btn btn-warning btn-xs");
+								domClass.add(span, "btn-label icon fa fa-user-times");
+								
+								inactiveBtn.appendChild(span);
+								td.appendChild(inactiveBtn);
+							}
+
+							td.style.verticalAlign = "middle";
+							this.setupDataToVisualElements(view, record);
+							break;
+						case 1:
+							var header = "<div class=cellHeader>" + record.customerId + "</div><div class=cellHeader>" + record.customerName + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldWac", "curWac", "newWac", "decimal", true);
+							cell.setSortValue(record.customerId);
+							break;
+						case 2:
+							var header = "<div class=cellHeader>" + record.materialId + "</div><div class=cellHeader>" + record.materialName + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldBid", "curBid", "newBid", "decimal", true);
+							cell.setSortValue(record.materialId);
+							break;
+						case 3:
+							var header = "<div class=cellHeader>" + dateTerms(record.pricingDate) + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldLead", "curLead", "newLead", "string", true);
+							cell.setSortValue(record.pricingDate);
+							break;
+						case 4: 
+							var header = "<div class=cellHeader>" + record.invoiceId + "/" + "</div>"  +  "<div class=cellHeader>" + record.invoiceLineItemNum + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldPrice", "curPrice", "newPrice", "decimal", false);
+							cell.setSortValue(record.invoiceId);
+							break;
+						case 5:
+							var header = "<div class=cellHeader>" + record.supplierId + "</div><div class=cellHeader>" + record.supplierName + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldConRef", "curConRef", "newConRef", "string", true);
+							cell.setSortValue(record.supplierId);
+							break;
+						case 6: 
+							var header = "<div class=cellHeader>" + record.billQty  + "+ (" + record.retQty + "+" + record.crQty + ")" + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldCbRef", "curCbRef", "newCbRef", "string", false);					
+							cell.setSortValue(record.billQty);
+							break;
+						case 7:
+							var header = "<div class=cellHeader>" + record.rebillQty + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldContCogPer", "curContCogPer", "newContCogPer", "percent", true);
+							cell.setSortValue(record.rebillQty);
+							break;
+						case 8:
+							var header = "<div class=cellHeader>" + record.uom + "</div>";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldItemVarPer", "curItemVarPer", "newItemVarPer", "percent", true);
+							cell.setSortValue(record.uom);
+							break;
+						case 9:
+							var header = "<div class=cellHeader>" + dateTerms(record.createdOn) + "</div>";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldWacCogPer", "curWacCogPer", "newWacCogPer", "percent", true);
+							cell.setSortValue(record.createdOn);
+							break;
+						case 10:
+							var header = "<div class=cellHeader>" + record.dc + "</div>";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldItemMkUpPer", "curItemMkUpPer", "newItemMkUpPer", "percent", true);
+							cell.setSortValue(record.dc);
+							break;
+						case 11:
+							var header = "<div class=cellHeader>" + record.ndcUpc + "</div>";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldAwp", "curAwp", "newAwp", "decimal", true);
+							cell.setSortValue(record.ndcUpc);
+							break;
+						case 12:
+							var header = "<div class=cellHeader>" + record.billType + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSellCd", "curSellCd", "newSellCd", "string", false);
+							cell.setSortValue(record.poNumber);
+							break;	
+						case 13:
+							var header = "<div class=cellHeader>" + record.chainId + " " + record.chainName + "</div>";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldNoChargeback", "curNoChargeBack", "newNoChargeBack", "string", true);
+							cell.setSortValue(record.ndcUpc);
+							break;
+						case 14:
+							var header = "<div class=cellHeader>" + record.groupId + " " + record.groupName + "/" + "</div><div class=cellHeader>" + record.subgroupId + " " + record.subgroupName + "</div>";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldActivePrice", "curActivePrice", "newActivePrice", "string", false);
+							cell.setSortValue(record.billType);
+							break;
+						case 15:
+							var header = "<div class=cellHeader>" + record.origInvoiceId + "/" + "</div>" +  "<div class=cellHeader>" + record.origInvoiceLineItemNum + "</div>";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldChargeBack", "curChargeBack", "newChargeBack", "decimal", false);	
+							cell.setSortValue(record.chainId);
+							break;
+						case 16:
+							var header = "<div class=cellHeader>" + record.orgDbtMemoId + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSsf", "curSsf", "newSsf", "decimal", false);
+							cell.setSortValue(record.groupId);
+							break;
+						case 17: 
+							var header = "<div class=cellHeader>" + dollarTerms(record.orgVendorAccAmt) + "</div>";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSf", "curSf", "newSf", "decimal", false);
+							cell.setSortValue(record.origInvoiceId);
+							break;
+						case 18:
+							var header = "";						
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldListPrice", "curListPrice", "newListPrice", "decimal", false);
+							cell.setSortValue(record.orgDbtMemoId);
+							break;
+						case 19:
+							var header = "";	
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldOverridePrice", "curOverridePrice", "newOverridePrice", "decimal", true);
+							cell.setSortValue(record.orgVendorAccAmt);
+							break;
+						case 20:
+							var header = "";
+							td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "poNumber", null, "consolidatedPONumber", "string", true);
+							cell.setSortValue(record.oldOverridePrice);
+							break;
+						default:
+							return "H";
+					}
+				}
+				
+			},
+			createAccountSwitch: function(view, cell){
+				var dollarTerms = view._proto.dollarTerms;
+				var percentTerms = view._proto.percentTerms;
+				var dateTerms = view._proto.dateTerms;
+				
+				var record = cell.row.data;
+				var td = cell.td;
+				var colIndex = cell.colIndex;
+				var tableRowId = cell.row.data.invoiceId + cell.row.data.invoiceLineItemNum;
+				td.parentNode.setAttribute('id', tableRowId);
+
 				switch(colIndex)
 				{
 					case 0:
@@ -1859,11 +2030,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
-							//lockBtn.style.backgroundColor = "red";
+							lockBtn.style.opacity = 1;
 							var span = document.createElement("span");
-							
-							domClass.add(lockBtn, "btn btn-primary btn-xs");
-							domClass.add(span, "btn-label icon fa fa-lock");
 							
 							lockBtn.appendChild(span);
 							td.appendChild(lockBtn);		
@@ -1872,7 +2040,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var inactiveBtn = document.createElement("button");
 							inactiveBtn.disabled = true;
-							//inactiveBtn.style.backgroundColor = "red";
+							inactiveBtn.style.opacity = 1;
 							var span = document.createElement("span");
 							
 							domClass.add(inactiveBtn, "btn btn-warning btn-xs");
@@ -1881,105 +2049,161 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							inactiveBtn.appendChild(span);
 							td.appendChild(inactiveBtn);
 						}
+						else if(record.isCustEligible == false){
+							td.parentNode.setAttribute('class', 'lockedRow');
+							var inactiveBtn = document.createElement("button");
+							inactiveBtn.disabled = true;
+							inactiveBtn.style.opacity = 1;
+							var span = document.createElement("span");
+							
+							domClass.add(inactiveBtn, "btn btn-warning btn-xs");
+							domClass.add(span, "btn-label icon fa fa-user-times");
+							
+							inactiveBtn.appendChild(span);
+							td.appendChild(inactiveBtn);
+						}
 						td.style.verticalAlign = "middle";
 						this.setupDataToVisualElements(view, record);
 						break;
 					case 1:
+						var oldDH = "";
+						var curDH = "";
+						var newDH = "";
+						if(record.deaNum){
+							curDH += record.deaNum;
+						}
+						if(record.hin){
+							curDH += "/" + record.hin;
+						}
+						if(record.newDeaNum){
+							newDH += record.newDeaNum;
+						}
+						if(record.newHin){
+							newDH += "/" + record.newHin;
+						}
+						td.innerHTML = "<div class=colgroup><span class=tooltiptext>Old Customer<div class=littleRight><br>Old DEA/HIN<br>Cur DEA/HIN<br>New DEA/HIN</div></span><div class=cellHeader>" + record.oldCustomerName + "</div>"
+						
+						td.innerHTML += "<div>" + "&nbsp;" + "</div>"
+
+						if(!curDH || curDH == "" || curDH == undefined){
+							td.innerHTML += "<div>" + "&nbsp;" + "</div>"
+						}else{
+							td.innerHTML += "<div align=right style=color:orange>" + curDH + "</div>"
+						}
+						td.innerHTML += "</div>";
+						
+						cell.setSortValue(record.oldCustomerName);
+
+						var div = document.createElement("div");
+						div.className = "nonEditableField";
+						div.classList.add("string");
+
+						if(!newDH || newDH == "" || newDH == undefined){
+							newDH = "";
+						}
+
+						div.innerHTML = newDH;
+						
+						td.appendChild(div);
+						td.style.verticalAlign = "bottom"
+						
+						break;
+					case 2:
 						var header = "<div class=cellHeader>" + record.customerId + "</div><div class=cellHeader>" + record.customerName + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldWac", "curWac", "newWac", "decimal", true);
 						cell.setSortValue(record.customerId);
 						break;
-					case 2:
+					case 3:
 						var header = "<div class=cellHeader>" + record.materialId + "</div><div class=cellHeader>" + record.materialName + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldBid", "curBid", "newBid", "decimal", true);
 						cell.setSortValue(record.materialId);
 						break;
-					case 3:
+					case 4:
 						var header = "<div class=cellHeader>" + dateTerms(record.pricingDate) + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldLead", "curLead", "newLead", "string", true);
 						cell.setSortValue(record.pricingDate);
 						break;
-					case 4: 
+					case 5: 
 						var header = "<div class=cellHeader>" + record.invoiceId + "/" + "</div>"  +  "<div class=cellHeader>" + record.invoiceLineItemNum + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldPrice", "curPrice", "newPrice", "decimal", false);
 						cell.setSortValue(record.invoiceId);
 						break;
-					case 5:
+					case 6:
 						var header = "<div class=cellHeader>" + record.supplierId + "</div><div class=cellHeader>" + record.supplierName + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldConRef", "curConRef", "newConRef", "string", true);
 						cell.setSortValue(record.supplierId);
 						break;
-					case 6: 
+					case 7: 
 						var header = "<div class=cellHeader>" + record.billQty  + "+ (" + record.retQty + "+" + record.crQty + ")" + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldCbRef", "curCbRef", "newCbRef", "string", false);					
 						cell.setSortValue(record.billQty);
 						break;
-					case 7:
+					case 8:
 						var header = "<div class=cellHeader>" + record.rebillQty + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldContCogPer", "curContCogPer", "newContCogPer", "percent", true);
 						cell.setSortValue(record.rebillQty);
 						break;
-					case 8:
+					case 9:
 						var header = "<div class=cellHeader>" + record.uom + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldItemVarPer", "curItemVarPer", "newItemVarPer", "percent", true);
 						cell.setSortValue(record.uom);
 						break;
-					case 9:
+					case 10:
 						var header = "<div class=cellHeader>" + dateTerms(record.createdOn) + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldWacCogPer", "curWacCogPer", "newWacCogPer", "percent", true);
 						cell.setSortValue(record.createdOn);
 						break;
-					case 10:
+					case 11:
 						var header = "<div class=cellHeader>" + record.dc + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldItemMkUpPer", "curItemMkUpPer", "newItemMkUpPer", "percent", true);
 						cell.setSortValue(record.dc);
 						break;
-					case 11:
+					case 12:
 						var header = "<div class=cellHeader>" + record.ndcUpc + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldAwp", "curAwp", "newAwp", "decimal", true);
 						cell.setSortValue(record.ndcUpc);
 						break;
-					case 12:
+					case 13:
 						var header = "<div class=cellHeader>" + record.billType + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSellCd", "curSellCd", "newSellCd", "string", false);
 						cell.setSortValue(record.poNumber);
 						break;	
-					case 13:
+					case 14:
 						var header = "<div class=cellHeader>" + record.chainId + " " + record.chainName + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldNoChargeback", "curNoChargeBack", "newNoChargeBack", "string", true);
 						cell.setSortValue(record.ndcUpc);
 						break;
-					case 14:
+					case 15:
 						var header = "<div class=cellHeader>" + record.groupId + " " + record.groupName + "/" + "</div><div class=cellHeader>" + record.subgroupId + " " + record.subgroupName + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldActivePrice", "curActivePrice", "newActivePrice", "string", false);
 						cell.setSortValue(record.billType);
 						break;
-					case 15:
+					case 16:
 						var header = "<div class=cellHeader>" + record.origInvoiceId + "/" + "</div>" +  "<div class=cellHeader>" + record.origInvoiceLineItemNum + "</div>";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldChargeBack", "curChargeBack", "newChargeBack", "decimal", false);	
 						cell.setSortValue(record.chainId);
 						break;
-					case 16:
+					case 17:
 						var header = "<div class=cellHeader>" + record.orgDbtMemoId + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSsf", "curSsf", "newSsf", "decimal", false);
 						cell.setSortValue(record.groupId);
 						break;
-					case 17: 
+					case 18: 
 						var header = "<div class=cellHeader>" + dollarTerms(record.orgVendorAccAmt) + "</div>";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldSf", "curSf", "newSf", "decimal", false);
 						cell.setSortValue(record.origInvoiceId);
 						break;
-					case 18:
+					case 19:
 						var header = "";						
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldListPrice", "curListPrice", "newListPrice", "decimal", false);
 						cell.setSortValue(record.orgDbtMemoId);
 						break;
-					case 19:
+					case 20:
 						var header = "";	
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "oldOverridePrice", "curOverridePrice", "newOverridePrice", "decimal", true);
 						cell.setSortValue(record.orgVendorAccAmt);
 						break;
-					case 20:
+					case 21:
 						var header = "";
 						td = view._proto.setInnerHTML(view, td, record, tableRowId, colIndex, header, "poNumber", null, "consolidatedPONumber", "string", true);
 						cell.setSortValue(record.oldOverridePrice);
@@ -1987,7 +2211,6 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					default:
 						return "H";
 				}
-				
 			}
         }
 	}
@@ -2036,12 +2259,29 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		this._instance.progressCtl = this.ui.get("Progress");
 		this._instance.progressBadgeCtl = this.ui.get("ProgressBadge");
 		this._instance.isInitialLoad = this.context.options.isInitialLoad.get("value");
-		var isPOCorrection = view.context.options.crrbRequest.get("value").get("caseType");
+		this._instance.isPOCorrection = view.context.options.crrbRequest.get("value").get("caseType");
 
-		if(isPOCorrection == "PO"){
+		if(this._instance.isPOCorrection == "PO"){
 			view._instance.hasNoNetChangeRows = true;
 			view.ui.get("IncludeNetChange").setChecked(true);
 			view.ui.get("IncludeNetChange").setEnabled(false);
+		}
+		if(this._instance.isPOCorrection == "AS"){
+			var cspecs = view._instance.table.getColumns();
+			var newCol = {   
+					"options":{  
+					},
+					"dataElementName":"oldCustomerName",
+					"renderAs":"C",
+					"visibility":"V",
+					"sortable":true,
+					"css":"",
+					"width":"",
+					"label":"Old Customer<div class=\"littleRight\"><br>Old DEA/HIN<br>Cur DEA/HIN<br>New DEA/HIN</div>",
+					"showLabel":false
+				};
+			cspecs.splice(1, 0, newCol);
+			view._instance.table.setColumns(cspecs);
 		}
 		
 		//Workaround for table performance & selection detection issue

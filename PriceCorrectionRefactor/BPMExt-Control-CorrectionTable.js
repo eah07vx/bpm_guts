@@ -684,17 +684,16 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						var id = sel.invoiceId + sel.invoiceLineItemNum;
 						// finds the row by it's unique id
 						var row = document.getElementById(id);
-						// if the selected row is locked, and the row does not have the locked css class, it will add it.
+						
+						// if the selected row is locked, and the row does not have the locked css class, it will get added
+						
+						var addStyle = false;
+						var lockBtn = document.createElement("button");
+						
+						// Create an icon unique for each locked style 
+						// create locked icon
 						if(sel.isLocked && row.classList.value.indexOf("lockedRow") == -1){
-							var td = row.childNodes[1];
 							
-							var tooltiptext = "Row is locked";
-							var div = document.createElement("div");
-							div.className =  "colgroup";
-							div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
-							
-							row.setAttribute('class', 'lockedRow');
-							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
 							lockBtn.style.opacity = 1;
 							var span = document.createElement("span");
@@ -703,6 +702,49 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							domClass.add(span, "btn-label icon fa fa-lock");
 							
 							lockBtn.appendChild(span);
+							
+							addStyle = true;
+						}
+						// create inactive icon
+						if(sel.isCustInactive && row.classList.value.indexOf("lockedRow") == -1){
+							//var lockBtn = document.createElement("button");
+							lockBtn.disabled = true;
+							lockBtn.style.opacity = 1;
+							var span = document.createElement("span");
+							
+							domClass.add(lockBtn, "btn btn-primary btn-xs");
+							domClass.add(span, "btn-label icon fa fa-ban");
+							
+							lockBtn.appendChild(span);
+							
+							addStyle = true;
+						}
+						// create ineligible icon
+						if(view._instance.isPOCorrection == "AS" && sel.isCustEligible == false && row.classList.value.indexOf("lockedRow") == -1){
+							//var lockBtn = document.createElement("button");
+							lockBtn.disabled = true;
+							lockBtn.style.opacity = 1;
+							var span = document.createElement("span");
+							
+							domClass.add(lockBtn, "btn btn-primary btn-xs");
+							domClass.add(span, "btn-label icon fa fa-user-times");
+							
+							lockBtn.appendChild(span);
+							
+							addStyle = true;
+						}
+						
+						//if(sel.isLocked && row.classList.value.indexOf("lockedRow") == -1){
+						if(addStyle){
+							var td = row.childNodes[1];
+							
+							var tooltiptext = "Row is locked";
+							var div = document.createElement("div");
+							div.className =  "colgroup";
+							div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+							
+							row.setAttribute('class', 'lockedRow');
+						
 							div.appendChild(lockBtn);
 							td.appendChild(div);
 							
@@ -1433,7 +1475,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					break;
 					case "pricingDate":
 					modalAlert.setColorStyle("W");		
-					modalAlert.setTitle("Pricing Date Greater Than 6 Months");
+					modalAlert.setTitle("Pricing Date Older Than 6 Months");
 					modalAlert.setText("The pricing date for one or more submitted rows is older than 6 months. A task to get supplier approval will be created.");
 					modalAlert.setVisible(true);
 					break;

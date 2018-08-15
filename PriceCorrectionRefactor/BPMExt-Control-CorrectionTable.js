@@ -188,11 +188,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				view.ui.get("Table").search(function(listItem){
 
 					var isAddBill = listItem.newPrice>listItem.oldPrice;
-					var isNoNetChange = ((listItem.oldLead == listItem.newLead) && (listItem.oldBid == listItem.newBid) && (listItem.oldConRef == listItem.newConRef) && (listItem.oldCbRef == listItem.newCbRef));
+					var isNoNetChange = ((listItem.oldLead == listItem.newLead) && (listItem.oldBid == listItem.newBid) && (listItem.oldConRef == listItem.newConRef) && (listItem.oldCbRef == listItem.newCbRef) && (listItem.oldPrice == listItem.newPrice));
 					var isLocked = listItem.isLocked;
 
 					// Filter using mutliple checkboxes
-					// There are 3 checkbox (includeAddBill,includeNetChange, and showLockedRows). There can be scenario where a line item falls under all 3 conditions, so the logic that follows is this:
+					// There are 3 checkbox (includeAddBill,includeNetChange, and showLockedRows). 
+					// There can be scenario where a line item falls under all 3 conditions, so the logic that follows is this:
 					// if condition (checkbox) is false, 
 					//	then if one other 2 conditions are true, include this line item
 					//	else if the other 2 conditions are false, don't include this line item
@@ -687,6 +688,11 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						if(sel.isLocked && row.classList.value.indexOf("lockedRow") == -1){
 							var td = row.childNodes[1];
 							
+							var tooltiptext = "Row is locked";
+							var div = document.createElement("div");
+							div.className =  "colgroup";
+							div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+							
 							row.setAttribute('class', 'lockedRow');
 							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
@@ -697,8 +703,9 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							domClass.add(span, "btn-label icon fa fa-lock");
 							
 							lockBtn.appendChild(span);
-							td.appendChild(lockBtn);
-
+							div.appendChild(lockBtn);
+							td.appendChild(div);
+							
 							row.classList.remove('editedRow');				
 							var btnId = 'undoBtn' + row.id;
 							var btn = document.getElementById(btnId);
@@ -1424,6 +1431,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					modalAlert.setText("The Partial Submission was unsuccessful due to a service failure, your systems administrator has been notified.");
 					modalAlert.setVisible(true);
 					break;
+					case "pricingDate":
+					modalAlert.setColorStyle("W");		
+					modalAlert.setTitle("Pricing Date Greater Than 6 Months");
+					modalAlert.setText("The pricing date for one or more submitted rows is older than 6 months. A task to get supplier approval will be created.");
+					modalAlert.setVisible(true);
+					break;
 				}
 			},
 			/*
@@ -1432,6 +1445,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			determineSubmissionType: function(view) {
 				
 				var isPartialSubmit = false;
+				view.context.options.isSupplierApprovalNeeded.set("value", false);
 				var diff = 0;
 				var filteredSelectedRecords = view._instance.table.getSelectedRecords(true); //mix-match work-around to counter 'myList.get("listAllSelectedIndices")' not taking into account filtered table results
 				var listValues = view._instance.table.getRecords();
@@ -1440,7 +1454,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var qualifiedListValues = [];
 				var qualifiedSelectedListValues = [];
 				for (var i = 0; i < listValues.length; i++) {
-					if (!listValues[i].isLocked && listValues[i].rebillQty > 0 && !listValues[i].isCustInactive && listValues[i].isCustEligible != false) {
+					if (!listValues[i].isLocked && listValues[i].rebillQty > 0 && !listValues[i].isCustInactive && (view._instance.isPOCorrection == "AS" && listValues[i].isCustEligible != false)) {
 						qualifiedListValues.push(listValues[i]);
 					}
 				}
@@ -1451,6 +1465,19 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						}
 						if (filteredSelectedRecords[k].invoiceId == listValues[selectedListIndices[j]].invoiceId && filteredSelectedRecords[k].invoiceLineItemNum == listValues[selectedListIndices[j]].invoiceLineItemNum && !listValues[selectedListIndices[j]].isLocked && listValues[selectedListIndices[j]].rebillQty > 0) {
 							qualifiedSelectedListValues.push(listValues[selectedListIndices[j]]);
+							
+							// pricingDate check
+							var today = new Date();
+							var pricingDate = new Date(listValues[selectedListIndices[j]].pricingDate);
+							
+							var timeDiff = Math.abs(pricingDate.getTime() - today.getTime());
+							var dayDifference = Math.ceil(timeDiff / (1000 * 3600 * 24));
+							
+							if(dayDifference > 180 && view.context.options.isSupplierApprovalNeeded.get("value") == false){
+								view._proto.populateModalAlerts(view, "pricingDate", null);
+								view.context.options.isSupplierApprovalNeeded.set("value", true);
+								//break;
+							}
 						}
 					}
 				}
@@ -1521,18 +1548,19 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			executePartialSubmission: function(view) {
 				var instanceId = view.context.options.processInstanceId.get("value");
 				var selectedCorrectionRows = view._instance.table.getSelectedRecords(true);
-				//var list = view.ui.get("Table").getRecords();
-				//var indices = view.ui.get("Table").getSelectedIndices();
+				var list = view.ui.get("Table").getRecords();
+				var indices = view.ui.get("Table").getSelectedIndices();
+				var selectedRowsWithVals = [];
 				var actionableCRData = [];	
-				//var allCorrectionRowsWithVals = [];
+				var allCorrectionRowsWithVals = [];
 				var crrbRequest = JSON.parse(JSON.stringify(view.context.options.crrbRequest.get("value")));
                 var extraKeys = ["childrenCache", "_objectPath", "_systemCallbackHandle", "_watchCallbacks", "_inherited"];
                 for (var i = 0; i < extraKeys.length; i++) {
 					delete crrbRequest[extraKeys[i]];
 				}
-                //var selectedRowsObj = JSON.parse(selectedCorrectionRows);
+                /*//var selectedRowsObj = JSON.parse(selectedCorrectionRows);
                 for (var i = 0; i < selectedCorrectionRows.length; i++) {
-                    if (!selectedCorrectionRows[i].isLocked && !selectedCorrectionRows[i].isCustInactive && selectedCorrectionRows[i].isCustEligible != false) {
+                    if (!selectedCorrectionRows[i].isLocked && !selectedCorrectionRows[i].isCustInactive && (view._instance.isPOCorrection == "AS" && listValues[i].isCustEligible != false)) {
                         var obj = {
                             invoiceId : selectedCorrectionRows[i].invoiceId,
                             invoiceLineItemNum : selectedCorrectionRows[i].invoiceLineItemNum,
@@ -1551,9 +1579,32 @@ bpmext_control_InitCorrectionTable = function(domClass)
                         }
                         actionableCRData.push(obj);
                     }
-                }
+                }*/
+				for (var i = 0; i < indices.length; i++) {
+					for (var j = 0; j < selectedCorrectionRows.length; j++) {
+						if (selectedCorrectionRows[j].invoiceId == list[indices[i]].invoiceId && selectedCorrectionRows[j].invoiceLineItemNum == list[indices[i]].invoiceLineItemNum) {
+							selectedRowsWithVals.push(list[indices[i]]);
+						}
+					}       
+				}
+				for (var k = 0; k < list.length; k++) {
+					allCorrectionRowsWithVals.push(list[k]);
+				}
+				for (var i = 0; i < extraKeys.length; i++) {
+					//console.log("inside key for loop");
+					delete crrbRequest[extraKeys[i]];
+					//console.log("before delete selectedCorrectionRows[extraKeys[i]]", selectedCorrectionRows);
+					for (var j = 0; j < selectedRowsWithVals.length; j++) {
+						delete selectedRowsWithVals[j][extraKeys[i]];
+						//console.log("after delete selectedCorrectionRows[extraKeys[i]]", selectedCorrectionRows);		
+					}
+					for (var k = 0; k < allCorrectionRowsWithVals.length; k++) {
+						delete allCorrectionRowsWithVals[k][extraKeys[i]];
+					}
+				}
+
 				var input = {
-					selectedCorrectionRows : actionableCRData,
+					selectedCorrectionRows : selectedRowsWithVals,
 					instanceId : instanceId,
 					crrbRequest : crrbRequest 
 				};
@@ -1561,7 +1612,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					params: JSON.stringify(input),
 					load: function(data) {
 						view._proto.lockScreen(view, false);
-						view._proto.toggleSubmittedRows(view, actionableCRData);
+						view._proto.toggleSubmittedRows(view, selectedRowsWithVals);
 						view._proto.searchTable(view);
 						view._proto.addLockedStyled(view, view._instance.table.getPageIndex());
 						view._proto.toggleTooltip(view);
@@ -1600,7 +1651,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							if(row != null){
 								var td = row.childNodes[1];
 								// add locked style
-								row.setAttribute('class', 'lockedRow');
+								var tooltiptext = "Customer is locked";
+								var div = document.createElement("div");
+								div.className =  "colgroup";
+								div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+
+								td.parentNode.setAttribute('class', 'lockedRow');
 								var lockBtn = document.createElement("button");
 								lockBtn.disabled = true;
 								lockBtn.style.opacity = 1;
@@ -1610,7 +1666,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								domClass.add(span, "btn-label icon fa fa-lock");
 								
 								lockBtn.appendChild(span);
-								td.appendChild(lockBtn);
+								div.appendChild(lockBtn);
+								td.appendChild(div);	
 
 								row.classList.remove('editedRow');				
 								var btnId = 'undoBtn' + row.id;
@@ -1763,7 +1820,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					}
 				}
 				td.innerHTML = innerHTML;
-				if(record.isLocked || record.isCustInactive || record.isCustEligible == false || !editable){
+				if(record.isLocked || record.isCustInactive || (view._instance.isPOCorrection == "AS" && record.isCustEligible == false) || !editable){
 					var div = this.createNonEditableDiv(view, record, v3, type, tableRowId);
 					td.appendChild(div);
 					td.style.verticalAlign = "bottom";
@@ -1864,6 +1921,11 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					{
 						case 0:
 							if(record.isLocked){
+								var tooltiptext = "Customer is locked";
+								var div = document.createElement("div");
+								div.className =  "colgroup";
+								div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+
 								td.parentNode.setAttribute('class', 'lockedRow');
 								var lockBtn = document.createElement("button");
 								lockBtn.disabled = true;
@@ -1874,9 +1936,15 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								domClass.add(span, "btn-label icon fa fa-lock");
 								
 								lockBtn.appendChild(span);
-								td.appendChild(lockBtn);		
+								div.appendChild(lockBtn);
+								td.appendChild(div);		
 							}
 							else if(record.isCustInactive){
+								var tooltiptext = "Customer is inactive";
+								var div = document.createElement("div");
+								div.className =  "colgroup";
+								div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+
 								td.parentNode.setAttribute('class', 'lockedRow');
 								var inactiveBtn = document.createElement("button");
 								inactiveBtn.disabled = true;
@@ -1887,20 +1955,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 								domClass.add(span, "btn-label icon fa fa-ban");
 								
 								inactiveBtn.appendChild(span);
-								td.appendChild(inactiveBtn);
-							}
-							else if(record.isCustEligible = false){
-								td.parentNode.setAttribute('class', 'lockedRow');
-								var inactiveBtn = document.createElement("button");
-								inactiveBtn.disabled = true;
-								inactiveBtn.style.opacity = 1;
-								var span = document.createElement("span");
-								
-								domClass.add(inactiveBtn, "btn btn-warning btn-xs");
-								domClass.add(span, "btn-label icon fa fa-user-times");
-								
-								inactiveBtn.appendChild(span);
-								td.appendChild(inactiveBtn);
+								div.appendChild(inactiveBtn);
+								td.appendChild(div);
 							}
 
 							td.style.verticalAlign = "middle";
@@ -2027,16 +2083,31 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				{
 					case 0:
 						if(record.isLocked){
+							var tooltiptext = "Customer is locked";
+							var div = document.createElement("div");
+							div.className =  "colgroup";
+							div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var lockBtn = document.createElement("button");
 							lockBtn.disabled = true;
 							lockBtn.style.opacity = 1;
 							var span = document.createElement("span");
 							
+							domClass.add(lockBtn, "btn btn-primary btn-xs");
+							domClass.add(span, "btn-label icon fa fa-lock");
+							
 							lockBtn.appendChild(span);
-							td.appendChild(lockBtn);		
+							div.appendChild(lockBtn);
+							td.appendChild(div);		
+							
 						}
 						else if(record.isCustInactive){
+							var tooltiptext = "Customer is inactive";
+							var div = document.createElement("div");
+							div.className =  "colgroup";
+							div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var inactiveBtn = document.createElement("button");
 							inactiveBtn.disabled = true;
@@ -2047,9 +2118,15 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							domClass.add(span, "btn-label icon fa fa-ban");
 							
 							inactiveBtn.appendChild(span);
-							td.appendChild(inactiveBtn);
+							div.appendChild(inactiveBtn);
+							td.appendChild(div);
 						}
 						else if(record.isCustEligible == false){
+							var tooltiptext = "Customer is not eligibile";
+							var div = document.createElement("div");
+							div.className =  "colgroup";
+							div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
+							
 							td.parentNode.setAttribute('class', 'lockedRow');
 							var inactiveBtn = document.createElement("button");
 							inactiveBtn.disabled = true;
@@ -2060,7 +2137,8 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							domClass.add(span, "btn-label icon fa fa-user-times");
 							
 							inactiveBtn.appendChild(span);
-							td.appendChild(inactiveBtn);
+							div.appendChild(inactiveBtn);
+							td.appendChild(div);
 						}
 						td.style.verticalAlign = "middle";
 						this.setupDataToVisualElements(view, record);
@@ -2295,6 +2373,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		this._proto.getCorrectionRows(this);
 
 		// OTHER HACKS 
+		// function to check when the page is changed
 		this._instance.table.constructor.prototype.setPageIndex = this._instance.table.constructor.prototype.setPageIndex2 = function(idx)
 		{
 			var ps = this.context.options.pageSize.get("value");

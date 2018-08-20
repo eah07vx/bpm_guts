@@ -10,9 +10,10 @@ bpmext_control_InitCorrectionTable = function(domClass)
 		getNoNetChangeRows: false,
 		hasNoNetChangeRows: false,
 		tableRecords: [],
-		isContinue: false
+        isContinue: false,
+        isLockedRowsUpdated: false
 	};
-
+	
 	if (!this.constructor.prototype._proto)
 	{
 		this.constructor.prototype._proto =
@@ -131,7 +132,15 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					//view._proto.lockScreen(view, true);
 					view.ui.get("Header_Layout").setEnabled(true);
 					view._instance.getLockedRows = true;
-					view._proto.getCorrectionRows(view); // add params
+                    if (view._instance.isLockedRowsUpdated) {
+                        view._proto.getCorrectionRows(view); // add params
+                    }
+                    else {
+                        setTimeout(function() {
+                            view._proto.getCorrectionRows(view);
+                        }, 1000);
+                    }
+                    
 				}else{
 					view._proto.searchTable(view);
 				}
@@ -146,7 +155,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					//view._proto.lockScreen(view, true);
 					view.ui.get("Header_Layout").setEnabled(true);
 					view._instance.getAddBillRows = true;
-					view._proto.getCorrectionRows(view); // add params
+					if (view._instance.isLockedRowsUpdated) {
+                        view._proto.getCorrectionRows(view); // add params
+                    }
+                    else {
+                        setTimeout(function() {
+                            view._proto.getCorrectionRows(view);
+                        }, 1000);
+                    }
 				}else{
 					view._proto.searchTable(view);
 				}
@@ -161,7 +177,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					//view._proto.lockScreen(view, true);
 					view.ui.get("Header_Layout").setEnabled(true);
 					view._instance.getNoNetChangeRows = true;
-					view._proto.getCorrectionRows(view); // add params
+					if (view._instance.isLockedRowsUpdated) {
+                        view._proto.getCorrectionRows(view); // add params
+                    }
+                    else {
+                        setTimeout(function() {
+                            view._proto.getCorrectionRows(view);
+                        }, 1000);
+                    }
 				}else if(!view._instance.isInitialLoad){
 					view._proto.searchTable(view);
 				}
@@ -820,7 +843,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 			continueLargeCall: function(view){
 				view._instance.isContinue = true;
 				view.ui.get("Large_Call_Modal").setVisible(false);
-				view._proto.getCorrectionRows(view);
+				if (view._instance.isLockedRowsUpdated) {
+                    view._proto.getCorrectionRows(view); // add params
+                }
+                else {
+                    setTimeout(function() {
+                        view._proto.getCorrectionRows(view);
+                    }, 1000);
+                }
 			},
 			/*
 				Updates necessary variables used in getCorrectionRows and resets the progress bar controls.
@@ -890,7 +920,14 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						}else{
 							if(!view._instance.cancelled)
 							{
-								view._proto.getCorrectionRows(view);
+								if (view._instance.isLockedRowsUpdated) {
+                                    view._proto.getCorrectionRows(view); // add params
+                                }
+                                else {
+                                    setTimeout(function() {
+                                        view._proto.getCorrectionRows(view);
+                                    }, 1000);
+                                }
 							}
 							else
 							{
@@ -941,12 +978,12 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							hasAddBill: view._instance.hasAddBillRows,
 							isGetNoNetChange: view._instance.getNoNetChangeRows,
 							hasNoNetChange: view._instance.hasNoNetChangeRows,
-							caseType: view.context.options.crrbRequest.get("value").get("caseType")
+                            caseType: view.context.options.crrbRequest.get("value").get("caseType")
 							};
 				var serviceArgs = {
 					params: JSON.stringify(input),
 					load: function(data) {
-
+                        view._instance.isLockedRowsUpdated = data.taskData.isLockedRowsUpdated;
 						if(!data.taskData){}
 						// if the case has no records
 						else if(data.taskData.totalCorrectionRows <= 0){
@@ -1495,21 +1532,35 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var allSelectedListValues = [];
 				var qualifiedListValues = [];
 				var qualifiedSelectedListValues = [];
-				for (var i = 0; i < listValues.length; i++) {
-					if (!listValues[i].isLocked && listValues[i].rebillQty > 0 && !listValues[i].isCustInactive && (view._instance.isPOCorrection == "AS" && listValues[i].isCustEligible != false)) {
-						qualifiedListValues.push(listValues[i]);
+				if(view._instance.isPOCorrection == "AS"){
+					for (var i = 0; i < listValues.length; i++) {
+						if (!listValues[i].isLocked && listValues[i].rebillQty > 0 && !listValues[i].isCustInactive && listValues[i].isCustEligible != false) {
+							qualifiedListValues.push(listValues[i]);
+						}
+					}
+				}
+				// All other case types
+				else{ 
+					for (var i = 0; i < listValues.length; i++) {
+						if (!listValues[i].isLocked && listValues[i].rebillQty > 0 && !listValues[i].isCustInactive) {
+							qualifiedListValues.push(listValues[i]);
+						}
 					}
 				}
 				for (var j = 0; j < selectedListIndices.length; j++) {
 					for (var k = 0; k < filteredSelectedRecords.length; k++) {
+                            //console.log("filteredSelectedRecords[k].isSubmitted:  ", filteredSelectedRecords[k].isSubmitted);
 						if (filteredSelectedRecords[k].invoiceId == listValues[selectedListIndices[j]].invoiceId && filteredSelectedRecords[k].invoiceLineItemNum == listValues[selectedListIndices[j]].invoiceLineItemNum) {
 							allSelectedListValues.push(listValues[selectedListIndices[j]]);
 						}
 						if (filteredSelectedRecords[k].invoiceId == listValues[selectedListIndices[j]].invoiceId && filteredSelectedRecords[k].invoiceLineItemNum == listValues[selectedListIndices[j]].invoiceLineItemNum && !listValues[selectedListIndices[j]].isLocked && listValues[selectedListIndices[j]].rebillQty > 0) {
 							qualifiedSelectedListValues.push(listValues[selectedListIndices[j]]);
 							
+							if(view.context.options.isSupplierApprovalNeeded.get("value") == false){
+								view._proto.checkPricingDate(view, listValues[selectedListIndices[j]]);
+							};
 							// pricingDate check
-							var today = new Date();
+							/*var today = new Date();
 							var pricingDate = new Date(listValues[selectedListIndices[j]].pricingDate);
 							
 							var timeDiff = Math.abs(pricingDate.getTime() - today.getTime());
@@ -1518,8 +1569,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							if(dayDifference > 180 && view.context.options.isSupplierApprovalNeeded.get("value") == false){
 								view._proto.populateModalAlerts(view, "pricingDate", null);
 								view.context.options.isSupplierApprovalNeeded.set("value", true);
-								//break;
-							}
+							}*/
 						}
 					}
 				}
@@ -1533,7 +1583,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					view._proto.populateModalAlerts(view, "unqualifiedSubmit", null);
 					return false;
 				}
-				console.log("qualified: ", qualifiedListValues.length);
+				//console.log("qualified: ", qualifiedListValues.length);
 				if ((qualifiedListValues.length > 0 && qualifiedListValues.length > qualifiedSelectedListValues.length) || listValues.length < view._instance.allRecordCounts) {
 					isPartialSubmit = true;
 					var crTot = 0;
@@ -1542,6 +1592,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					var prRBTot = 0;
 					var crDiff = 0;
 					var rbDiff = 0;
+					//console.log("CR Total: " + (qualifiedListValues[0].oldPrice * qualifiedListValues[0].rebillQty));
 					for (var i = 0; i < qualifiedListValues.length; i++) {
 						crTot += qualifiedListValues[i].oldPrice * qualifiedListValues[i].rebillQty;
 						rbTot += qualifiedListValues[i].newPrice * qualifiedListValues[i].rebillQty;
@@ -1564,6 +1615,18 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					// this object is passed out from the coach, no service is invoked if not a partial submit
 					view.context.options.selectedCorrectionRows.set("value", allSelectedListValues);
 					return true;
+				}
+			},
+			checkPricingDate: function(view, record){
+				var today = new Date();
+				var pricingDate = new Date(record.pricingDate);
+				
+				var timeDiff = Math.abs(pricingDate.getTime() - today.getTime());
+				var dayDifference = Math.ceil(timeDiff / (1000 * 3600 * 24));
+				
+				if(dayDifference > 180){
+					view._proto.populateModalAlerts(view, "pricingDate", null);
+					view.context.options.isSupplierApprovalNeeded.set("value", true);
 				}
 			},
 			showPartialSubmissionModal: function(view, crOA, crTot, crDiff, rbOA, rbTot, rbDiff) {
@@ -1648,14 +1711,17 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				var input = {
 					selectedCorrectionRows : selectedRowsWithVals,
 					instanceId : instanceId,
-					crrbRequest : crrbRequest 
-				};
+					crrbRequest : crrbRequest,
+					isSupplierApprovalNeeded: view.context.options.isSupplierApprovalNeeded.get("value")				
+                };
+                console.log("INPUT INTO PARTIAL:  ", input);
 				var serviceArgs = {
 					params: JSON.stringify(input),
 					load: function(data) {
 						view._proto.lockScreen(view, false);
-						view._proto.toggleSubmittedRows(view, selectedRowsWithVals);
-						view._proto.searchTable(view);
+                        view._proto.toggleSubmittedRows(view, selectedRowsWithVals);
+                        view._proto.deselectSubmittedRecords(view, selectedRowsWithVals);
+						//view._proto.searchTable(view);
 						view._proto.addLockedStyled(view, view._instance.table.getPageIndex());
 						view._proto.toggleTooltip(view);
 						view._proto.populateModalAlerts(view, "partialSubmissionSuccess", null);
@@ -1682,6 +1748,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					for (var j = 0; j < selectedCRs.length; j++) {
 						var curCR = allCRs[i]; 
 						if (allCRs[i].invoiceId == selectedCRs[j].invoiceId && allCRs[i].invoiceLineItemNum == selectedCRs[j].invoiceLineItemNum) {
+                            //allCRs[i].setRecordSelected(i, false, true);
 							allCRs[i].isLocked = true;
 							allCRs[i].isSubmitted = true;
 							allCRs[i].isChanged = false;
@@ -1693,7 +1760,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 							if(row != null){
 								var td = row.childNodes[1];
 								// add locked style
-								var tooltiptext = "Customer is locked";
+								var tooltiptext = "Row has already been submitted";
 								var div = document.createElement("div");
 								div.className =  "colgroup";
 								div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
@@ -1754,7 +1821,15 @@ bpmext_control_InitCorrectionTable = function(domClass)
 						}
 					}
 				}
-			},
+            },
+            // DESELECT RECORDS AFTER LOCKED STYLING APPLIED SO THAT PREVIOUSLY SUBMITTED LINES ARE NOT SUBMITTED AGAIN - CAUSING STYLING AND SERVICE ERRORS
+            deselectSubmittedRecords: function(view, selectedCRs) {
+                console.log("deselectSubmittedRecords called");
+                var table = view.ui.get("Table");
+                for (var i = 0; i < selectedCRs.length; i++) {
+                    table.setRecordSelected(i, false, true);
+                }
+            },
 			// REMOVE
 			getMappedSubmittedRecords: function(data, id){	
 				for(var i = 0; i < data.length; i++){
@@ -1963,7 +2038,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 					{
 						case 0:
 							if(record.isLocked){
-								var tooltiptext = "Customer is locked";
+								var tooltiptext = "Row is locked";
 								var div = document.createElement("div");
 								div.className =  "colgroup";
 								div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"
@@ -2125,7 +2200,7 @@ bpmext_control_InitCorrectionTable = function(domClass)
 				{
 					case 0:
 						if(record.isLocked){
-							var tooltiptext = "Customer is locked";
+							var tooltiptext = "Row is locked";
 							var div = document.createElement("div");
 							div.className =  "colgroup";
 							div.innerHTML =  "<span class=tooltiptext>" + String(tooltiptext) + "</span>"

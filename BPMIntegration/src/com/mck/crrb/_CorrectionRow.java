@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+//import com.fasterxml.jackson.annotation.JsonInclude;
 
 import teamworks.TWObject;
 import teamworks.TWObjectFactory;
@@ -15,6 +16,7 @@ import teamworks.TWObjectFactory;
  * @author akatre
  *
  */
+//@JsonInclude(JsonInclude.Include.ALWAYS)
 public class _CorrectionRow {
 	private TWObject twCorrectionRow;
 	//invoice
@@ -174,7 +176,7 @@ public class _CorrectionRow {
 	//distribution channel
 	private String distrChan;
 	private String division;
-	private String docType;
+//	private String docType;
 	private String prcGroup5;
 	//PO numbers
 	private String oldPurchaseOrder;
@@ -204,6 +206,106 @@ public class _CorrectionRow {
 	public _CorrectionRow() {
 		try {
 			this.twCorrectionRow = TWObjectFactory.createObject();
+			this.twCorrectionRow.setPropertyValue("invoiceId", null);
+            this.twCorrectionRow.setPropertyValue("invoiceLineItemNum", null);
+            //customer
+            this.twCorrectionRow.setPropertyValue("customerId", null);
+            this.twCorrectionRow.setPropertyValue("customerName", null); 
+            //material
+            this.twCorrectionRow.setPropertyValue("materialId", null);
+            this.twCorrectionRow.setPropertyValue("materialName", null);
+            //supplier
+            this.twCorrectionRow.setPropertyValue("supplierId", null);
+            this.twCorrectionRow.setPropertyValue("supplierName", null);
+
+            this.twCorrectionRow.setPropertyValue("uom", null);
+            this.twCorrectionRow.setPropertyValue("dc", null);
+            this.twCorrectionRow.setPropertyValue("ndcUpc", null);
+            this.twCorrectionRow.setPropertyValue("billType", null);
+            //chain
+            this.twCorrectionRow.setPropertyValue("chainId", null);
+            this.twCorrectionRow.setPropertyValue("chainName", null);
+            //group; sub-group
+            this.twCorrectionRow.setPropertyValue("groupId", null);
+            this.twCorrectionRow.setPropertyValue("groupName", null);
+            this.twCorrectionRow.setPropertyValue("subgroupId", null);
+            this.twCorrectionRow.setPropertyValue("subgroupName", null);
+            this.twCorrectionRow.setPropertyValue("poNumber", null);
+            //lead trifecta
+            this.twCorrectionRow.setPropertyValue("oldLead", null);
+            this.twCorrectionRow.setPropertyValue("curLead", null);
+            this.twCorrectionRow.setPropertyValue("newLead", null);
+            //contract reference trifecta
+            this.twCorrectionRow.setPropertyValue("oldConRef", null);
+            this.twCorrectionRow.setPropertyValue("curConRef", null);
+            this.twCorrectionRow.setPropertyValue("newConRef", null);
+            //chargeback reference trifecta
+            this.twCorrectionRow.setPropertyValue("oldCbRef", null);
+            this.twCorrectionRow.setPropertyValue("curCbRef", null);
+            this.twCorrectionRow.setPropertyValue("newCbRef", null);
+            //sell code trifecta
+            this.twCorrectionRow.setPropertyValue("oldSellCd", null);
+            this.twCorrectionRow.setPropertyValue("curSellCd", null);
+            this.twCorrectionRow.setPropertyValue("newSellCd", null);
+            //no chargeback indicator trifecta
+            this.twCorrectionRow.setPropertyValue("oldNoChargeBack", null);
+            this.twCorrectionRow.setPropertyValue("curNoChargeBack", null);
+            this.twCorrectionRow.setPropertyValue("newNoChargeBack", null);
+            //active price indicator (e.g. YCON, YCOS, YFIX, ZDSC) trifecta
+            this.twCorrectionRow.setPropertyValue("oldActivePrice", null);
+            this.twCorrectionRow.setPropertyValue("curActivePrice", null);
+            this.twCorrectionRow.setPropertyValue("newActivePrice", null);
+            this.twCorrectionRow.setPropertyValue("orgDbtMemoId", null);
+            //additional customer identification 
+            this.twCorrectionRow.setPropertyValue("deaNum", null);
+            this.twCorrectionRow.setPropertyValue("hin", null);
+            //customer address
+            this.twCorrectionRow.setPropertyValue("street", null);
+            this.twCorrectionRow.setPropertyValue("city", null);
+            this.twCorrectionRow.setPropertyValue("region", null);
+            this.twCorrectionRow.setPropertyValue("postalCode", null);
+            this.twCorrectionRow.setPropertyValue("country", null);
+            //miscellaneous attributes
+            this.twCorrectionRow.setPropertyValue("salesOrg", null);
+            this.twCorrectionRow.setPropertyValue("orderType", null);
+            //net bill trifecta
+            this.twCorrectionRow.setPropertyValue("oldNetBill", null);
+            this.twCorrectionRow.setPropertyValue("curNetBill", null);
+            this.twCorrectionRow.setPropertyValue("newNetBill", null);
+            //GX program type trifecta
+            this.twCorrectionRow.setPropertyValue("oldProgType", null);
+            this.twCorrectionRow.setPropertyValue("newProgType", null);
+            this.twCorrectionRow.setPropertyValue("curProgType", null);
+            //control Id trifecta
+            this.twCorrectionRow.setPropertyValue("oldContrId", null);
+            this.twCorrectionRow.setPropertyValue("newContrId", null);
+            this.twCorrectionRow.setPropertyValue("curContrId", null);
+            //cont type trifecta
+            this.twCorrectionRow.setPropertyValue("oldContType", null);
+            this.twCorrectionRow.setPropertyValue("newContType", null);
+            this.twCorrectionRow.setPropertyValue("curContType", null);
+            //rebill customer trifecta
+            this.twCorrectionRow.setPropertyValue("oldRebillCust", null);
+            this.twCorrectionRow.setPropertyValue("newRebillCust", null);
+            this.twCorrectionRow.setPropertyValue("curRebillCust", null);
+            //customer name trifecta (used for rebill)
+            this.twCorrectionRow.setPropertyValue("oldCustomerName", null); 
+            this.twCorrectionRow.setPropertyValue("newCustomerName", null);
+            this.twCorrectionRow.setPropertyValue("curCustomerName", null);
+            //distribution channel
+            this.twCorrectionRow.setPropertyValue("distrChan", null);
+            this.twCorrectionRow.setPropertyValue("division", null);
+            //this.twCorrectionRow.setPropertyValue("docType", null);
+            this.twCorrectionRow.setPropertyValue("prcGroup5", null);
+            //PO numbers
+            this.twCorrectionRow.setPropertyValue("oldPurchaseOrder", null);
+            this.twCorrectionRow.setPropertyValue("newPurchaseOrder", null);
+            //Original invoice information
+            this.twCorrectionRow.setPropertyValue("origInvoiceId", null);
+            this.twCorrectionRow.setPropertyValue("origInvoiceLineItemNum", null);
+            //Customer attributes (billing attributes)
+            this.twCorrectionRow.setPropertyValue("ediSuppression", null);
+            this.twCorrectionRow.setPropertyValue("consolidatedPONumber", null);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -332,7 +434,7 @@ public class _CorrectionRow {
 		this.curCustomerName = (String)this.twCorrectionRow.getPropertyValue("curCustomerName");
 		this.distrChan = (String)this.twCorrectionRow.getPropertyValue("distrChan");
 		this.division = (String)this.twCorrectionRow.getPropertyValue("division");
-		this.docType = (String)this.twCorrectionRow.getPropertyValue("docType");
+		//this.docType = (String)this.twCorrectionRow.getPropertyValue("docType");
 		this.prcGroup5 = (String)this.twCorrectionRow.getPropertyValue("prcGroup5");
 		this.submittedBy = (String)this.twCorrectionRow.getPropertyValue("submittedBy");
 		this.oldPurchaseOrder = (String)this.twCorrectionRow.getPropertyValue("oldPurchaseOrder");
@@ -1446,7 +1548,7 @@ public class _CorrectionRow {
 		this.division = division;
 		this.twCorrectionRow.setPropertyValue("division", this.division);
 	}
-
+/*
 	public String getDocType() {
 		return docType;
 	}
@@ -1455,7 +1557,7 @@ public class _CorrectionRow {
 		this.docType = docType;
 		this.twCorrectionRow.setPropertyValue("docType", this.docType);
 	}
-
+*/
 	public String getPrcGroup5() {
 		return prcGroup5;
 	}
@@ -1658,7 +1760,7 @@ public class _CorrectionRow {
 				", oldContType: " + this.oldContType +  ", newContType: " + this.newContType +  ", curContType: " + this.curContType + 
 				", oldRebillCust: " + this.oldRebillCust +  ", newRebillCust: " + this.newRebillCust +  ", curRebillCust: " + this.curRebillCust +
 				", oldCustomerName: " + this.oldCustomerName +  ", newCustomerName: " + this.newCustomerName +  ", curCustomerName: " + this.curCustomerName + 
-				", distrChan: " + this.distrChan +  ", division: " + this.division +  ", docType: " + this.docType + 
+				", distrChan: " + this.distrChan +  ", division: " + this.division + 
 				", prcGroup5: " + this.prcGroup5 + ", oldPurchaseOrder: " + this.oldPurchaseOrder + ", newPurchaseOrder: " + this.newPurchaseOrder +
 //				", manufacturer: " + this.manufacturer + 
 				", origInvoiceId: " + origInvoiceId + ", origInvoiceLineItemNum: " + origInvoiceLineItemNum +

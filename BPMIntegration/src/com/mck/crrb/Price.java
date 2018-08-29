@@ -75,6 +75,7 @@ public class Price extends _API {
 			return "failed";
 		}
 		boolean useOldValues = ((Boolean)reqHeader.getPropertyValue("useOldValues")).booleanValue();
+		//reqHeader.getPropertyValue("correctionType");
 		//Transform the JSON to match price simulation API request
 		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, useOldValues, sopDebug);
 	}
@@ -255,6 +256,7 @@ public class Price extends _API {
 		_SimulatePriceRowHeader headerKey = new _SimulatePriceRowHeader();
 		headerKey.setIndex(index);
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
+		//headerKey.setCustomerId(invoiceLine.getNewRebillCust()); if correctionType == "AS"
 		headerKey.setPricingDate(invoiceLine.getPricingDate());
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());

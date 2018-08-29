@@ -104,7 +104,7 @@ public class CompositeBillingAttributes extends _API {
 				for (int i = 0; i < this.invoiceLines.length; i++) {
 					for(int j = 0; j < billAttRows.length; j++){
 						if (this.invoiceLines[i].getCustomerId().equals(billAttRows[j].getCustomerId())) {
-							if (billAttRows[j].getConsolidatedPONumber() != null && billAttRows[j].getConsolidatedPONumber() != "") {
+							if (billAttRows[j].getConsolidatedPONumber() != null && !billAttRows[j].getConsolidatedPONumber().equals("")) {
                                 this.invoiceLines[i].setConsolidatedPONumber(billAttRows[j].getConsolidatedPONumber());
                             }
 							else {

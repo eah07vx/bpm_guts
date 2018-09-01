@@ -75,9 +75,9 @@ public class Price extends _API {
 			return "failed";
 		}
 		boolean useOldValues = ((Boolean)reqHeader.getPropertyValue("useOldValues")).booleanValue();
-		//reqHeader.getPropertyValue("correctionType");
+		boolean useNewRebillCustomer = ((String)reqHeader.getPropertyValue("correctionType")).equals(_API.ACCOUNT_SWITCH);//added for Account Switch
 		//Transform the JSON to match price simulation API request
-		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, useOldValues, sopDebug);
+		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, useOldValues, useNewRebillCustomer, sopDebug);
 	}
 	
 	/* (non-Javadoc)
@@ -165,11 +165,11 @@ public class Price extends _API {
 		return simulatePriceResp;
 	}
 	
-	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean useOldValues, boolean sopDebug) {
+	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean useOldValues, boolean useNewRebillCustomer, boolean sopDebug) {
 		
 		String simulatePriceReqJSON = null;
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, useOldValues, sopDebug);
+		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, useOldValues, useNewRebillCustomer, sopDebug);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		this.correlatedResults = new TreeMap<Integer, Set<String>>();
 		
@@ -213,7 +213,7 @@ public class Price extends _API {
 		return simulatePriceReqJSON;
 	}
 	
-	private TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines, boolean useOldValues, boolean sopDebug) {
+	private TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> bucketizePriceMap(_CorrectionRowISO[] invoiceLines, boolean useOldValues, boolean useNewRebillCustomer, boolean sopDebug) {
 		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = new TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>>();
 		//System.out.println("TestRow[] invoiceLines.length: " + invoiceLines.length);
 		
@@ -223,7 +223,7 @@ public class Price extends _API {
 			
 			if (invoiceLines[i] != null && invoiceLines[i].getCustomerId() != null) {
 				//Hydrate key as SimulatePriceRowHeader
-				_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], idx++); 
+				_SimulatePriceRowHeader headerKey = hydrateSimulatePriceRowHeader(invoiceLines[i], idx++, useNewRebillCustomer); 
 				if (sopDebug) {
 					System.out.println(this.getClass().getName() + ".bucketizePriceMap() invoiceLines[" + i + "].headerKey has:\n customerId: " + headerKey.getCustomerId() + ", pricingDate: " + sdf.format(headerKey.getPricingDate()));
 				}
@@ -252,11 +252,15 @@ public class Price extends _API {
 		return priceMap;
 	}
 
-	private _SimulatePriceRowHeader hydrateSimulatePriceRowHeader(_CorrectionRowISO invoiceLine, int index){
+	private _SimulatePriceRowHeader hydrateSimulatePriceRowHeader(_CorrectionRowISO invoiceLine, int index, boolean useNewRebillCustomer){
 		_SimulatePriceRowHeader headerKey = new _SimulatePriceRowHeader();
 		headerKey.setIndex(index);
-		headerKey.setCustomerId(invoiceLine.getCustomerId());
-		//headerKey.setCustomerId(invoiceLine.getNewRebillCust()); if correctionType == "AS"
+		if (useNewRebillCustomer) {
+			headerKey.setCustomerId(invoiceLine.getNewRebillCust());
+		}
+		else {
+			headerKey.setCustomerId(invoiceLine.getCustomerId());
+		}
 		headerKey.setPricingDate(invoiceLine.getPricingDate());
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());

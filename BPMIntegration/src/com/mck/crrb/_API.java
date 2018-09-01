@@ -33,6 +33,7 @@ public abstract class _API {
 	public static final String LONG_DASHED_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.S";
 	public static final String HTTP_NOT_OK = "HTTP_RESPONSE_NOT_OK";
 	public static final String DEFAULT_SALES_ORG = "8000";
+	public static final String ACCOUNT_SWITCH = "AS";
 	
 	public final TWObject process(String url, String httpMethod, String sslAlias, String requestJSON, String invoiceLines, TWObject reqHeader, boolean sopDebug) throws Exception {
 		Date d1 = null;

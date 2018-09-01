@@ -62,7 +62,7 @@ public class _SimulatePriceRowHeader extends _PriceRow implements Comparable<_Si
 		if (arg0 == null) {
 			throw new NullPointerException(this.getClass().getName() + ".compareTo() null argument");
 		}
-		return (this.getCustomerId().compareTo((String)arg0.getCustomerId()) 
+		return (this.getCustomerId().compareTo((String)arg0.getCustomerId())
 				| this.getPricingDate().compareTo(arg0.getPricingDate())
 				| this.getSalesOrg().compareTo((String)arg0.getSalesOrg())
 				| this.getBillType().compareTo((String)arg0.getBillType())

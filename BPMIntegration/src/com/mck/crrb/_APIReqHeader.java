@@ -26,6 +26,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	private String submittedBy;
 	private String ediSuppression;
 	private String consolidatedPONumber;
+	private String newRebillCust;
 
 	public _APIReqHeader (TWObject reqHeader) {
 		if (reqHeader != null) { 
@@ -35,9 +36,10 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 			this.setIdtCaseNumber((String)reqHeader.getPropertyValue("idtCaseNumber"));
 			this.setReasonCode((String)reqHeader.getPropertyValue("reasonCode"));
 			this.setSubmittedBy((String)reqHeader.getPropertyValue("submittedBy"));
+			this.setNewRebillCust((String)reqHeader.getPropertyValue("newRebillCust"));
 		}
 	}
-	
+
 	public int getIndex() {
 		return index;
 	}
@@ -124,14 +126,19 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	public void setConsolidatedPONumber(String consolidatedPONumber) {
 		this.consolidatedPONumber = consolidatedPONumber;
 	}
-	
+	public String getNewRebillCust() {
+		return newRebillCust;
+	}
+	public void setNewRebillCust(String newRebillCust) {
+		this.newRebillCust = newRebillCust; 
+	}
 	@Override
 	public String toString() {
 		return ", index: " + index + ", correlationId: " + correlationId + ", customerId: " + customerId
 				+ ", pricingDate: " + (pricingDate != null ? pricingDate.toString() : null) + ", orderType: " + orderType
 				+ ", salesOrg: " + salesOrg + ", billType: " + billType 
 				+ ", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", reasonCode: " + reasonCode + ", submittedBy: " + submittedBy
-				+ ", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber;		
+				+ ", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber + ", newRebillCust: " + newRebillCust;		
 	}
 	
 	@Override

@@ -68,6 +68,7 @@ public class CreditRebill extends _API {
 		if(invoiceLines == null) {
 			return "failed";
 		}
+		//boolean useNewRebillCustomer = ((String)reqHeader.getPropertyValue("correctionType")).equals(_API.ACCOUNT_SWITCH);//added for Account Switch
 		return prepSubmitPriceCorrectionCall(invoiceLines, reqHeader, "priceCorrectionReq", 0, _API.FETCH_SIZE, sopDebug);	
 	}
 
@@ -133,6 +134,8 @@ public class CreditRebill extends _API {
 				pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
 				pricingReq.put("correctionType", priceCorrectionRowHeader.getCorrectionType());
 				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
+				//for Account Switch
+				pricingReq.put("newRebillCust", priceCorrectionRowHeader.getNewRebillCust());
 				//pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
 				pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
 				pricingReq.put("billType", priceCorrectionRowHeader.getBillType());
@@ -234,6 +237,8 @@ public class CreditRebill extends _API {
 		headerKey.setCustomerId(invoiceLine.getCustomerId());
 		// Moving pricingDate into materials array
 		//headerKey.setPricingDate(invoiceLine.getPricingDate());
+		// for Account Switch
+		headerKey.setNewRebillCust(invoiceLine.getNewRebillCust());
 		headerKey.setOrderType(invoiceLine.getOrderType());
 		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
 		headerKey.setBillType(invoiceLine.getBillType());

@@ -39,7 +39,30 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 			this.setNewRebillCust((String)reqHeader.getPropertyValue("newRebillCust"));
 		}
 	}
-
+	
+	public _APIReqHeader (_CorrectionRowISO invoiceLine, TWObject reqHeader, int index) {
+        this.setIndex(index);
+        if (reqHeader != null) {
+            this.setCorrelationId((String)reqHeader.getPropertyValue("correlationId"));
+            this.setCorrectionType((String)reqHeader.getPropertyValue("correctionType"));
+            this.setIdtCaseType((String)reqHeader.getPropertyValue("idtCaseType"));
+            this.setIdtCaseNumber((String)reqHeader.getPropertyValue("idtCaseNumber"));
+            this.setReasonCode((String)reqHeader.getPropertyValue("reasonCode"));
+            this.setSubmittedBy((String)reqHeader.getPropertyValue("submittedBy"));
+        }
+        if (invoiceLine != null) {
+            this.setCustomerId(invoiceLine.getCustomerId());
+            this.setNewRebillCust(invoiceLine.getNewRebillCust());
+            // Moving pricingDate into materials array
+            //this.setPricingDate(invoiceLine.getPricingDate());
+            this.setOrderType(invoiceLine.getOrderType());
+            this.setSalesOrg(invoiceLine.getSalesOrg());
+            this.setBillType(invoiceLine.getBillType());
+            this.setEdiSuppression(invoiceLine.getEdiSuppression());
+            this.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber());
+        }
+    }
+	
 	public int getIndex() {
 		return index;
 	}
@@ -140,7 +163,9 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 				+ ", idtCaseType: " + idtCaseType + ", idtCaseNumber: " + idtCaseNumber + ", reasonCode: " + reasonCode + ", submittedBy: " + submittedBy
 				+ ", ediSuppression: " + ediSuppression + ", consolidatedPONumber: " + consolidatedPONumber + ", newRebillCust: " + newRebillCust;		
 	}
-	
+	/**
+	 * used for consolidation logic to group header
+	 */
 	@Override
 	public int compareTo(_APIReqHeader arg0) {
 		int comparison = -1;
@@ -157,6 +182,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 		*/
 		if (this.customerId.equals(arg0.getCustomerId()) 
 				&& this.salesOrg.equals(arg0.getSalesOrg())	
+				&& this.newRebillCust.equals(arg0.getNewRebillCust())
 				&& ((this.consolidatedPONumber == null && arg0.getConsolidatedPONumber() == null) || this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
 				&& ((this.ediSuppression == null && arg0.getEdiSuppression() == null) || this.ediSuppression.equals(arg0.getEdiSuppression()))) {
 			comparison = 0;

@@ -182,7 +182,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 		*/
 		if (this.customerId.equals(arg0.getCustomerId()) 
 				&& this.salesOrg.equals(arg0.getSalesOrg())	
-				&& this.newRebillCust.equals(arg0.getNewRebillCust())
+				&& ((this.newRebillCust == null && arg0.getNewRebillCust() == null) || this.newRebillCust.equals(arg0.getNewRebillCust()))
 				&& ((this.consolidatedPONumber == null && arg0.getConsolidatedPONumber() == null) || this.consolidatedPONumber.equals(arg0.getConsolidatedPONumber()))
 				&& ((this.ediSuppression == null && arg0.getEdiSuppression() == null) || this.ediSuppression.equals(arg0.getEdiSuppression()))) {
 			comparison = 0;

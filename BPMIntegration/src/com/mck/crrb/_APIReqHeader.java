@@ -16,6 +16,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	private String correlationId;
 	private String correctionType;
 	private String customerId;
+	private String newRebillCust;
 	private Date pricingDate;
 	private String orderType;
 	private String salesOrg;
@@ -38,6 +39,29 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 		}
 	}
 	
+	public _APIReqHeader (_CorrectionRowISO invoiceLine, TWObject reqHeader, int index) {
+		this.setIndex(index);
+		if (reqHeader != null) { 
+			this.setCorrelationId((String)reqHeader.getPropertyValue("correlationId"));
+			this.setCorrectionType((String)reqHeader.getPropertyValue("correctionType"));
+			this.setIdtCaseType((String)reqHeader.getPropertyValue("idtCaseType"));
+			this.setIdtCaseNumber((String)reqHeader.getPropertyValue("idtCaseNumber"));
+			this.setReasonCode((String)reqHeader.getPropertyValue("reasonCode"));
+			this.setSubmittedBy((String)reqHeader.getPropertyValue("submittedBy"));
+		}
+		if (invoiceLine != null) {
+			this.setCustomerId(invoiceLine.getCustomerId());
+			this.setNewRebillCust(invoiceLine.getNewRebillCust());
+			// Moving pricingDate into materials array
+			//this.setPricingDate(invoiceLine.getPricingDate());
+			this.setOrderType(invoiceLine.getOrderType());
+			this.setSalesOrg(invoiceLine.getSalesOrg());
+			this.setBillType(invoiceLine.getBillType());
+			this.setEdiSuppression(invoiceLine.getEdiSuppression());
+			this.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber());
+		}
+	}
+	
 	public int getIndex() {
 		return index;
 	}
@@ -53,16 +77,20 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 	public String getCorrectionType() {
 		return correctionType;
 	}
-
 	public void setCorrectionType(String correctionType) {
 		this.correctionType = correctionType;
 	}
-
 	public String getCustomerId() {
 		return customerId;
 	}
 	public void setCustomerId(String customerId) {
 		this.customerId = customerId;
+	}
+	public String getNewRebillCust() {
+		return newRebillCust;
+	}
+	public void setNewRebillCust(String newRebillCust) {
+		this.newRebillCust = newRebillCust;
 	}
 	public Date getPricingDate() {
 		return pricingDate;

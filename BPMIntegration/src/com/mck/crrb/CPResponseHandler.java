@@ -84,7 +84,7 @@ public class CPResponseHandler {
 						}
 					}
 					if (sopDebug) {
-						System.out.println("Returning twCorrectionRows[" + i + "].isCustInactive: " + this.correctionRows[i].getTwCorrectionRow().getPropertyValue("isCustInactive"));
+						System.out.println("Returning twCorrectionRows[" + i + "].isCustInactive: " + this.correctionRows[i].getTwCorrectionRow().getPropertyValue("isCustInactive") + " --subgroupName:  " + this.correctionRows[i].getTwCorrectionRow().getPropertyValue("subgroupName"));
 					}
 					twCorrectionRows.addArrayData(this.correctionRows[i].getTwCorrectionRow());
 				}

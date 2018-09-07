@@ -68,6 +68,7 @@ public class CreditRebill extends _API {
 		if(invoiceLines == null) {
 			return "failed";
 		}
+		//boolean useNewRebillCustomer = ((String)reqHeader.getPropertyValue("correctionType")).equals(_API.ACCOUNT_SWITCH);//added for Account Switch
 		return prepSubmitPriceCorrectionCall(invoiceLines, reqHeader, "priceCorrectionReq", 0, _API.FETCH_SIZE, sopDebug);	
 	}
 
@@ -133,6 +134,8 @@ public class CreditRebill extends _API {
 				pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
 				pricingReq.put("correctionType", priceCorrectionRowHeader.getCorrectionType());
 				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
+				//for Account Switch
+				pricingReq.put("newRebillCust", priceCorrectionRowHeader.getNewRebillCust());
 				//pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
 				pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
 				pricingReq.put("billType", priceCorrectionRowHeader.getBillType());
@@ -170,7 +173,7 @@ public class CreditRebill extends _API {
 		
 		for (int i = 0; i < invoiceLines.length; i++) {
 			//Hydrate key as SubmitPriceReqHeader
-			//_APIReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], reqHeader, i);
+			//_APIReqHeader headerKey = hydrateSubmitPriceReqHeader(invoiceLines[i], reqHeader, i); 
 			_APIReqHeader headerKey = new _APIReqHeader(invoiceLines[i], reqHeader, i);
 			if (sopDebug) {
 				System.out.println((i+1) + ". \n" + "CreditRebill.bucketizeSubmitMap() invoiceLines[" + i + "].headerKey - customerId: " + headerKey.getCustomerId() + ", billType: " + headerKey.getBillType());
@@ -228,36 +231,6 @@ public class CreditRebill extends _API {
 		}
 		return submitPriceResp;
 	}
-	/*
-	@Deprecated
-	private static _APIReqHeader hydrateSubmitPriceReqHeader(_CorrectionRowISO invoiceLine, TWObject reqHeader, int index) {
-		_APIReqHeader headerKey = new _APIReqHeader(reqHeader);
-		headerKey.setIndex(index);
-		headerKey.setCustomerId(invoiceLine.getCustomerId());
-		// Moving pricingDate into materials array
-		//headerKey.setPricingDate(invoiceLine.getPricingDate());
-		headerKey.setOrderType(invoiceLine.getOrderType());
-		headerKey.setSalesOrg(invoiceLine.getSalesOrg());
-		headerKey.setBillType(invoiceLine.getBillType());
-		headerKey.setEdiSuppression(invoiceLine.getEdiSuppression());
-		headerKey.setConsolidatedPONumber(invoiceLine.getConsolidatedPONumber());
-//		/*
-//		 * UPDATE: EDI Suppression flag and Consolidated PO Number are part of the response from invoice lookup and thus they are available.
-//		 * Commenting below code in favor of directly reading getting those parameters from invoiceLine above
-//		 * 
-//		//Currently EDI Suppression flag and Consolidated PO Number do NOT come through reqHeader - the are in correction row a.k.a. invoice line
-//		if ((String)reqHeader.getPropertyValue("ediSuppression") == null) {
-//			headerKey.setEdiSuppression(invoiceLine.getEdiSuppression());  
-//		}
-//		if ((String)reqHeader.getPropertyValue("consolidatedPONumber") == null) {
-//			headerKey.setConsolidatedPONumber(invoiceLine.getPoNumber());
-//		}
-//		*
-// 		*
-// 		*  ///
-		return headerKey;
-	}
-	*/
 	
 	private static _PriceCorrectionMaterial hydratePriceCorrectionMaterial(_CorrectionRowISO invoiceLine) {
 		_PriceCorrectionMaterial priceCorrectionMaterial = new _PriceCorrectionMaterial();

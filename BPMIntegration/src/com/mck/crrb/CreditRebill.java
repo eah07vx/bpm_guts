@@ -6,10 +6,14 @@ package com.mck.crrb;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -120,36 +124,54 @@ public class CreditRebill extends _API {
 		
 		String submitPriceCorrectionReqJSON = null; 
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-//		SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
+		int payloadBucketSize = _API.MAXSUBMITBUCKETSIZE;
+		if (reqHeader.getPropertyValue("payloadBucketSize") != null && reqHeader.getPropertyValue("payloadBucketSize") != "") {
+			try {
+				payloadBucketSize = Integer.parseInt((String) reqHeader.getPropertyValue("payloadBucketSize"));
+			}
+			catch (NumberFormatException nfe) {
+				System.err.println("Warning: Error parsing payloadBucketSize from request header. Using default maximum value: " + payloadBucketSize);
+			}
+		}
+		//SimpleDateFormat sdf = new SimpleDateFormat(_API.API_DATE_FORMAT);
 		
 		TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> submitMap = bucketizeSubmitMap(invoiceLines, reqHeader, sopDebug);
 
 		List<Object> pricingRequests = new ArrayList<Object>();
 		int i = 0;
 		for (Entry<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> entry : submitMap.entrySet()) {
-			Map<String, Object> pricingReq = new HashMap<String, Object>();
 			_APIReqHeader priceCorrectionRowHeader = entry.getKey();
-			if (priceCorrectionRowHeader != null) {
-				pricingReq.put("index", i++);
-				pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
-				pricingReq.put("correctionType", priceCorrectionRowHeader.getCorrectionType());
-				pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
-				//for Account Switch
-				pricingReq.put("newRebillCust", priceCorrectionRowHeader.getNewRebillCust());
-				//pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
-				pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
-				pricingReq.put("billType", priceCorrectionRowHeader.getBillType());
-				pricingReq.put("idtCaseType", priceCorrectionRowHeader.getIdtCaseType());
-				pricingReq.put("idtCaseNumber", priceCorrectionRowHeader.getIdtCaseNumber());
-				pricingReq.put("reasonCode", priceCorrectionRowHeader.getReasonCode());
-				pricingReq.put("submittedBy", priceCorrectionRowHeader.getSubmittedBy());
-				pricingReq.put("ediSuppression", priceCorrectionRowHeader.getEdiSuppression());
-				pricingReq.put("consolidatedPONumber", priceCorrectionRowHeader.getConsolidatedPONumber());
+			if (sopDebug) System.out.println("Generating output for index [" + i + "], customerId: " + entry.getKey().getCustomerId());
+			if (priceCorrectionRowHeader != null && entry != null && entry.getValue() != null && entry.getValue().values() != null) {
+				if (sopDebug) System.out.println(">>>> Entry exists with materials collection of (size): " + entry.getValue().values().size());
+				// if materials size > payloadBucketSize then break at payloadBucketSize
+				Iterator<List<_PriceCorrectionMaterial>> materials = partition(entry.getValue().values().iterator(), payloadBucketSize); // value in the priceMap entry has materials
+				if (sopDebug) System.out.println(">>>> Iterator materials has: " + materials.toString());
 				
-				if (entry != null && entry.getValue() != null && entry.getValue().values() != null) {
-					pricingReq.put("materials", entry.getValue().values());		// value in the priceMap entry has materials
+				while(materials.hasNext()) {
+					Map<String, Object> pricingReq = new HashMap<String, Object>();
+
+					if (sopDebug) System.out.println(">>> Output for index [" + i + "] hasNext() returned true: " + materials.toString());
+					
+					pricingReq.put("index", i++);
+					pricingReq.put("correlationId", priceCorrectionRowHeader.getCorrelationId());
+					pricingReq.put("correctionType", priceCorrectionRowHeader.getCorrectionType());
+					pricingReq.put("customerId", priceCorrectionRowHeader.getCustomerId());
+					//for Account Switch
+					pricingReq.put("newRebillCust", priceCorrectionRowHeader.getNewRebillCust());
+					//pricingReq.put("pricingDate", sdf.format(priceCorrectionRowHeader.getPricingDate()));
+					pricingReq.put("salesOrg", priceCorrectionRowHeader.getSalesOrg());
+					pricingReq.put("billType", priceCorrectionRowHeader.getBillType());
+					pricingReq.put("idtCaseType", priceCorrectionRowHeader.getIdtCaseType());
+					pricingReq.put("idtCaseNumber", priceCorrectionRowHeader.getIdtCaseNumber());
+					pricingReq.put("reasonCode", priceCorrectionRowHeader.getReasonCode());
+					pricingReq.put("submittedBy", priceCorrectionRowHeader.getSubmittedBy());
+					pricingReq.put("ediSuppression", priceCorrectionRowHeader.getEdiSuppression());
+					pricingReq.put("consolidatedPONumber", priceCorrectionRowHeader.getConsolidatedPONumber());
+					
+					pricingReq.put("materials", materials.next());		
+					pricingRequests.add(pricingReq);
 				}
-				pricingRequests.add(pricingReq);
 			}
 		}
 		priceReqMap.put(containerName, pricingRequests.toArray());
@@ -168,6 +190,34 @@ public class CreditRebill extends _API {
 		}
 		return submitPriceCorrectionReqJSON;
 	}
+	
+	//TODO: Add some basic checks on the iterator and check size to be > 0
+	private static <T> Iterator<List<T>> partition(final Iterator<T> iterator, final int size) {
+
+		return new Iterator<List<T>>() {
+			@Override
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+	
+			@Override
+			public List<T> next() {
+				if (!hasNext()) {
+					throw new NoSuchElementException();
+				}
+				Object[] array = new Object[size];
+				int count = 0;
+				for (; count < size && iterator.hasNext(); count++) {
+					array[count] = iterator.next();
+				}
+	
+				@SuppressWarnings("unchecked")
+				List<T> list = Collections.unmodifiableList((List<T>) Arrays.asList(array));
+				return (count == size) ? list : list.subList(0, count);
+			}
+	    };
+	}
+	
 	static TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> bucketizeSubmitMap(_CorrectionRowISO[] invoiceLines, TWObject reqHeader, boolean sopDebug) {
 		TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>> priceMap = new TreeMap<_APIReqHeader, TreeMap<String, _PriceCorrectionMaterial>>();
 		

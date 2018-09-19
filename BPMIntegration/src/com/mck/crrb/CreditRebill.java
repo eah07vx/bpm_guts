@@ -127,7 +127,7 @@ public class CreditRebill extends _API {
 		int payloadBucketSize = _API.MAXSUBMITBUCKETSIZE;
 		if (reqHeader.getPropertyValue("payloadBucketSize") != null && reqHeader.getPropertyValue("payloadBucketSize") != "") {
 			try {
-				payloadBucketSize = Integer.parseInt((String) reqHeader.getPropertyValue("payloadBucketSize"));
+				payloadBucketSize = Integer.parseInt(reqHeader.getPropertyValue("payloadBucketSize").toString());
 			}
 			catch (NumberFormatException nfe) {
 				System.err.println("Warning: Error parsing payloadBucketSize from request header. Using default maximum value: " + payloadBucketSize);

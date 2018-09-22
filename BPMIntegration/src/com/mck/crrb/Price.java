@@ -38,7 +38,8 @@ public class Price extends _API {
 	// Need to send the complete invoiceLine correction row back - so keep local copy to be used in merging the response
 	private _CorrectionRowISO[] invoiceLines;
 	private Map<Integer, Set<String>> correlatedResults;
-	
+	private boolean useNewRebillCustomer; //= ((String)reqHeader.getPropertyValue("correctionType")).equals(_API.ACCOUNT_SWITCH);//added for Account Switch;
+	//private TWObject reqHeader;
 	@Override
 	String prepRequest(String requestJSON, TWObject reqHeader, boolean sopDebug) throws Exception {
 		//Read and Hold original correction rows invoice lines to be overlaid with price simulation values from the response
@@ -52,6 +53,8 @@ public class Price extends _API {
 			//	Evaluate DateTime offset if json string contains ISO string format with Z meaning UTC timezone 
 			this.invoiceLines = null;
 			this.invoiceLines = jacksonMapper.readValue(requestJSON, _CorrectionRowISO[].class);
+			//this.correctionType = reqHeader.getPropertyValue("correctionType");
+			//this.useNewRebillCustomer = ((String)reqHeader.getPropertyValue("correctionType")).equals(_API.ACCOUNT_SWITCH);
 
 		} catch (JsonParseException e) {
 			System.out.println(e.getMessage());
@@ -75,9 +78,9 @@ public class Price extends _API {
 			return "failed";
 		}
 		boolean useOldValues = ((Boolean)reqHeader.getPropertyValue("useOldValues")).booleanValue();
-		boolean useNewRebillCustomer = ((String)reqHeader.getPropertyValue("correctionType")).equals(_API.ACCOUNT_SWITCH);//added for Account Switch
+		this.useNewRebillCustomer = ((String)reqHeader.getPropertyValue("correctionType")).equals(_API.ACCOUNT_SWITCH);//added for Account Switch
 		//Transform the JSON to match price simulation API request
-		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, useOldValues, useNewRebillCustomer, sopDebug);
+		return prepSimulatePriceCall("priceSimulationReq", 0, _API.FETCH_SIZE, useOldValues, sopDebug);
 	}
 	
 	/* (non-Javadoc)
@@ -165,11 +168,11 @@ public class Price extends _API {
 		return simulatePriceResp;
 	}
 	
-	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean useOldValues, boolean useNewRebillCustomer, boolean sopDebug) {
+	private String prepSimulatePriceCall(String containerName, int startIndex, int endIndex, boolean useOldValues, boolean sopDebug) {
 		
 		String simulatePriceReqJSON = null;
 		Map<String, Object> priceReqMap = new HashMap<String, Object>();
-		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, useOldValues, useNewRebillCustomer, sopDebug);
+		TreeMap<_SimulatePriceRowHeader, TreeMap<String, _CreditRebillMaterial>> priceMap = bucketizePriceMap(this.invoiceLines, useOldValues, this.useNewRebillCustomer, sopDebug);
 		List<Object> pricingRequests = new ArrayList<Object>();
 		this.correlatedResults = new TreeMap<Integer, Set<String>>();
 		
@@ -376,8 +379,9 @@ public class Price extends _API {
 						System.out.println("> invoiceLines[i].getPricingDate() equals simulatePriceRows[j].getPricingDate()? " + this.invoiceLines[i].getPricingDate() + " == " + simulatePriceRows[j].getPricingDate());
 						System.out.println("> invoiceLines[i].getCustomerId() equals simulatePriceRows[j].getCustomerId()? " + this.invoiceLines[i].getCustomerId() + " == " + simulatePriceRows[j].getCustomerId());
 					}
+					System.out.println("useNewRebillCustomer:  " + this.useNewRebillCustomer);
 					if (this.invoiceLines != null && this.invoiceLines[i] != null && this.invoiceLines[i].getCustomerId() != null 
-							&& this.invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
+							&& this.useNewRebillCustomer ? this.invoiceLines[i].getNewRebillCust().equals(simulatePriceRows[j].getCustomerId()) : this.invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
 							&& _Utility.compareDates(this.invoiceLines[i].getPricingDate(), simulatePriceRows[j].getPricingDate()) == 0
 							&& this.invoiceLines[i].getBillType().equals(simulatePriceRows[j].getBillType()) 
 							&& this.invoiceLines[i].getSalesOrg().equals(simulatePriceRows[j].getSalesOrg())) {

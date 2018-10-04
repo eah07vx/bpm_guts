@@ -379,7 +379,7 @@ public class Price extends _API {
 						System.out.println("> invoiceLines[i].getPricingDate() equals simulatePriceRows[j].getPricingDate()? " + this.invoiceLines[i].getPricingDate() + " == " + simulatePriceRows[j].getPricingDate());
 						System.out.println("> invoiceLines[i].getCustomerId() equals simulatePriceRows[j].getCustomerId()? " + this.invoiceLines[i].getCustomerId() + " == " + simulatePriceRows[j].getCustomerId());
 					}
-					System.out.println("useNewRebillCustomer:  " + this.useNewRebillCustomer);
+					//System.out.println("useNewRebillCustomer:  " + this.useNewRebillCustomer);
 					if (this.invoiceLines != null && this.invoiceLines[i] != null && this.invoiceLines[i].getCustomerId() != null 
 							&& this.useNewRebillCustomer ? this.invoiceLines[i].getNewRebillCust().equals(simulatePriceRows[j].getCustomerId()) : this.invoiceLines[i].getCustomerId().equals(simulatePriceRows[j].getCustomerId())
 							&& _Utility.compareDates(this.invoiceLines[i].getPricingDate(), simulatePriceRows[j].getPricingDate()) == 0

@@ -34,10 +34,10 @@ public class _CorrectionRowISO extends _CorrectionRow {
 
 			try {
 				//TODO: Remove SOP debug
-				System.out.println("CorrectionRow.pricingDate input string: " + twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 10));
+				//System.out.println("CorrectionRow.pricingDate input string: " + twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 10));
 				this.setPricingDate(dateFormater.parse(twCorrRow.getPropertyValue("pricingDate").toString().substring(0, 10)));
 				//TODO: Remove SOP debug
-				System.out.println("CorrectionRow.createdOn input string: " + twCorrRow.getPropertyValue("createdOn").toString().substring(0, 10));
+				//System.out.println("CorrectionRow.createdOn input string: " + twCorrRow.getPropertyValue("createdOn").toString().substring(0, 10));
 				this.setCreatedOn(dateFormater.parse(twCorrRow.getPropertyValue("createdOn").toString().substring(0, 10)));
 			} catch (ParseException e) {
 				System.out.println(e.getMessage());

@@ -187,7 +187,7 @@ public class _APIReqHeader implements Comparable<_APIReqHeader> {
 				&& ((this.ediSuppression == null && arg0.getEdiSuppression() == null) || this.ediSuppression.equals(arg0.getEdiSuppression()))) {
 			comparison = 0;
 		}
-		System.out.println("\n    comparison: " + comparison);
+		//System.out.println("\n    comparison: " + comparison);
 		return comparison;
 	}
 }
